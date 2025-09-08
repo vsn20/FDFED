@@ -1,0 +1,203 @@
+<style>
+    nav {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to right, rgb(66, 32, 70), rgb(30, 26, 71), rgb(77, 38, 44), #155217, #2E8B57);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 60px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        box-sizing: border-box;
+    }
+  
+    .logo img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+    }
+  
+    .logo img:hover {
+        transform: scale(1.4);
+    }
+  
+    .nav-links {
+        display: flex;
+        gap: 40px;
+        margin: auto;
+    }
+  
+    .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s, transform 0.3s, text-shadow 0.3s;
+        white-space: nowrap;
+    }
+  
+    .nav-links a:hover,
+    .nav-links a.active {
+        color: #FFD700;
+        transform: scale(1.1);
+        text-shadow: 0 0 10px #FFD700;
+    }
+  
+    .hamburger {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        position: relative;
+        margin-right: 20px;
+    }
+  
+    .profile {
+        flex-direction: column;
+        cursor: pointer;
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .profile-symbol {
+        width: 50px;
+        height: 50px;
+        background: #FFD700;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #2E8B57;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-symbol:hover {
+        transform: scale(1.4);
+        box-shadow: 0 0 10px #FFD700;
+    }
+  
+    .hamburger span {
+        width: 30px;
+        height: 3px;
+        background: white;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+  
+    .hamburger-menu, .profile-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 200px;
+        background: linear-gradient(135deg, #34495E, #2C3E50);
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 999;
+    }
+  
+    .hamburger:hover .hamburger-menu,
+    .profile:hover .profile-menu {
+        display: block;
+    }
+  
+    .hamburger-menu a, .profile-menu span, .profile-menu a {
+        color: white;
+        text-decoration: none;
+        font-size: 1em;
+        font-weight: bold;
+        padding: 8px;
+        background: linear-gradient(135deg, #5D6D7E, #4A5A6A);
+        text-align: center;
+        border-radius: 5px;
+        display: block;
+        margin: 5px 0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, color 0.3s;
+    }
+  
+    .profile-menu span {
+        background: none;
+        pointer-events: none;
+    }
+  
+    .hamburger-menu a:hover,
+    .hamburger-menu a.active,
+    .profile-menu a:hover {
+        transform: translateX(5px);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        color: #FFD700;
+    }
+  
+    @media (max-width: 1000px) and (min-width: 769px) {
+        .nav-links {
+            gap: 20px;
+        }
+    }
+  
+    @media (max-width: 768px) {
+        nav {
+            padding: 15px 20px;
+        }
+  
+        .nav-links {
+            display: none;
+        }
+  
+        .hamburger {
+            display: flex;
+        }
+    }
+</style>
+
+<nav>
+    <div class="logo">
+        <a href="/"><img src="/logo.jpg" alt="Logo"></a>
+    </div>
+    
+    <div class="nav-links">
+        <a href="/" class="<%= activePage === 'home' ? 'active' : '' %>">Home</a>
+        <a href="/about-us" class="<%= activePage === 'about-us' ? 'active' : '' %>">About Us</a>
+        <a href="/our-branches" class="<%= activePage === 'our-branches' ? 'active' : '' %>">Our Branches</a>
+        <a href="/customerlogin" class="<%= activePage === 'customer' ? 'active' : '' %>">Customer</a>
+        <a href="/employeelogin" class="<%= activePage === 'employee' ? 'active' : '' %>">Employee</a>
+        <a href="/companylogin" class="<%= activePage === 'company' ? 'active' : '' %>">Company</a>
+        <a href="/contact-us" class="<%= activePage === 'contact-us' ? 'active' : '' %>">Contact Us</a>
+    </div>
+  
+    <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+        <div class="hamburger-menu">
+            <a href="/" class="<%= activePage === 'home' ? 'active' : '' %>">Home</a>
+            <a href="/about-us" class="<%= activePage === 'about-us' ? 'active' : '' %>">About Us</a>
+            <a href="/our-branches" class="<%= activePage === 'our-branches' ? 'active' : '' %>">Our Branches</a>
+            <a href="/customerlogin" class="<%= activePage === 'customer' ? 'active' : '' %>">Customer</a>
+            <a href="/employeelogin" class="<%= activePage === 'employee' ? 'active' : '' %>">Employee</a>
+            <a href="/companylogin" class="<%= activePage === 'company' ? 'active' : '' %>">Company</a>
+            <a href="/contact-us" class="<%= activePage === 'contact-us' ? 'active' : '' %>">Contact Us</a>
+            <a href="/newproducts" class="<%= activePage === 'new-products' ? 'active' : '' %>">New Products</a>
+            <a href="/ourproducts" class="<%= activePage === 'our-products' ? 'active' : '' %>">Our Products</a>
+            <a href="/topproducts" class="<%= activePage === 'top-products' ? 'active' : '' %>">Top Products</a>
+        </div>
+    </div>
+  
+    <% if (user) { %>
+    <div class="profile">
+        <div class="profile-symbol">U</div>
+        <div class="profile-menu">
+            <span>User ID: <%= user.user_id %></span>
+            <span>Type: <%= user.type %></span>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    <% } %>
+</nav>

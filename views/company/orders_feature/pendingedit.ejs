@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Pending Order - ElectroLand</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+      max-width: 100%;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+    }
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .section-header {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      margin-top: 20px;
+      color: #2d3436;
+    }
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .detail-item label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    .detail-item input,
+    .detail-item select {
+      padding: 10px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      background: #f9fbfd;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .detail-item input[readonly] {
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+    .delivery-date-input {
+      cursor: text !important;
+      background: #f9fbfd !important;
+      border: 1px solid #e6e9f0 !important;
+    }
+    .delivery-date-input:hover {
+      border-color: #b0b8c1;
+    }
+    .submit-button {
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 20px;
+      display: inline-block;
+    }
+    .submit-button:hover {
+      background-color: #555555;
+    }
+    .no-order {
+      color: #666;
+      font-size: 1rem;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+      .content-area {
+        padding: 15px;
+      }
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <% try { %>
+    <%- include('../../partials/navbar') %>
+  <% } catch (e) { %>
+    <p>Error rendering navbar: <%= e.message %></p>
+  <% } %>
+  <div class="container">
+    <% try { %>
+      <%- include('../../partials/company_sidebar') %>
+    <% } catch (e) { %>
+      <p>Error rendering sidebar: <%= e.message %></p>
+    <% } %>
+    <div class="content-area">
+      <h1>Edit Pending Order</h1>
+      <% if (order) { %>
+        <form action="/company/orders/update/<%= order.order_id %>" method="POST">
+          <div class="section-header">Order Information</div>
+          <div class="details-grid">
+            <div class="detail-item">
+              <label for="order_id">Order ID</label>
+              <input type="text" id="order_id" value="<%= order.order_id %>" readonly>
+            </div>
+            <div class="detail-item">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Accepted" <%= order.status === 'Accepted' ? 'selected' : '' %>>Accepted</option>
+                <option value="Rejected" <%= order.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+              </select>
+            </div>
+            <div class="detail-item">
+              <label for="delivery_date">Delivery Date</label>
+              <input type="text" id="delivery_date" name="delivery_date" class="delivery-date-input" 
+                     value="<%= order.delivery_date ? new Date(order.delivery_date).toISOString().split('T')[0] : '' %>" 
+                     placeholder="Select Date">
+            </div>
+          </div>
+          <button type="submit" class="submit-button">Update Order</button>
+        </form>
+      <% } else { %>
+        <p class="no-order">No order found to edit.</p>
+      <% } %>
+    </div>
+  </div>
+  <% try { %>
+    <%- include('../../partials/footer') %>
+  <% } catch (e) { %>
+    <p>Error rendering footer: <%= e.message %></p>
+  <% } %>
+  <script>
+    flatpickr(".delivery-date-input", {
+      dateFormat: "Y-m-d",
+      minDate: "today"
+    });
+  </script>
+</body>
+</html>

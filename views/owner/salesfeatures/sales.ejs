@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1; /* Restore original width behavior */
+      height: calc(100vh - 90px); /* Match sidebar height for scrollbar length */
+      overflow-y: auto; /* Enable vertical scrolling like sidebar */
+      overflow-x: auto;
+    }
+
+    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar in Firefox */
+    .content-area {
+      scrollbar-width: none;
+    }
+
+    /* Hide scrollbar in IE/Edge */
+    .content-area {
+      -ms-overflow-style: none;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #2d3436;
+      font-size: 1.5rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      font-size: 1rem;
+      border: 1px solid #eaeaea;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #333;
+      color: white;
+    }
+
+    tr:nth-child(odd) {
+      background: #f8f9fd;
+    }
+
+    tr:nth-child(even) {
+      background: #eef2f7;
+    }
+
+    td {
+      background: inherit;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    td:hover {
+      background-color: #f0f4f8;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin-top: 60px;
+        flex-direction: column;
+        padding: 0 10px;
+        gap: 15px;
+      }
+
+      .content-area {
+        flex: none; /* Adjust for mobile */
+        width: 100%; /* Full width on mobile */
+        height: auto; /* Auto height on mobile like sidebar */
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: block;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        background: #f8f9fd;
+        margin: 5px 0;
+        text-align: left;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        min-width: 100px;
+      }
+
+      tr:hover {
+        background-color: #f0f4f8;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .container {
+        gap: 20px;
+        padding: 0 15px;
+      }
+
+      .content-area {
+        flex: 1; /* Maintain original width behavior */
+        height: calc(100vh - 90px); /* Maintain sidebar height */
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin-top: 50px;
+        padding: 0 5px;
+      }
+
+      .content-area {
+        flex: none; /* Adjust for small screens */
+        width: 100%; /* Full width on small screens */
+        height: auto; /* Auto height on small screens */
+        padding: 10px;
+      }
+
+      th, td {
+        font-size: 0.9rem;
+      }
+
+      td {
+        padding: 6px;
+      }
+
+      td:before {
+        min-width: 80px;
+      }
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2d3748, #1a2a44);
+      border-radius: 15px;
+      padding: 30px 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      height: calc(100vh - 90px);
+      overflow-y: auto; /* Enable scrolling functionality */
+    }
+
+    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+    .sidebar::-webkit-scrollbar {
+      display: none; /* Completely hide the scrollbar */
+    }
+
+    /* Hide scrollbar in Firefox */
+    .sidebar {
+      scrollbar-width: none; /* Firefox */
+    }
+
+    /* Hide scrollbar in IE/Edge */
+    .sidebar {
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+
+    .dashboard-btn {
+      display: block;
+      font-size: 1.5rem;
+      color: #fff;
+      background: linear-gradient(90deg, #4a5568, #2d3748);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .dashboard-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, #FFD700, transparent);
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+
+    .dashboard-btn:hover {
+      background: linear-gradient(90deg, #636e72, #4a5568);
+      transform: scale(1.02);
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .feature-item:hover {
+      background: linear-gradient(to right, #4a5568, #2d3748);
+      color: #FFD700;
+      transform: translateX(5px);
+    }
+
+    .feature-item.active {
+      background: linear-gradient(to right, #FFD700, #d4b106);
+      color: #2d3748;
+      font-weight: bold;
+    }
+
+    .feature-icon {
+      font-size: 1.4rem;
+      width: 30px;
+      text-align: center;
+    }
+
+    .feature-title {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        overflow-y: auto; /* Enable scrolling on mobile */
+      }
+
+      .sidebar::-webkit-scrollbar {
+        display: none; /* Hide scrollbar on mobile */
+      }
+
+      .sidebar {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <div class="sidebar">
+      <a href="/admin/home" class="dashboard-btn">Admin Dashboard</a>
+      <div class="features">
+        <a href="/admin/sales" class="feature-item <%= activeRoute === 'sales' ? 'active' : '' %>">
+          <span class="feature-icon">💰</span>
+          <span class="feature-title">Sales</span>
+        </a>
+        <a href="/admin/orders" class="feature-item <%= activeRoute === 'orders' ? 'active' : '' %>">
+          <span class="feature-icon">📝</span>
+          <span class="feature-title">Orders</span>
+        </a>
+        <a href="/admin/products" class="feature-item <%= activeRoute === 'products' ? 'active' : '' %>">
+          <span class="feature-icon">📦</span>
+          <span class="feature-title">Products</span>
+        </a>
+        <a href="/admin/stocks" class="feature-item <%= activeRoute === 'stocks' ? 'active' : '' %>">
+          <span class="feature-icon">🏬</span>
+          <span class="feature-title">Inventory</span>
+        </a>
+        <a href="/admin/customers" class="feature-item <%= activeRoute === 'customers' ? 'active' : '' %>">
+          <span class="feature-icon">👤</span>
+          <span class="feature-title">Customers</span>
+        </a>
+        <a href="/admin/employees" class="feature-item <%= activeRoute === 'employees' ? 'active' : '' %>">
+          <span class="feature-icon">👥</span>
+          <span class="feature-title">Employees</span>
+        </a>
+        <a href="/admin/salaries" class="feature-item <%= activeRoute === 'salaries' ? 'active' : '' %>">
+          <span class="feature-icon">💸</span>
+          <span class="feature-title">Salaries</span>
+        </a>
+        <a href="/admin/profits" class="feature-item <%= activeRoute === 'profits' ? 'active' : '' %>">
+          <span class="feature-icon">📈</span>
+          <span class="feature-title">Profits</span>
+        </a>
+        <a href="/admin/branches" class="feature-item <%= activeRoute === 'branches' ? 'active' : '' %>">
+          <span class="feature-icon">🌐</span>
+          <span class="feature-title">Branches</span>
+        </a>
+        <a href="/admin/company" class="feature-item <%= activeRoute === 'company' ? 'active' : '' %>">
+          <span class="feature-icon">🏢</span>
+          <span class="feature-title">Company</span>
+        </a>
+        <a href="/admin/messages" class="feature-item <%= activeRoute === 'messages' ? 'active' : '' %>">
+          <span class="feature-icon">✉</span>
+          <span class="feature-title">Messages</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Sales</h1>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Sale ID</th>
+              <th>Branch Name</th>
+              <th>Price</th>
+              <th>Profit</th>
+              <th>Sale Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% salers.forEach(sale => { %>
+              <tr onclick="window.location='/admin/sales/<%= sale.sales_id %>'">
+                <td data-label="Sale ID"><%= sale.sales_id %></td>
+                <td data-label="Branch Name"><%= sale.branch_name %></td>
+                <td data-label="Price">$<%= typeof sale.amount === 'number' ? sale.amount.toFixed(2) : '0.00' %></td>
+                <td data-label="Profit">$<%= typeof sale.profit_or_loss === 'number' ? sale.profit_or_loss.toFixed(2) : '0.00' %></td>
+                <td data-label="Sale Date"><%= new Date(sale.sales_date).toISOString().split('T')[0] %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

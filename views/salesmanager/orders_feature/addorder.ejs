@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Order - ElectroLand</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+    }
+    .content-area h2 {
+      color: #2d3436;
+      margin-bottom: 20px;
+    }
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .field-group > div {
+      flex: 1 1 45%;
+      min-width: 200px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+    }
+    input[readonly] {
+      background: #e9ecef;
+      cursor: default;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #555555;
+    }
+    #error-message {
+      color: #e74c3c;
+      margin: 10px 0;
+      min-height: 20px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+      .field-group > div {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/salesmanager_sidebar') %>
+
+    <div class="content-area" id="content">
+      <div class="form-container">
+        <h2>Add Order</h2>
+        <form id="order-form" action="/salesmanager/add-order" method="POST">
+          <fieldset>
+            <legend>Order Details</legend>
+            <div class="field-group">
+              <div>
+                <label for="branch_name">Branch</label>
+                <input type="text" id="branch_name" name="branch_name" value="<%= branchname %>" readonly>
+              </div>
+              <div>
+                <label for="company_id">Company Name</label>
+                <select id="company_id" name="company_id" required>
+                  <option value="">Select a company</option>
+                  <% companies.forEach(company => { %>
+                    <option value="<%= company.c_id %>"><%= company.cname %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div>
+                <label for="product_id">Product Name</label>
+                <select id="product_id" name="product_id" required>
+                  <option value="">Select a product</option>
+                </select>
+              </div>
+              <div>
+                <label for="quantity">Quantity</label>
+                <input type="number" id="quantity" name="quantity" required placeholder="Enter quantity" min="1">
+              </div>
+              <div>
+                <label for="ordered_date">Ordered Date</label>
+                <input type="date" id="ordered_date" name="ordered_date" required>
+              </div>
+            </div>
+          </fieldset>
+          <div id="error-message"></div>
+          <button type="submit">Add Order</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    const form = document.getElementById('order-form');
+    const companySelect = document.getElementById('company_id');
+    const productSelect = document.getElementById('product_id');
+    const quantity = document.getElementById('quantity');
+    const errorMessage = document.getElementById('error-message');
+
+    companySelect.addEventListener('change', async function() {
+      const companyId = this.value;
+      productSelect.innerHTML = '<option value="">Select a product</option>';
+
+      if (companyId) {
+        try {
+          const response = await fetch(`/salesmanager/products-by-company/${companyId}`);
+          const products = await response.json();
+
+          console.log("Products received from API:", products.map(p => ({
+            prod_id: p.prod_id,
+            Prod_name: p.Prod_name,
+            Status: p.Status
+          })));
+
+          products.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product.prod_id;
+            option.textContent = product.Prod_name;
+            productSelect.appendChild(option);
+          });
+        } catch (error) {
+          errorMessage.textContent = 'Error fetching products: ' + error.message;
+        }
+      }
+    });
+
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      quantity.style.borderColor = '#ddd';
+      quantity.style.backgroundColor = '#f8f9fa';
+      errorMessage.textContent = '';
+
+      if (quantity.value <= 0) {
+        quantity.style.borderColor = '#e74c3c';
+        quantity.style.backgroundColor = '#fff5f5';
+        errorMessage.textContent = 'Quantity must be greater than 0.';
+        return;
+      }
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      try {
+        const response = await fetch('/salesmanager/add-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.href = result.redirect;
+        } else {
+          errorMessage.textContent = result.message || 'An error occurred while adding the order.';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error: ' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>

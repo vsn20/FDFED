@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Employee - ElectroLand</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+    }
+
+    .content-area h2 {
+      color: #2d3436;
+      margin-bottom: 20px;
+    }
+
+    fieldset {
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    legend {
+      color: #2d3436;
+      font-weight: bold;
+      padding: 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .field-group > div {
+      flex: 1 1 45%;
+      min-width: 200px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #fff;
+      transition: border-color 0.3s;
+    }
+
+    input:disabled, select:disabled, textarea:disabled {
+      background: #e6e9f0;
+      cursor: not-allowed;
+    }
+
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    button[type="submit"] {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #555555;
+    }
+
+    button[type="submit"]:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+
+    #error-message {
+      color: #e74c3c;
+      font-size: 0.85rem;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .branch-option {
+      display: none;
+    }
+
+    .branch-option.show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .field-group > div {
+        flex: 1 1 100%;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+
+    <div class="content-area" id="content">
+      <div class="form-container">
+        <h2>Edit Employee</h2>
+        <form id="edit-employee-form" action="/admin/employee/update/<%= employee.e_id %>" method="POST">
+          <fieldset>
+            <legend>Personal Details</legend>
+            <div class="field-group">
+              <div>
+                <label for="f_name">First Name</label>
+                <input type="text" id="f_name" name="f_name" value="<%= employee.f_name %>" <%= isEditable ? '' : 'disabled' %> required placeholder="Enter first name">
+              </div>
+              <div>
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" value="<%= employee.last_name %>" <%= isEditable ? '' : 'disabled' %> required placeholder="Enter last name">
+              </div>
+              <div>
+                <label for="role">Role</label>
+                <select id="role" name="role" <%= isEditable ? '' : 'disabled' %> required>
+                  <option value="Sales Manager" <%= employee.role === 'Sales Manager' ? 'selected' : '' %>>Sales Manager</option>
+                  <option value="Salesman" <%= employee.role === 'Salesman' ? 'selected' : '' %>>Salesman</option>
+                </select>
+              </div>
+              <div>
+                <label for="bid">Branch</label>
+                <select id="bid" name="bid" <%= isEditable ? '' : 'disabled' %>>
+                  <option value="" disabled>Select branch</option>
+                  <% allBranches.forEach(branch => { %>
+                    <option value="<%= branch.bid %>" 
+                            class="branch-option all-branches <%= unassignedBranches.some(ub => ub.bid === branch.bid) || (currentBranch && currentBranch.bid === branch.bid) ? 'unassigned' : '' %>"
+                            <%= employee.bid === branch.bid ? 'selected' : '' %>>
+                      <%= branch.bid %> - <%= branch.b_name %>
+                    </option>
+                  <% }) %>
+                  <option value="null" class="branch-option all-branches unassigned" <%= employee.bid === null ? 'selected' : '' %>>Not Assigned</option>
+                </select>
+              </div>
+              <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="<%= employee.email %>" <%= isEditable ? '' : 'disabled' %> required placeholder="Enter email">
+              </div>
+              <div>
+                <label for="phone_no">Phone Number</label>
+                <input type="tel" id="phone_no" name="phone_no" value="<%= employee.phone_no || '' %>" <%= isEditable ? '' : 'disabled' %> placeholder="Enter phone number" pattern="[0-9]{10}">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Account and Salaries</legend>
+            <div class="field-group">
+              <div>
+                <label for="acno">Account Number</label>
+                <input type="text" id="acno" name="acno" value="<%= employee.acno %>" <%= isEditable ? '' : 'disabled' %> required placeholder="Enter account number">
+              </div>
+              <div>
+                <label for="ifsc">IFSC Code</label>
+                <input type="text" id="ifsc" name="ifsc" value="<%= employee.ifsc %>" <%= isEditable ? '' : 'disabled' %> required placeholder="Enter IFSC code">
+              </div>
+              <div>
+                <label for="bankname">Bank Name</label>
+                <input type="text" id="bankname" name="bankname" value="<%= employee.bankname %>" <%= isEditable ? '' : 'disabled' %> required placeholder="Enter bank name">
+              </div>
+              <div>
+                <label for="base_salary">Monthly Salary</label>
+                <input type="number" id="base_salary" name="base_salary" value="<%= employee.base_salary %>" <%= isEditable ? '' : 'disabled' %> required placeholder="Enter monthly salary" step="0.01">
+              </div>
+              <div>
+                <label for="address">Address</label>
+                <textarea id="address" name="address" <%= isEditable ? '' : 'disabled' %> placeholder="Enter address"><%= employee.address || '' %></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Status</legend>
+            <div class="field-group">
+              <div>
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                  <option value="active" <%= employee.status === 'active' ? 'selected' : '' %>>Active</option>
+                  <option value="resigned" <%= employee.status === 'resigned' ? 'selected' : '' %>>Resigned</option>
+                  <option value="fired" <%= employee.status === 'fired' ? 'selected' : '' %>>Fired</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <div id="error-message"></div>
+          <button type="submit">Update Employee</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    const form = document.getElementById('edit-employee-form');
+    const roleSelect = document.getElementById('role');
+    const branchSelect = document.getElementById('bid');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone_no');
+    const statusSelect = document.getElementById('status');
+    const errorMessage = document.getElementById('error-message');
+
+    function updateBranchDropdown() {
+      const options = branchSelect.querySelectorAll('.branch-option');
+      options.forEach(option => {
+        if (roleSelect.value === 'Sales Manager') {
+          option.classList.contains('unassigned') ? option.classList.add('show') : option.classList.remove('show');
+        } else {
+          option.classList.contains('all-branches') ? option.classList.add('show') : option.classList.remove('show');
+        }
+      });
+    }
+
+    function toggleFormInputs() {
+      const isActive = statusSelect.value === 'active';
+      const inputs = form.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        if (input.id !== 'status') {
+          input.disabled = !isActive;
+        }
+      });
+    }
+
+    updateBranchDropdown();
+    toggleFormInputs();
+
+    roleSelect.addEventListener('change', function() {
+      updateBranchDropdown();
+      let currentBid = '<%= employee.bid %>';
+      if (!currentBid || currentBid === 'null') {
+        currentBid = 'null';
+      }
+      const selectedOption = branchSelect.querySelector(`option[value="${currentBid}"]`);
+      if (selectedOption && selectedOption.classList.contains('show')) {
+        branchSelect.value = currentBid;
+      } else {
+        branchSelect.value = '';
+      }
+    });
+
+    statusSelect.addEventListener('change', toggleFormInputs);
+
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      email.style.borderColor = '#e6e9f0';
+      email.style.backgroundColor = '#fff';
+      phone.style.borderColor = '#e6e9f0';
+      phone.style.backgroundColor = '#fff';
+      errorMessage.textContent = '';
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email.value)) {
+        email.style.borderColor = '#e74c3c';
+        email.style.backgroundColor = '#fff5f5';
+        errorMessage.textContent = 'Please enter a valid email address.';
+        return;
+      }
+
+      const phonePattern = /^[0-9]{10}$/;
+      if (phone.value && !phonePattern.test(phone.value)) {
+        phone.style.borderColor = '#e74c3c';
+        phone.style.backgroundColor = '#fff5f5';
+        errorMessage.textContent = 'Please enter a valid 10-digit phone number.';
+        return;
+      }
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      try {
+        const response = await fetch(`/admin/employee/update/<%= employee.e_id %>`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (response.redirected) {
+          window.location.href = response.url;
+        } else {
+          const result = await response.json();
+          errorMessage.textContent = result.message || 'An error occurred while updating the employee.';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error: ' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>

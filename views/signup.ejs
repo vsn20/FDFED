@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; /* Reset default margin */
+            padding: 0; /* Reset default padding */
+            min-height: 100vh; /* Ensure body takes at least full viewport height */
+            display: flex;
+            flex-direction: column; /* Stack children vertically */
+            background: #f0f2f5;
+        }
+
+        .form-container {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+                       0 10px 20px rgba(0, 0, 0, 0.1),
+                       0 0 0 1px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            margin: auto; /* Center horizontally */
+            margin-top: 100px; /* Space below fixed navbar */
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #34495e;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 5px rgba(26, 115, 232, 0.3);
+        }
+
+        .form-group input.error {
+            border-color: #e74c3c;
+        }
+
+        .message {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #e74c3c; /* Red for error */
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #34495E, #2C3E50);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(to right, rgb(66, 32, 70), rgb(30, 26, 71), rgb(77, 38, 44), #155217, #2E8B57);
+        }
+
+        .submit-btn:active {
+            background: linear-gradient(to left, rgb(66, 32, 70), rgb(30, 26, 71), rgb(77, 38, 44), #155217, #2E8B57);
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    <div class="form-container">
+        <h2>Sign Up</h2>
+        <form id="signin-form" action="welcome.html" method="POST">
+            <div class="form-group">
+                <label for="email">Email ID</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+            <div class="form-group">
+                <label for="retype-password">Retype Password</label>
+                <input type="password" id="retype-password" name="retype-password" required placeholder="Retype your password">
+            </div>
+            <div class="message" id="password-message"></div>
+            <button type="submit" class="submit-btn">Sign Up</button>
+        </form>
+    </div>
+    <%- include('partials/footer') %>
+    <script>
+        // Get form and input elements
+        const form = document.getElementById('signin-form');
+        const password = document.getElementById('password');
+        const retypePassword = document.getElementById('retype-password');
+        const message = document.getElementById('password-message');
+
+        // Add submit event listener
+        form.addEventListener('submit', function(event) {
+            // Clear previous message and error states
+            password.classList.remove('error');
+            retypePassword.classList.remove('error');
+            message.textContent = '';
+
+            // Check if passwords match
+            if (password.value !== retypePassword.value) {
+                event.preventDefault(); // Prevent form submission
+                password.classList.add('error');
+                retypePassword.classList.add('error');
+                message.textContent = 'Passwords do not match. Please try again.';
+            }
+            // If passwords match, do nothing here; form will submit naturally to "welcome.html"
+        });
+    </script>
+</body>
+</html>

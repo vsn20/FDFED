@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Selling Products - Electroland</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            position: relative;
+            scroll-behavior: smooth;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            text-align: center;
+            padding: 100px 40px 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 100px auto 0;
+            display: none;
+        }
+        .container.active {
+            display: block;
+        }
+        .hero-image {
+            position: relative;
+            width: 80%;
+            height: 500px;
+            margin: auto;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: white;
+        }
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+            border-radius: 15px;
+        }
+        .hero-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+        .content-section {
+            display: none;
+            margin: 100px auto 0;
+            max-width: 800px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .slider {
+            position: relative;
+            width: 80%;
+            height: 500px;
+            margin: auto;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .slider:hover {
+            transform: scale(1.02);
+        }
+        .slider img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            transition: opacity 1s ease-in-out;
+            display: block;
+        }
+        .product-info {
+            padding: 15px;
+            font-size: 1.2em;
+            color: white;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2E8B57, #155217);
+            border-radius: 10px;
+            width: 90%;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .left-sidebar-container {
+            width: 250px;
+            background: linear-gradient(135deg, #34495E, #2C3E50);
+            height: auto;
+            padding: 20px;
+            position: fixed;
+            top: 50%;
+            left: -220px;
+            transform: translateY(-50%);
+            box-sizing: border-box;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: left 0.5s ease;
+            z-index: 999;
+        }
+        .left-sidebar-container:hover {
+            left: 0;
+            transition-delay: 0s !important;
+        }
+        .left-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+        .left-sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 10px;
+            background: linear-gradient(135deg, #5D6D7E, #4A5A6A);
+            text-align: center;
+            border-radius: 5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: block;
+            margin: 0 10px;
+        }
+        .left-sidebar a:hover {
+            transform: translateX(10px);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        #Home {
+            display: block;
+        }
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            max-width: 1450px;
+            height: 700px;
+            margin: 100px auto 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .slideshow {
+            display: flex;
+            width: 500%;
+            height: 100%;
+            animation: slideRight 25s infinite;
+        }
+        .slide {
+            position: relative;
+            width: 20%;
+            height: 100%;
+        }
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.95;
+            border-radius: 15px;
+        }
+        .slide-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FFD700;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 10px #e635a5;
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            animation: slideInFromLeft 1s ease-out forwards;
+            animation-delay: 0.5s;
+        }
+        @keyframes slideRight {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(0); }
+            20.01% { transform: translateX(-20%); }
+            40% { transform: translateX(-20%); }
+            40.01% { transform: translateX(-40%); }
+            60% { transform: translateX(-40%); }
+            60.01% { transform: translateX(-60%); }
+            80% { transform: translateX(-60%); }
+            80.01% { transform: translateX(-80%); }
+            100% { transform: translateX(-80%); }
+            100.01% { transform: translateX(0); }
+        }
+        @keyframes slideInFromLeft {
+            0% {
+                left: -100%;
+                opacity: 0;
+            }
+            100% {
+                left: 50%;
+                opacity: 1;
+            }
+        }
+        .image-description-container {
+            max-width: 1450px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .image-description-container img {
+            width: 600px;
+            height: auto;
+            border-radius: 10px;
+            float: left;
+            margin-right: 20px;
+        }
+        .description {
+            flex: 1;
+            font-size: 1.2em;
+            color: #555;
+            line-height: 1.6;
+        }
+        .description h3 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .hero-image-container {
+            position: relative;
+            width: 100%;
+            max-width: 1450px;
+            height: 500px;
+            margin: 40px auto 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .hero-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+            border-radius: 15px;
+        }
+        .hero-overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            animation: slideInFromLeft 1s ease-out forwards;
+        }
+        .hero-overlay-text h2 {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+        .hero-overlay-text p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .hero-description {
+            max-width: 1450px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: left;
+            overflow: hidden;
+        }
+        .hero-description h3 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .hero-description p {
+            font-size: 1.2em;
+            color: #555;
+            line-height: 1.6;
+        }
+        .hero-description img {
+            width: 350px;
+            height: auto;
+            border-radius: 10px;
+            float: right;
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        /* Why Choose Us Section */
+        .why-choose-us {
+            max-width: 1450px;
+            margin: 40px auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #34495E, #2C3E50); 
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .why-choose-us h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .why-choose-us h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: #FFD700;
+            border-radius: 2px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+        .feature-card {
+            text-align: center;
+            padding: 25px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .feature-card i {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+        .feature-card h3 {
+            font-size: 1.4em;
+            margin: 10px 0;
+        }
+        .feature-card p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        /* Reviews Section */
+        .reviews-container {
+            max-width: 1450px;
+            margin: 40px auto;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .reviews-title {
+            text-align: center;
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .reviews-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: #FFD700;;
+            border-radius: 2px;
+        }
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+        .review-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .review-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+        .review-card:before {
+            content: '“';
+            position: absolute;
+            top: -20px;
+            left: 15px;
+            font-size: 80px;
+            color: rgba(46, 139, 87, 0.2);
+            font-family: Georgia, serif;
+        }
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .review-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #2E8B57;
+        }
+        .review-info h3 {
+            margin: 0;
+            font-size: 1.3em;
+            color: #333;
+        }
+        .rating {
+            color: #FFD700;
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+        .review-text {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.6;
+            margin: 15px 0;
+            font-style: italic;
+        }
+        .review-date {
+            display: block;
+            font-size: 0.9em;
+            color: #777;
+            text-align: right;
+        }
+        @media (max-width: 768px) {
+            .left-sidebar-container {
+                display: none;
+            }
+            .container {
+                margin-left: 0;
+                width: 90%;
+            }
+            .hero-image,
+            .slider,
+            .slideshow-container,
+            .hero-image-container,
+            .hero-description {
+                width: 90%;
+            }
+            .image-description-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            .image-description-container img {
+                float: none;
+                margin: 0 auto 20px;
+                width: 100%;
+                max-width: 300px;
+            }
+            .description {
+                text-align: center;
+            }
+            .hero-overlay-text h2 {
+                font-size: 2em;
+            }
+            .hero-overlay-text p {
+                font-size: 1em;
+            }
+            .hero-description {
+                text-align: center;
+            }
+            .hero-description img {
+                float: none;
+                margin: 20px auto 0;
+                width: 100%;
+                max-width: 300px;
+            }
+            .slide-text {
+                font-size: 1.5em;
+            }
+            .reviews-title, .why-choose-us h2 {
+                font-size: 2em;
+            }
+            .reviews-grid, .features-grid {
+                grid-template-columns: 1fr;
+                padding: 0 10px;
+            }
+            .review-card, .feature-card {
+                padding: 20px;
+            }
+            .review-avatar {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        @media (max-width: 450px) {
+            .slideshow-container {
+                height: 400px;
+                margin: 80px auto 0;
+            }
+            .slide-text {
+                font-size: 1.2em;
+                padding: 8px;
+            }
+            .image-description-container {
+                padding: 15px;
+                margin: 20px auto;
+            }
+            .image-description-container img {
+                max-width: 200px;
+            }
+            .description h3 {
+                font-size: 1.3em;
+            }
+            .description p {
+                font-size: 1em;
+            }
+            .hero-image-container {
+                height: 300px;
+                margin: 20px auto 0;
+            }
+            .hero-overlay-text h2 {
+                font-size: 1.8em;
+            }
+            .hero-overlay-text p {
+                font-size: 0.9em;
+            }
+            .hero-description {
+                padding: 15px;
+                margin: 15px auto;
+            }
+            .hero-description h3 {
+                font-size: 1.3em;
+            }
+            .hero-description p {
+                font-size: 1em;
+            }
+            .hero-description img {
+                max-width: 200px;
+                margin: 15px auto 0;
+            }
+            .reviews-container, .why-choose-us {
+                margin: 20px auto;
+                padding: 20px 15px;
+            }
+            .reviews-title, .why-choose-us h2 {
+                font-size: 1.8em;
+            }
+            .review-info h3, .feature-card h3 {
+                font-size: 1.1em;
+            }
+            .review-text, .feature-card p {
+                font-size: 1em;
+            }
+            .review-avatar {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+    <section id="Home">
+        <div class="left-sidebar-container">
+            <div class="left-sidebar">
+                <a href="/newproducts" id="new-products-link">New Products</a>
+                <a href="/ourproducts" id="our-products-link">Our Products</a>
+                <a href="/topproducts" id="top-products-link">Top Products</a>
+            </div>
+        </div>
+        <div class="slideshow-container">
+            <div class="slideshow">
+                <div class="slide">
+                    <img src="IntoHome2.jpg" alt="Slide 1">
+                    <div class="slide-text">Welcome to Electroland</div>
+                </div>
+                <div class="slide">
+                    <img src="IntoHome.jpg" alt="Slide 2">
+                    <div class="slide-text">Discover Top Appliances</div>
+                </div>
+                <div class="slide">
+                    <img src="IntoHome3.jpg" alt="Slide 3">
+                    <div class="slide-text">Your Stocks In Our Hands</div>
+                </div>
+                <div class="slide">
+                    <img src="IntoHome4.jpg" alt="Slide 4">
+                    <div class="slide-text">Explore Our Latest Offers</div>
+                </div>
+                <div class="slide">
+                    <img src="IntoHome5.jpg" alt="Slide 5">
+                    <div class="slide-text">Manage Retail Stocks</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="image-description-container">
+            <img src="/shopsmart.jpg" alt="Featured Product">
+            <div class="description">
+                <h3>Discover Our Top Appliances</h3>
+                <p>At Electroland, we bring you the best in home appliances, designed to make your life easier and more efficient. From state-of-the-art kitchen gadgets to innovative home solutions, our products are built with quality and durability in mind. Explore our wide range of offerings and find the perfect appliance to suit your needs. Shop now and experience the Electroland difference!. Our products are crafted with innovation, quality, and durability in mind, ensuring that every purchase delivers exceptional performance and long-lasting value.</p>
+            </div>
+        </div>
+
+        <div class="hero-image-container">
+            <img src="https://cdn.pixabay.com/photo/2016/11/18/17/46/house-1836070_1280.jpg" alt="Hero Image">
+            <div class="hero-overlay-text">
+                <h2>Transform Your Home</h2>
+                <p>Upgrade your living space with our premium appliances and enjoy unmatched quality and style. Visit us today!</p>
+            </div>
+        </div>
+
+        <div class="hero-description">
+            <img src="IntoHome6.jpg" alt="Floating Image">
+            <h3>Elevate Your Lifestyle</h3>
+            <p>Transforming your home starts with choosing the right appliances. At Electroland, we offer a curated selection of products that blend functionality with modern design. Whether you're upgrading your kitchen, laundry, or living spaces, our appliances are engineered to deliver top performance and lasting value. Discover how Electroland can help you create a home that's both beautiful and efficient.</p>
+        </div>
+
+        <div class="why-choose-us">
+            <h2>Why Choose Electroland</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Unmatched Quality Guarantee</h3>
+                    <p>At Electroland, we stand behind every product we sell. All appliances come with a comprehensive 2-year warranty, and our rigorous quality control ensures that each item meets the highest standards of durability and performance. Shop with confidence knowing you're investing in long-lasting solutions for your home.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-microchip"></i>
+                    <h3>Innovative Technology</h3>
+                    <p>Our appliances feature cutting-edge technology designed to enhance your daily life. From smart controls to energy-saving systems, we integrate the latest advancements to ensure maximum efficiency, convenience, and performance in every product we offer.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h3>Exceptional 24/7 Support</h3>
+                    <p>Our dedicated customer support team is available around the clock to assist you with any questions or concerns. Whether you need help choosing the right appliance, troubleshooting, or arranging a service, we're here to provide personalized assistance anytime you need it.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Eco-Friendly Innovation</h3>
+                    <p>We’re committed to sustainability. Our appliances are designed with energy-efficient technology to reduce your carbon footprint while saving you money on utility bills. Choose Electroland for environmentally conscious solutions that don’t compromise on performance.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="reviews-container">
+            <h2 class="reviews-title">What Our Customers Say</h2>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Customer" class="review-avatar">
+                        <div class="review-info">
+                            <h3>Sarah Johnson</h3>
+                            <div class="rating">★★★★★</div>
+                        </div>
+                    </div>
+                    <p class="review-text">"The kitchen appliances I bought from Electroland transformed my cooking experience. Top quality and amazing customer service!"</p>
+                    <span class="review-date">March 10, 2025</span>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Customer" class="review-avatar">
+                        <div class="review-info">
+                            <h3>Michael Chen</h3>
+                            <div class="rating">★★★★☆</div>
+                        </div>
+                    </div>
+                    <p class="review-text">"Great selection of products and good quality of products. The washing machine works like a dream!"</p>
+                    <span class="review-date">March 12, 2025</span>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Customer" class="review-avatar">
+                        <div class="review-info">
+                            <h3>Emily Davis</h3>
+                            <div class="rating">★★★★★</div>
+                        </div>
+                    </div>
+                    <p class="review-text">"Absolutely love my new refrigerator! Energy efficient and stylish - Electroland never disappoints."</p>
+                    <span class="review-date">March 14, 2025</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <%- include('partials/footer') %>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const slides = document.querySelectorAll(".slide");
+            let currentSlide = 0;
+
+            function resetTextAnimation() {
+                const currentText = slides[currentSlide].querySelector(".slide-text");
+                currentText.style.animation = "none";
+                void currentText.offsetWidth;
+                currentText.style.animation = "slideInFromLeft 1s ease-out forwards";
+            }
+
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % slides.length;
+                resetTextAnimation();
+            }, 5000);
+
+            resetTextAnimation();
+        });
+    </script>
+</body>
+</html>

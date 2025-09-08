@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Details - ElectroLand</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1a1a1a;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      flex: 1;
+      overflow-x: auto;
+      border: 1px solid #ebedf0;
+    }
+
+    .content-area h1 {
+      color: #2c3e50;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .edit-button, .submit-button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .edit-button:hover, .submit-button:hover {
+      background-color: #45a049;
+    }
+
+    .submit-button {
+      background-color: #008CBA;
+    }
+
+    .submit-button:hover {
+      background-color: #007bb5;
+    }
+
+    .success-message {
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .error-message {
+      background-color: #f2dede;
+      color: #a94442;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .field-error {
+      color: #a94442;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 20px;
+      }
+
+      .content-area h1 {
+        font-size: 1.5rem;
+      }
+
+      .header-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+
+      .form-container .field-group > div {
+        flex: 1 1 100%;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.6rem;
+      }
+
+      .form-container .field-group > div {
+        flex: 1 1 45%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/salesman_sidebar') %>
+
+    <div class="content-area">
+      <% if (successMessage) { %>
+        <div class="success-message"><%= successMessage %></div>
+      <% } %>
+      <% if (errorMessage) { %>
+        <div class="error-message"><%= errorMessage %></div>
+      <% } %>
+      <div class="header-container">
+        <h1>Employee Details</h1>
+        <button id="editButton" class="edit-button">Edit</button>
+      </div>
+
+      <form id="employeeForm" action="/salesman/employees/update" method="POST">
+        <div class="form-container">
+          <!-- Personal Details Section -->
+          <fieldset>
+            <legend>Personal Details</legend>
+            <div class="field-group">
+              <div>
+                <label for="salesmanId">Salesman ID</label>
+                <input type="text" id="salesmanId" name="salesmanId" value="<%= salesman.salesmanId %>" readonly>
+              </div>
+              <div>
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="firstName" value="<%= salesman.firstName %>" readonly required>
+                <div class="field-error" id="firstNameError">First Name is required</div>
+              </div>
+              <div>
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="lastName" value="<%= salesman.lastName %>" readonly required>
+                <div class="field-error" id="lastNameError">Last Name is required</div>
+              </div>
+              <div>
+                <label for="role">Role</label>
+                <select id="role" name="role" disabled>
+                  <option><%= salesman.role %></option>
+                </select>
+              </div>
+              <div>
+                <label for="status">Status</label>
+                <select id="status" name="status" disabled>
+                  <option value="active" <%= salesman.status === 'Active' ? 'selected' : '' %>>Active</option>
+                  <option value="resigned" <%= salesman.status === 'Resigned' ? 'selected' : '' %>>Resigned</option>
+                </select>
+              </div>
+              <div>
+                <label for="branch">Branch Name</label>
+                <input type="text" id="branch" name="branch" value="<%= salesman.branch %>" readonly>
+              </div>
+              <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="<%= salesman.email %>" readonly required>
+                <div class="field-error" id="emailError">Email is required</div>
+              </div>
+              <div>
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" value="<%= salesman.phoneNumber %>" readonly>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Account and Salaries Section -->
+          <fieldset>
+            <legend>Account and Salaries</legend>
+            <div class="field-group">
+              <div>
+                <label for="registrationDate">Registration Date</label>
+                <input type="text" id="registrationDate" name="registrationDate" value="<%= salesman.formattedRegistrationDate %>" readonly>
+              </div>
+              <div>
+                <label for="accountNumber">Account Number</label>
+                <input type="text" id="accountNumber" name="accountNumber" value="<%= salesman.accountNumber %>" readonly required>
+                <div class="field-error" id="accountNumberError">Account Number is required</div>
+              </div>
+              <div>
+                <label for="ifscCode">IFSC Code</label>
+                <input type="text" id="ifscCode" name="ifscCode" value="<%= salesman.ifscCode %>" readonly required>
+                <div class="field-error" id="ifscCodeError">IFSC Code is required</div>
+              </div>
+              <div>
+                <label for="bank">Bank</label>
+                <input type="text" id="bank" name="bank" value="<%= salesman.bank %>" readonly required>
+                <div class="field-error" id="bankError">Bank is required</div>
+              </div>
+              <div>
+                <label for="hireDate">Hire Date</label>
+                <input type="text" id="hireDate" name="hireDate" value="<%= salesman.formattedHireDate %>" readonly>
+              </div>
+              <div>
+                <label for="monthlySalary">Monthly Salary</label>
+                <input type="text" id="monthlySalary" name="monthlySalary" value="$<%= salesman.monthlySalary %>" readonly>
+              </div>
+              <div style="flex: 1 1 100%;">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" readonly><%= salesman.address %></textarea>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </form>
+
+      <script>
+        const editButton = document.getElementById('editButton');
+        const employeeForm = document.getElementById('employeeForm');
+        const inputs = employeeForm.querySelectorAll('input:not([id="salesmanId"]):not([id="registrationDate"]):not([id="hireDate"]):not([id="monthlySalary"]):not([id="branch"]), select, textarea');
+
+        editButton.addEventListener('click', () => {
+          inputs.forEach(input => {
+            if (input.tagName === 'SELECT') {
+              input.disabled = false;
+            } else {
+              input.readOnly = false;
+            }
+          });
+
+          editButton.style.display = 'none';
+          const submitButton = document.createElement('button');
+          submitButton.type = 'submit';
+          submitButton.className = 'submit-button';
+          submitButton.textContent = 'Submit';
+          employeeForm.appendChild(submitButton);
+        });
+
+        employeeForm.addEventListener('submit', (e) => {
+          let isValid = true;
+          const requiredFields = [
+            { id: 'firstName', errorId: 'firstNameError' },
+            { id: 'lastName', errorId: 'lastNameError' },
+            { id: 'email', errorId: 'emailError' },
+            { id: 'accountNumber', errorId: 'accountNumberError' },
+            { id: 'ifscCode', errorId: 'ifscCodeError' },
+            { id: 'bank', errorId: 'bankError' }
+          ];
+
+          requiredFields.forEach(field => {
+            const input = document.getElementById(field.id);
+            const error = document.getElementById(field.errorId);
+            if (input.value.trim() === '') {
+              error.style.display = 'block';
+              isValid = false;
+            } else {
+              error.style.display = 'none';
+            }
+          });
+
+          if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+          }
+        });
+      </script>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

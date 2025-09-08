@@ -1,0 +1,168 @@
+<style>
+    footer {
+        margin-top: auto;
+        width: 100%;
+        padding: 20px 0;
+    }
+
+    .footer-content {
+        max-width: 1450px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #34495E, #2C3E50);
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 20px;
+        color: white;
+    }
+
+    .footer-section {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .footer-section h3 {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+    }
+
+    .footer-section ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer-section ul li {
+        margin-bottom: 8px;
+    }
+
+    .footer-section ul li a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .footer-section ul li a:hover {
+        color: #FFD700;
+    }
+
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-logo img {
+        width: 200px;
+        border-radius: 200px;
+        margin-bottom: 15px;
+    }
+
+    .footer-logo .tagline {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #FFD700;
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+
+    .footer-social {
+        display: flex;
+        gap: 10px;
+    }
+
+    .footer-social a {
+        color: white;
+        font-size: 1.5em;
+        transition: color 0.3s;
+    }
+
+    .footer-social a:hover {
+        color: #FFD700;
+    }
+
+    .footer-bottom {
+        text-align: center;
+        padding-top: 10px;
+        background-color: #555;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 20px;
+        color: #ccc;
+    }
+
+    @media (max-width: 768px) {
+        .footer-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .footer-section {
+            margin-bottom: 20px;
+            min-width: 100%;
+        }
+
+        .footer-logo img {
+            width: 150px;
+        }
+
+        .footer-logo .tagline {
+            font-size: 1em;
+        }
+
+        .footer-social {
+            justify-content: center;
+        }
+    }
+</style>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-section footer-logo">
+            <img src="/logo.jpg" alt="ElectroLand Logo">
+            <div class="tagline">Powering Your World, Direct from the Source</div>
+        </div>
+        <div class="footer-section">
+            <h3>Information</h3>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about-us">About</a></li>
+                <li><a href="/contact-us">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Our Services</h3>
+            <ul>
+                <li>Workday Extend Implementation</li>
+                <li>Workday HCM/Finance Implementation</li>
+                <li>Workday Integrations</li>
+                <li>Project Managed Services</li>
+                <li>Workday Payroll Services</li>
+                <li>Application Management Services</li>
+                <li>Staff Augmentation Services</li>
+                <li>Training & Support</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Get In Touch</h3>
+            <ul>
+                <li>Guntur, Andhra Pradesh</li>
+                <li><a href="tel:+911234567890">+91 1234567890</a></li>
+                <li><a href="mailto:seshasaichand.a23@iiits.in">seshasaichand.a23@iiits.in</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>©2024 ElectroLand, All Rights Reserved</p>
+        <div class="footer-social">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+    </div>
+</footer>

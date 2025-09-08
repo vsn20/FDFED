@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px);
+      overflow-y: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+    }
+
+    .section-title {
+      color: #2d3436;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .field-group > div {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .field-input:disabled {
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    .field-input-file {
+      width: 100%;
+      padding: 10px 0;
+      font-size: 1rem;
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #2d3436;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-align: center;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+
+    .submit-btn:hover {
+      background: #636e72;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      color: #2d3436;
+      text-decoration: none;
+      margin-top: 20px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #636e72;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto;
+      }
+
+      .field-group {
+        flex-direction: column;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+
+      .submit-btn, .back-link {
+        font-size: 1rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../partials/company_sidebar') %>
+
+    <div class="content-area" id="content">
+      <h1>Add New Product</h1>
+      <form action="/company/products/add" method="POST" enctype="multipart/form-data">
+        <div class="form-section">
+          <legend class="section-title">Product Information</legend>
+          <div class="field-group">
+            <div>
+              <label for="prod-name" class="field-label">Product Name</label>
+              <input type="text" id="prod-name" name="Prod_name" class="field-input" required>
+            </div>
+            <div>
+              <label for="com-id" class="field-label">Company ID</label>
+              <input type="text" id="com-id" value="<%= companyId %>" class="field-input" disabled>
+              <input type="hidden" name="Com_id" value="<%= companyId %>">
+            </div>
+            <div>
+              <label for="model-no" class="field-label">Model Number</label>
+              <input type="text" id="model-no" name="Model_no" class="field-input" required>
+            </div>
+            <div>
+              <label for="com-name" class="field-label">Company Name</label>
+              <input type="text" id="com-name" value="<%= companyName %>" class="field-input" disabled>
+              <input type="hidden" name="com_name" value="<%= companyName %>">
+            </div>
+            <div>
+              <label for="prod-year" class="field-label">Production Year</label>
+              <input type="text" id="prod-year" name="prod_year" class="field-input" required>
+            </div>
+            <div>
+              <label for="stock" class="field-label">Stock</label>
+              <input type="text" id="stock" name="stock" class="field-input" required>
+            </div>
+            <div>
+              <label for="stockavailability" class="field-label">Stock Availability</label>
+              <select id="stockavailability" name="stockavailability" class="field-input" required>
+                <option value="instock">In Stock</option>
+                <option value="outofstock">Out of Stock</option>
+              </select>
+            </div>
+            <div>
+              <label for="description" class="field-label">Description</label>
+              <input type="text" id="description" name="prod_description" class="field-input" required>
+            </div>
+            <div>
+              <label for="company-selling-price" class="field-label">Company Selling Price</label>
+              <input type="text" id="company-selling-price" name="Retail_price" class="field-input" required>
+            </div>
+            <div>
+              <label for="warranty" class="field-label">Warranty Period</label>
+              <input type="text" id="warranty" name="warrantyperiod" class="field-input" required>
+            </div>
+            <div>
+              <label for="installation" class="field-label">Installation</label>
+              <select id="installation" name="installation" class="field-input" required>
+                <option value="">Select Installation</option>
+                <option value="Required">Required</option>
+                <option value="Not Required">Not Required</option>
+              </select>
+            </div>
+            <div>
+              <label for="installation-type" class="field-label">Installation Type</label>
+              <select id="installation-type" name="installationType" class="field-input" disabled>
+                <option value="">Select Type</option>
+                <option value="Paid">Paid</option>
+                <option value="Free">Free</option>
+              </select>
+            </div>
+            <div>
+              <label for="installation-charge" class="field-label">Installation Charge</label>
+              <input type="text" id="installation-charge" name="installationcharge" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="prod-photos" class="field-label">Product Photos</label>
+              <input type="file" id="prod-photos" name="prod_photos" class="field-input-file" multiple accept="image/*" required>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">Add Product</button>
+      </form>
+      <a href="/company/products" class="back-link">Back to Products</a>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    document.getElementById('installation').addEventListener('change', function() {
+      const installationType = document.getElementById('installation-type');
+      const installationCharge = document.getElementById('installation-charge');
+      if (this.value === 'Required') {
+        installationType.disabled = false;
+        installationType.focus();
+      } else {
+        installationType.disabled = true;
+        installationType.value = '';
+        installationCharge.disabled = true;
+        installationCharge.value = '';
+      }
+    });
+
+    document.getElementById('installation-type').addEventListener('change', function() {
+      const installationCharge = document.getElementById('installation-charge');
+      if (this.value === 'Paid') {
+        installationCharge.disabled = false;
+        installationCharge.focus();
+      } else {
+        installationCharge.disabled = true;
+        installationCharge.value = '';
+      }
+    });
+  </script>
+</body>
+</html>

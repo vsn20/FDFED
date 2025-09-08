@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compose Message - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+    }
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .form-row .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    select, input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: #333333;
+      outline: none;
+    }
+    input[readonly] {
+      background: #e9ecef;
+      cursor: default;
+    }
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    button {
+      background: #333333;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background: #555555;
+    }
+    .recipient-fields, .branch-fields {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+      .content-area {
+        padding: 15px;
+      }
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+      .form-row {
+        flex-direction: column;
+      }
+      .form-row .form-group {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+      select, input, textarea {
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+      .form-row .form-group {
+        flex: 1 1 45%;
+      }
+      select, input, textarea {
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+      button {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+    <div class="content-area" id="content">
+      <h1>Compose Message</h1>
+      <form action="/admin/messages/compose" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="from">From:</label>
+            <input type="text" name="from" id="from" value="<%= from %>" readonly>
+          </div>
+          <div class="form-group">
+            <label for="category">Recipient Type:</label>
+            <select name="category" id="category" required>
+              <option value="all_salesman">All Salesmen</option>
+              <option value="all_sales_manager">All Sales Managers</option>
+              <option value="all_customers">All Customers</option>
+              <option value="all_companies">All Companies</option>
+              <option value="specific_company">Specific Company</option>
+              <option value="specific_sales_manager">Specific Sales Manager</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row recipient-fields" id="recipient-row">
+          <div class="form-group">
+            <label for="to">Recipient:</label>
+            <select name="to" id="to"></select>
+          </div>
+        </div>
+        <div class="form-row branch-fields" id="branch-row">
+          <div class="form-group">
+            <label for="branch_id">Branch ID (Optional):</label>
+            <select name="branch_id" id="branch_id">
+              <option value="">Select a Branch (Optional)</option>
+              <% branches.forEach(branch => { %>
+                <option value="<%= branch.bid %>"><%= branch.bid %> - <%= branch.b_name %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="message">Message:</label>
+          <textarea name="message" id="message" placeholder="Enter your message here..." required></textarea>
+        </div>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </div>
+  <%- include('../../partials/footer') %>
+  <script>
+    const categorySelect = document.getElementById('category');
+    const recipientRow = document.getElementById('recipient-row');
+    const branchRow = document.getElementById('branch-row');
+    const toSelect = document.getElementById('to');
+    const branchSelect = document.getElementById('branch_id');
+
+    // Store initial data
+    const companies = <%- JSON.stringify(companies) %>;
+    const salesManagers = <%- JSON.stringify(salesManagers) %>;
+
+    function updateFields() {
+      const category = categorySelect.value;
+      toSelect.innerHTML = ''; // Clear existing options
+
+      if (category === 'specific_company') {
+        recipientRow.style.display = 'flex';
+        toSelect.setAttribute('required', 'true');
+        branchRow.style.display = 'none';
+        branchSelect.removeAttribute('required');
+        // Populate companies with c_id and cname
+        companies.forEach(company => {
+          const option = document.createElement('option');
+          option.value = company.c_id;
+          option.text = `${company.c_id} - ${company.cname}`;
+          toSelect.appendChild(option);
+        });
+      } else if (category === 'specific_sales_manager') {
+        recipientRow.style.display = 'flex';
+        toSelect.setAttribute('required', 'true');
+        branchRow.style.display = 'none';
+        branchSelect.removeAttribute('required');
+        // Populate sales managers with emp_id and name
+        salesManagers.forEach(manager => {
+          const option = document.createElement('option');
+          option.value = manager.e_id;
+          option.text = `${manager.e_id} - ${manager.f_name} ${manager.last_name}`;
+          toSelect.appendChild(option);
+        });
+      } else if (category === 'all_salesman') {
+        recipientRow.style.display = 'none';
+        toSelect.removeAttribute('required');
+        branchRow.style.display = 'flex';
+        branchSelect.removeAttribute('required'); // Branch is optional
+      } else if (category === 'all_sales_manager') {
+        recipientRow.style.display = 'none';
+        toSelect.removeAttribute('required');
+        branchRow.style.display = 'none';
+        branchSelect.removeAttribute('required');
+      } else {
+        recipientRow.style.display = 'none';
+        branchRow.style.display = 'none';
+        toSelect.removeAttribute('required');
+        branchSelect.removeAttribute('required');
+      }
+    }
+
+    categorySelect.addEventListener('change', updateFields);
+    updateFields();
+  </script>
+</body>
+</html>

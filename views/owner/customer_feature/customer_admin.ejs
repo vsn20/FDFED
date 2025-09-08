@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - ElectroLand</title>
+  <style>
+    /* Structural CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px; /* Standardized gap */
+      padding: 0 20px !important; /* Standardized padding with !important to prevent override */
+      max-width: 100%; /* Ensure it doesn’t exceed viewport */
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px; /* Standardized padding */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Standardized shadow */
+      flex: 1;
+      overflow-x: auto; /* Consistent overflow */
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px; /* Standardized margin */
+      font-size: 1.5rem; /* Standardized font size */
+    }
+
+    /* Header container styling */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px; /* Standardized margin */
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+    }
+
+    /* Add button styling (not used here but kept for consistency) */
+    .add-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333; /* Consistent button color */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem; /* Standardized font size */
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-decoration: none; /* Added for potential link use */
+    }
+
+    .add-btn:hover {
+      background-color: #555555; /* Consistent hover color */
+    }
+
+    /* Table styling */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
+      scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+
+    .table-wrapper::-webkit-scrollbar {
+      display: none; /* Hide scrollbar in Webkit browsers */
+    }
+
+    table {
+      width: 100%;
+      min-width: 600px; /* Standardized min-width */
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      border-spacing: 0;
+    }
+
+    thead {
+      background: #333333;
+    }
+
+    th {
+      color: white;
+      padding: 12px; /* Standardized padding */
+      text-align: left;
+      font-size: 0.9rem; /* Standardized font size */
+      border-bottom: 2px solid #ffffff;
+    }
+
+    td {
+      padding: 12px; /* Standardized padding */
+      text-align: left;
+      font-size: 0.9rem; /* Standardized font size */
+      border-bottom: 1px solid #e6e9f0;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important; /* Consistent responsive padding */
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .add-btn {
+        margin-top: 5px;
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+
+      table {
+        display: block;
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Our Customers</h1>
+        <!-- Add button can be reintroduced if needed, e.g., <a href="/admin/customers/add" class="add-btn">Add Customer</a> -->
+      </div>
+
+      <!-- Table to display customer data -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Phone Number</th>
+              <th>Profit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% customerData.forEach(customer => { %>
+              <tr>
+                <td data-label="Customer ID"><%= customer.cid %></td>
+                <td data-label="First Name"><%= customer.customer_first_name %></td>
+                <td data-label="Last Name"><%= customer.customer_last_name %></td>
+                <td data-label="Phone Number"><%= customer.customer_ph_no %></td>
+                <td data-label="Profit"><%= customer.profit_from_customer %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

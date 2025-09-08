@@ -1,0 +1,139 @@
+<style>
+    .sidebar {
+        width: 250px;
+        background: linear-gradient(180deg, #2d3748, #1a2a44);
+        border-radius: 15px;
+        padding: 30px 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        height: calc(100vh - 90px);
+        overflow-y: auto;
+    }
+
+    .sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .sidebar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .dashboard-btn {
+        display: block;
+        font-size: 1.5rem;
+        color: #fff;
+        background: linear-gradient(90deg, #4a5568, #2d3748);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .dashboard-btn::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50%;
+        height: 3px;
+        background: linear-gradient(to right, transparent, #FFD700, transparent);
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+
+    .dashboard-btn:hover {
+        background: linear-gradient(90deg, #636e72, #4a5568);
+        transform: scale(1.02);
+    }
+
+    .features {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .feature-item:hover {
+        background: linear-gradient(to right, #4a5568, #2d3748);
+        color: #FFD700;
+        transform: translateX(5px);
+    }
+
+    .feature-item.active {
+        background: linear-gradient(to right, #FFD700, #d4b106);
+        color: #2d3748;
+        font-weight: bold;
+    }
+
+    .feature-icon {
+        font-size: 1.4rem;
+        width: 30px;
+        text-align: center;
+    }
+
+    .feature-title {
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            overflow-y: auto;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sidebar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+    }
+</style>
+
+<div class="sidebar">
+    <a href="/company/home" class="dashboard-btn">Company Dashboard</a>
+    <div class="features">
+        <a href="/company/sales" class="feature-item <%= activeRoute === 'sales' ? 'active' : '' %>">
+            <span class="feature-icon">💸</span>
+            <span class="feature-title">Sales</span>
+        </a>
+        <a href="/company/products" class="feature-item <%= activeRoute === 'products' ? 'active' : '' %>">
+            <span class="feature-icon">💰</span>
+            <span class="feature-title">Products</span>
+        </a>
+        <a href="/company/complaints" class="feature-item <%= activeRoute === 'complaints' ? 'active' : '' %>">
+            <span class="feature-icon">🏬</span>
+            <span class="feature-title">Complaints</span>
+        </a>
+        <a href="/company/orders" class="feature-item <%= activeRoute === 'orders' ? 'active' : '' %>">
+            <span class="feature-icon">👥</span>
+            <span class="feature-title">Orders</span>
+        </a>
+        <a href="/company/messages" class="feature-item <%= activeRoute === 'messages' ? 'active' : '' %>">
+            <span class="feature-icon">✉</span>
+            <span class="feature-title">Messages</span>
+        </a>
+    </div>
+</div>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Branch - ElectroLand</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            margin-top: 90px;
+            display: flex;
+            flex: 1;
+            gap: 25px;
+            padding: 0 20px;
+        }
+
+        .content-area {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .content-area h1 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .content-area p {
+            color: #636e72;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e6e9f0;
+            border-radius: 5px;
+        }
+
+        .section-title {
+            color: #2d3436;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+            padding: 0 10px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .field-group > div {
+            flex: 1 1 45%;
+            min-width: 200px;
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2d3436;
+            font-weight: 500;
+        }
+
+        .field-input, .field-textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e6e9f0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            background: #fff;
+            transition: border-color 0.3s;
+        }
+
+        .field-textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .field-input:focus, .field-textarea:focus {
+            border-color: #333333;
+            outline: none;
+        }
+
+        .disabled-field {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .form-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .form-btn:hover {
+            background-color: #555555;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 0 10px;
+            }
+
+            .content-area {
+                padding: 15px;
+            }
+
+            .content-area h1 {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+            }
+
+            .field-group > div {
+                flex: 1 1 100%;
+            }
+
+            .form-btn {
+                width: 100%;
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .content-area h1 {
+                font-size: 1.3rem;
+            }
+
+            .field-group > div {
+                flex: 1 1 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../../partials/navbar') %>
+
+    <div class="container">
+        <%- include('../../partials/admin_sidebar') %>
+
+        <div class="content-area" id="content">
+            <h1>Edit Branch</h1>
+            <% if (branch) { %>
+                <form action="/admin/branches/edit/<%= branch.bid %>" method="POST">
+                    <fieldset class="form-section">
+                        <legend class="section-title">Branch Information</legend>
+                        <div class="field-group">
+                            <div>
+                                <label for="branch-id" class="field-label">Branch ID</label>
+                                <input type="text" id="branch-id" name="bid" value="<%= branch.bid %>" class="field-input disabled-field" readonly>
+                            </div>
+                            <div>
+                                <label for="branch-name" class="field-label">Branch Name</label>
+                                <input type="text" id="branch-name" name="b_name" value="<%= branch.b_name %>" class="field-input" required>
+                            </div>
+                            <div>
+                                <label for="manager-name" class="field-label">Manager Name</label>
+                                <input type="text" id="manager-name" name="manager_name" value="<%= branch.manager_name %>" class="field-input disabled-field" readonly>
+                            </div>
+                            <div>
+                                <label for="manager-email" class="field-label">Manager Email</label>
+                                <input type="email" id="manager-email" name="manager_email" value="<%= branch.manager_email %>" class="field-input disabled-field" readonly>
+                            </div>
+                            <div>
+                                <label for="manager-phone" class="field-label">Manager Phone</label>
+                                <input type="tel" id="manager-phone" name="manager_ph_no" value="<%= branch.manager_ph_no %>" class="field-input disabled-field" readonly>
+                            </div>
+                            <div>
+                                <label for="address" class="field-label">Address</label>
+                                <textarea id="address" name="address" class="field-textarea" required><%= branch.location %></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <button type="submit" class="form-btn">Update Branch</button>
+                </form>
+            <% } else { %>
+                <p>Branch not found.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../../partials/footer') %>
+</body>
+</html>

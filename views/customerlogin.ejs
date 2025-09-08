@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login</title>
+    <style>
+        /* Existing CSS remains unchanged */
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-wrapper {
+            flex: 1 0 auto;
+            padding-top: 80px;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 80vh;
+            max-width: 1200px;
+            margin: 50px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-section {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-container {
+            flex: 1;
+            background: #fff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h2 {
+            color: #2C3E50;
+            margin-bottom: 30px;
+            font-size: 2em;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(135deg, #34495E, #2C3E50);
+        }
+
+        input {
+            width: 70%;
+            padding: 12px;
+            margin: 15px auto;
+            border: none;
+            border-radius: 25px;
+            background: #f5f6fa;
+            box-shadow: inset 4px 4px 8px #e0e1e5,
+                       inset -4px -4px 8px #ffffff;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(52, 73, 94, 0.3);
+        }
+
+        button {
+            width: 70%;
+            padding: 12px;
+            margin: 20px auto;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #34495E, #2C3E50);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+        }
+
+        button:hover {
+            background: linear-gradient(to right, rgb(66, 32, 70), rgb(30, 26, 71), rgb(77, 38, 44), #155217, #2E8B57);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            background: linear-gradient(to left, rgb(66, 32, 70), rgb(30, 26, 71), rgb(77, 38, 44), #155217, #2E8B57);
+            transform: scale(0.95);
+        }
+
+        .clicked {
+            transform: scale(0.95);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin: 15px auto;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 5px;
+            width: 70%;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                margin: 20px;
+            }
+            .image-section {
+                min-height: 300px;
+            }
+            .content-wrapper {
+                padding-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar',{ activePage: 'customer' }) %>
+
+    <div class="content-wrapper">
+        <div class="main-container">
+            <div class="image-section">
+                <img src="https://img.freepik.com/premium-vector/trendy-vector-design-secure-website_362714-3915.jpg?semt=ais_hybrid" alt="Customer Login Image">
+                <div class="image-overlay"></div>
+            </div>
+            
+            <div class="auth-container">
+                <h2>Customer Login</h2>
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="error-message"><%= error %></div>
+                    <script>
+                        // Show OTP section if there's an error after OTP submission
+                        document.addEventListener("DOMContentLoaded", function () {
+                            document.getElementById("send-otp-btn").classList.add("hidden");
+                            document.getElementById("otp-section").classList.remove("hidden");
+                        });
+                    </script>
+                <% } %>
+                <form id="customerForm" action="/customer-login" method="POST">
+                    <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="Enter your mobile number" required pattern="[0-9]{10}" title="Please enter a 10-digit mobile number">
+                    <button type="button" id="send-otp-btn">Send OTP</button>
+                    
+                    <div id="otp-section" class="hidden">
+                        <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+                        <button type="submit">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer',{ activePage: 'customer' }) %>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const customerForm = document.getElementById("customerForm");
+            const sendOtpBtn = document.getElementById("send-otp-btn");
+            const otpSection = document.getElementById("otp-section");
+            const mobileNumberInput = document.getElementById("mobileNumber");
+            const buttons = document.querySelectorAll("button");
+
+            // Button click animation for all buttons
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    this.classList.add("clicked");
+                    setTimeout(() => this.classList.remove("clicked"), 400);
+                });
+            });
+
+            // Handle "Send OTP" button click
+            sendOtpBtn.addEventListener("click", function () {
+                const mobileNumber = mobileNumberInput.value;
+                if (mobileNumber.match(/^[0-9]{10}$/)) {
+                    // Simulate OTP sending (replace with actual API call in production)
+                    setTimeout(() => {
+                        sendOtpBtn.classList.add("hidden");
+                        otpSection.classList.remove("hidden");
+                    }, 500); // Simulated delay
+                } else {
+                    alert("Please enter a valid 10-digit mobile number");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

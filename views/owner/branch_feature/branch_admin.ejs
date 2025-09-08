@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ElectroLand</title>
+    <style>
+        /* Structural CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            margin-top: 90px;
+            display: flex;
+            flex: 1;
+            gap: 25px;
+            padding: 0 20px;
+        }
+
+        .content-area {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .content-area h1 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .add-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #333333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .add-button:hover {
+            background-color: #555555;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 10px;
+            border-spacing: 0;
+        }
+
+        thead {
+            background: #333333;
+        }
+
+        th {
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        td {
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e6e9f0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fd;
+        }
+
+        .clickable-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 0;
+            font-size: inherit;
+            width: 100%;
+            text-align: left;
+        }
+
+        .clickable-btn:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 0 10px;
+            }
+
+            .content-area {
+                padding: 15px;
+            }
+
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .add-button {
+                margin-top: 10px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .content-area h1 {
+                font-size: 1.2rem;
+            }
+
+            table {
+                display: block;
+                min-width: 0;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tr {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 15px;
+                border: 1px solid #e6e9f0;
+                border-radius: 5px;
+                padding: 10px;
+                background: #fff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                font-size: 0.85rem;
+                border-bottom: 1px dashed #e6e9f0;
+            }
+
+            td:last-child {
+                border-bottom: none;
+            }
+
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #2d3436;
+                margin-right: 10px;
+                min-width: 100px;
+            }
+
+            .clickable-btn {
+                flex: 1;
+                text-align: right;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            th, td {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+
+            .content-area h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../../partials/navbar') %>
+
+    <div class="container">
+        <%- include('../../partials/admin_sidebar') %>
+
+        <div class="content-area" id="content">
+            <div class="header-container">
+                <h1>Our Branches</h1>
+                <a href="/admin/branches/add" class="add-button">Add Branch</a>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="branches-table">
+                    <thead>
+                        <tr>
+                            <th>Branch ID</th>
+                            <th>Branch Name</th>
+                            <th>Manager Name</th>
+                            <th>Manager Email</th>
+                            <th>Manager Phone</th>
+                            <th>Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branches-tbody">
+                        <% branches.forEach(branch => { %>
+                            <tr>
+                                <td data-label="Branch ID"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.bid %></button></td>
+                                <td data-label="Branch Name"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.b_name %></button></td>
+                                <td data-label="Manager Name"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.manager_name %></button></td>
+                                <td data-label="Manager Email"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.manager_email %></button></td>
+                                <td data-label="Manager Phone"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.manager_ph_no %></button></td>
+                                <td data-label="Address"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.location %></button></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../../partials/footer') %>
+
+    <script>
+        // Navigate to edit branch page on button click
+        document.querySelectorAll('.clickable-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const bid = button.getAttribute('data-bid');
+                window.location.href = `/admin/branches/edit/${bid}`;
+            });
+        });
+
+        // Listen for messages from employee forms to refresh branch data
+        window.addEventListener('message', async (event) => {
+            if (event.origin !== window.location.origin) return; // Security check
+            if (event.data.type === 'refreshBranches') {
+                try {
+                    const response = await fetch('/admin/branches/data', {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    const branches = await response.json();
+                    const tbody = document.getElementById('branches-tbody');
+                    tbody.innerHTML = ''; // Clear existing rows
+                    branches.forEach(branch => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td data-label="Branch ID"><button class="clickable-btn" data-bid="${branch.bid}">${branch.bid}</button></td>
+                            <td data-label="Branch Name"><button class="clickable-btn" data-bid="${branch.bid}">${branch.b_name}</button></td>
+                            <td data-label="Manager Name"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_name}</button></td>
+                            <td data-label="Manager Email"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_email}</button></td>
+                            <td data-label="Manager Phone"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_ph_no}</button></td>
+                            <td data-label="Address"><button class="clickable-btn" data-bid="${branch.bid}">${branch.location}</button></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    // Re-attach event listeners for new buttons
+                    document.querySelectorAll('.clickable-btn').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const bid = button.getAttribute('data-bid');
+                            window.location.href = `/admin/branches/edit/${bid}`;
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error refreshing branches:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

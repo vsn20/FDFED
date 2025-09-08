@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profits - ElectroLand</title>
+  <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #e9ecef;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #343a40;
+    }
+
+    /* Container */
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    /* Content Area */
+    .content-area {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      transition: transform 0.2s ease;
+    }
+
+    .content-area:hover {
+      transform: translateY(-2px);
+    }
+
+    .content-area h2 {
+      color: #1a3c6d;
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    /* Month Selector */
+    .month-selector-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .month-selector-wrapper label {
+      font-size: 0.9rem;
+      color: #495057;
+      align-self: center;
+    }
+
+    .month-selector-wrapper select {
+      padding: 10px;
+      font-size: 0.9rem;
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+      background: #ffffff;
+      color: #343a40;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+      width: 200px;
+    }
+
+    .month-selector-wrapper select:focus {
+      outline: none;
+      border-color: #1a3c6d;
+      box-shadow: 0 0 0 2px rgba(26, 60, 109, 0.2);
+    }
+
+    /* Profit Cards */
+    .profit-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .profit-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .profit-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .profit-card h3 {
+      color: #495057;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .profit-card p {
+      color: #28a745;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .profit-card p.negative {
+      color: #dc3545;
+      font-size: 1rem;
+    }
+
+    /* Message */
+    .message {
+      text-align: center;
+      color: #dc3545;
+      font-size: 1rem;
+      margin-top: 20px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .content-area h2 {
+        font-size: 1rem;
+      }
+
+      .month-selector-wrapper select {
+        width: 100%;
+      }
+
+      .profit-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h2 {
+        font-size: 1.1rem;
+      }
+
+      .profit-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../partials/admin_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <h2 id="profit-title"><%= selectedMonth %> Profits</h2>
+
+      <!-- Month Selector -->
+      <div class="month-selector-wrapper">
+        <label for="month-select">Select Month:</label>
+        <select id="month-select">
+          <% months.forEach(month => { %>
+            <option value="<%= month.year %>-<%= month.month %>"
+                    data-display="<%= month.name %> <%= month.year %>"
+                    <%= selectedMonth === `${month.name} ${month.year}` ? 'selected' : '' %>>
+              <%= month.name %> <%= month.year %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Profits Display -->
+      <div class="profit-cards" id="profit-cards">
+        <!-- Total Profit Card -->
+        <div class="profit-card">
+          <h3>Total Profit</h3>
+          <p id="total-profit" class="<%= profits.reduce((sum, profit) => sum + profit.profit, 0) < 0 ? 'negative' : '' %>">
+            $<%= Math.abs(profits.reduce((sum, profit) => sum + profit.profit, 0)).toLocaleString() %>
+          </p>
+        </div>
+
+        <!-- Branch Profit Cards -->
+        <% profits.forEach(profit => { %>
+          <div class="profit-card">
+            <h3><%= profit.branch_name %> (<%= profit.branch_id %>)</h3>
+            <p class="<%= profit.profit < 0 ? 'negative' : '' %>">
+              $<%= Math.abs(profit.profit).toLocaleString() %>
+            </p>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    async function updateMonth(month) {
+      try {
+        const response = await fetch(`/admin/profit-by-month?month=${month}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        console.log('Fetched data:', data); // Debug log to check response
+
+        if (data.error) {
+          document.getElementById('profit-cards').innerHTML = `
+            <div class="message">Error: ${data.error}</div>
+          `;
+          document.getElementById('profit-title').textContent = 'Profits';
+          return;
+        }
+
+        // Update the title
+        const selectedOption = document.querySelector(`#month-select option[value="${month}"]`);
+        const displayText = selectedOption ? selectedOption.getAttribute('data-display') : 'Profits';
+        document.getElementById('profit-title').textContent = `${displayText} Profits`;
+
+        // Calculate total profit
+        const totalProfit = data.profits.reduce((sum, profit) => sum + profit.profit, 0);
+
+        // Update the profit cards
+        document.getElementById('profit-cards').innerHTML = `
+          <div class="profit-card">
+            <h3>Total Profit</h3>
+            <p id="total-profit" class="${totalProfit < 0 ? 'negative' : ''}">
+              $${Math.abs(totalProfit).toLocaleString()}
+            </p>
+          </div>
+          ${data.profits.length > 0 ? data.profits.map(profit => `
+            <div class="profit-card">
+              <h3>${profit.branch_name} (${profit.branch_id})</h3>
+              <p class="${profit.profit < 0 ? 'negative' : ''}">
+                $${Math.abs(profit.profit).toLocaleString()}
+              </p>
+            </div>
+          `).join('') : '<div class="message">No sales data available for this month</div>'}
+        `;
+      } catch (error) {
+        document.getElementById('profit-cards').innerHTML = `
+          <div class="message">Error fetching profit data: ${error.message}</div>
+        `;
+        document.getElementById('profit-title').textContent = 'Profits';
+        console.error('Error:', error);
+      }
+    }
+
+    // Add event listener for month selection
+    document.getElementById('month-select').addEventListener('change', (event) => {
+      const month = event.target.value;
+      if (month) {
+        updateMonth(month);
+      } else {
+        document.getElementById('profit-cards').innerHTML = `
+          <div class="message">Please select a month to view profits</div>
+        `;
+        document.getElementById('profit-title').textContent = 'Profits';
+      }
+    });
+
+    // On load, ensure the selected month is reflected and profits are displayed
+    document.addEventListener('DOMContentLoaded', function() {
+      const select = document.getElementById('month-select');
+      const initialMonth = select.value;
+      if (!initialMonth) {
+        document.getElementById('profit-cards').innerHTML = `
+          <div class="message">Please select a month to view profits</div>
+        `;
+        document.getElementById('profit-title').textContent = 'Profits';
+      } else {
+        updateMonth(initialMonth);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Sale - ElectroLand</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px);
+      overflow-y: hidden;
+      transition: overflow-y 0.1s ease;
+    }
+
+    .content-area:hover {
+      overflow-y: auto;
+    }
+
+    .content-area::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .content-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .content-area::-webkit-scrollbar-thumb {
+      background: #4a5568;
+      border-radius: 4px;
+    }
+
+    .content-area::-webkit-scrollbar-thumb:hover {
+      background: #636e72;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .content-area p {
+      color: #636e72;
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+    }
+
+    .section-title {
+      color: #2d3436;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      font-weight: bold;
+      padding: 0 10px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .field-group > div {
+      flex: 1 1 45%;
+      min-width: 200px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    .field-input, .field-textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f0f0f0;
+      transition: border-color 0.3s;
+    }
+
+    .field-textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .field-input:focus, .field-textarea:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    .disabled-field {
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    .form-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form-btn:hover {
+      background-color: #555555;
+    }
+
+    .star-rating {
+      display: flex;
+      gap: 10px;
+      direction: rtl;
+      margin-bottom: 10px;
+    }
+
+    .star-rating input[type="radio"] {
+      display: none;
+    }
+
+    .star-rating label {
+      font-size: 1.8rem;
+      color: #ddd;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star-rating input[type="radio"]:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+      color: #FFD700;
+    }
+
+    .review-section .field-group {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 30px;
+      align-items: flex-start;
+    }
+
+    .review-section .field-group > div:first-child {
+      flex: 0 0 auto;
+    }
+
+    .review-section .field-group > div:last-child {
+      flex: 1 1 auto;
+    }
+
+    .error-message {
+      color: #d32f2f;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto;
+        overflow-y: hidden;
+      }
+
+      .content-area:hover {
+        overflow-y: auto;
+      }
+
+      .field-group {
+        flex-direction: column;
+      }
+
+      .field-group > div {
+        flex: 1 1 100%;
+      }
+
+      .review-section .field-group {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .form-btn {
+        width: 100%;
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/customer_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <h1>Review Sale</h1>
+      <% if (sale) { %>
+        <form id="review-form" action="/customer/reviews" method="POST">
+          <input type="hidden" name="sale_id" value="<%= sale.sale_id %>">
+          <fieldset class="form-section">
+            <legend class="section-title">Sale Information</legend>
+            <div class="field-group">
+              <div>
+                <label for="sale-id" class="field-label">Sale ID:</label>
+                <input type="text" id="sale-id" value="<%= sale.sale_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-id" class="field-label">Product ID:</label>
+                <input type="text" id="prod-id" value="<%= sale.prod_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-name" class="field-label">Product Name:</label>
+                <input type="text" id="prod-name" value="<%= sale.Prod_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="com-name" class="field-label">Company Name:</label>
+                <input type="text" id="com-name" value="<%= sale.com_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="purchase-date" class="field-label">Purchase Date:</label>
+                <input type="text" id="purchase-date" value="<%= sale.purchasedate %>" class="field-input disabled-field" readonly>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Review Section -->
+          <fieldset class="form-section review-section">
+            <legend class="section-title">Review</legend>
+            <div class="field-group">
+              <div>
+                <label class="field-label">Rating:</label>
+                <div class="star-rating">
+                  <input type="radio" id="star5" name="rating" value="5" <%= sale.rating === 5 ? 'checked' : '' %>>
+                  <label for="star5">★</label>
+                  <input type="radio" id="star4" name="rating" value="4" <%= sale.rating === 4 ? 'checked' : '' %>>
+                  <label for="star4">★</label>
+                  <input type="radio" id="star3" name="rating" value="3" <%= sale.rating === 3 ? 'checked' : '' %>>
+                  <label for="star3">★</label>
+                  <input type="radio" id="star2" name="rating" value="2" <%= sale.rating === 2 ? 'checked' : '' %>>
+                  <label for="star2">★</label>
+                  <input type="radio" id="star1" name="rating" value="1" <%= sale.rating === 1 ? 'checked' : '' %>>
+                  <label for="star1">★</label>
+                </div>
+                <p id="rating-error" class="error-message">Please select a rating.</p>
+              </div>
+              <div>
+                <label for="review" class="field-label">Review:</label>
+                <textarea id="review" name="review" class="field-textarea" placeholder="Enter your review here..."><%= sale.review %></textarea>
+                <p id="review-error" class="error-message">Please enter a review.</p>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Submit Button -->
+          <button type="submit" class="form-btn">Submit Review</button>
+        </form>
+      <% } else { %>
+        <p>Sale not found.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    document.getElementById('review-form').addEventListener('submit', async (event) => {
+      event.preventDefault(); // Prevent default form submission
+
+      // Client-side validation
+      const rating = document.querySelector('input[name="rating"]:checked');
+      const review = document.querySelector('#review').value.trim();
+      const ratingError = document.querySelector('#rating-error');
+      const reviewError = document.querySelector('#review-error');
+      let hasError = false;
+
+      // Reset error messages
+      ratingError.style.display = 'none';
+      reviewError.style.display = 'none';
+
+      if (!rating) {
+        ratingError.style.display = 'block';
+        hasError = true;
+      }
+
+      if (!review) {
+        reviewError.style.display = 'block';
+        hasError = true;
+      }
+
+      if (hasError) {
+        return; // Stop submission if there are validation errors
+      }
+
+      const form = event.target;
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.href = result.redirect; // Redirect to the specified URL
+        } else {
+          alert(result.message || 'Error submitting review');
+        }
+      } catch (error) {
+        console.error('Error submitting review:', error);
+        alert('An error occurred while submitting the review');
+      }
+    });
+  </script>
+</body>
+</html>

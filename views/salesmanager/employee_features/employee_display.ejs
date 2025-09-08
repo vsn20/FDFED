@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee List - ElectroLand</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px); /* Match sidebar height */
+      overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    }
+
+    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar in Firefox */
+    .content-area {
+      scrollbar-width: none;
+    }
+
+    /* Hide scrollbar in IE/Edge */
+    .content-area {
+      -ms-overflow-style: none;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+    }
+
+    .success-message {
+      color: #28a745;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #2d3436;
+      color: white;
+    }
+
+    tr {
+      cursor: pointer;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .edit-btn, .fire-btn {
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .edit-btn {
+      background-color: #007bff;
+    }
+
+    .edit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .fire-btn {
+      background-color: #dc3545;
+    }
+
+    .fire-btn:hover {
+      background-color: #c82333;
+    }
+
+    .add-employee-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .add-employee-btn:hover {
+      background-color: #218838;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 20px;
+      }
+
+      .content-area {
+        height: auto; /* Allow content area to expand on mobile */
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/salesmanager_sidebar') %>
+
+    <div class="content-area" id="content">
+      <h1>Employee List</h1>
+      <% if (message) { %>
+        <p class="success-message"><%= message %></p>
+      <% } %>
+      <% if (error) { %>
+        <p style="color: red;"><%= error %></p>
+      <% } %>
+      <a href="/salesmanager/add-employee" class="add-employee-btn">Add Employees</a>
+      <table id="employeeTable">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (salesManager) { %>
+            <tr>
+              <td><%= salesManager.e_id %></td>
+              <td><%= salesManager.f_name %></td>
+              <td><%= salesManager.last_name %></td>
+              <td><%= salesManager.status %></td>
+              <td>
+                <a href="/salesmanager/edit-salesmanager" class="edit-btn">Edit</a>
+              </td>
+            </tr>
+          <% } else { %>
+            <tr><td colspan="5">Sales Manager data not available</td></tr>
+          <% } %>
+
+          <% if (employeeData && Array.isArray(employeeData) && employeeData.length > 0) { %>
+            <% employeeData.forEach(employee => { %>
+              <tr>
+                <td><%= employee.e_id %></td>
+                <td><%= employee.f_name %></td>
+                <td><%= employee.last_name %></td>
+                <td><%= employee.status %></td>
+                <td>
+                  <a href="/salesmanager/employee-details/<%= employee.e_id %>" class="edit-btn">Details</a>
+                  <% if (employee.status === 'active') { %>
+                    <a href="#" class="fire-btn" onclick="document.getElementById('fireForm-<%= employee.e_id %>').style.display='block'; return false;">Fire</a>
+                    <form id="fireForm-<%= employee.e_id %>" action="/salesmanager/employee/fire/<%= employee.e_id %>" method="POST" style="display:none;">
+                      <label for="reason_for_exit-<%= employee.e_id %>">Reason for Exit:</label>
+                      <input type="text" id="reason_for_exit-<%= employee.e_id %>" name="reason_for_exit" required>
+                      <button type="submit" onclick="return confirm('Are you sure you want to fire this employee?')">Submit</button>
+                      <button type="button" onclick="document.getElementById('fireForm-<%= employee.e_id %>').style.display='none';">Cancel</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="5">No salesmen available</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

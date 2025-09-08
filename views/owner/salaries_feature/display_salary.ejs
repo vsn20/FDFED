@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Dashboard - Salaries - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .add-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .add-button:hover {
+      background-color: #555555;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .table-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      border-spacing: 0;
+    }
+
+    thead {
+      background: #333333;
+    }
+
+    th {
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #ffffff;
+    }
+
+    td {
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e9f0;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+
+    .date-range {
+      font-size: 1.2em;
+      color: #1a1a1a;
+      margin-left: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.625em;
+      align-items: center;
+    }
+
+    .month-year-select {
+      padding: 0.625em;
+      border: 0.0625em solid #e6e9f0;
+      border-radius: 0.3125em;
+      font-size: 0.9em;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .generate-btn {
+      padding: 0.625em 1.25em;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 0.3125em;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .generate-btn:hover {
+      background-color: #555555;
+    }
+
+    .note {
+      color: #e74c3c;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .add-button, .generate-btn {
+        margin-top: 5px;
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+
+      table {
+        display: block;
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+
+      .date-range {
+        font-size: 1.1rem;
+        margin-top: 0.625em;
+      }
+
+      .controls {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .month-year-select,
+      .generate-btn {
+        width: 100%;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+    
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Salaries</h1>
+        <div class="date-range">
+          <h1><%= selectedMonthYear %> Salaries</h1>
+        </div>
+        <div class="controls">
+          <select class="month-year-select" id="month-year">
+            <% monthYearOptions.forEach(option => { %>
+              <option value="<%= option %>" <%= selectedMonthYear === option ? 'selected' : '' %>>
+                <%= option.replace('-', ' ') %>
+              </option>
+            <% }) %>
+          </select>
+          <button class="generate-btn" onclick="filterSalaries()">Generate</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Employee Name</th>
+              <th>Role</th>
+              <th>Salary</th>
+              <th>Commission</th>
+              <th>Total</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (salary.length === 0) { %>
+              <tr>
+                <td colspan="7">No salaries found for <%= selectedMonthYear %>.</td>
+              </tr>
+            <% } else { %>
+              <% salary.forEach(s => { %>
+                <tr>
+                  <td data-label="Employee ID"><%= s.eid %></td>
+                  <td data-label="Employee Name"><%= s.ename %></td>
+                  <td data-label="Role"><%= s.role %></td>
+                  <td data-label="Salary">$<%= s.salary %></td>
+                  <td data-label="Commission">$<%= s.commission %></td>
+                  <td data-label="Total">$<%= s.totalsalary %></td>
+                  <td data-label="Note" class="note"><%= s.note || '' %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    function filterSalaries() {
+      const monthYear = document.getElementById('month-year').value;
+      console.log('[filterSalaries] Redirecting to:', `/admin/salaries?monthYear=${monthYear}`);
+      window.location.href = `/admin/salaries?monthYear=${monthYear}`;
+    }
+  </script>
+</body>
+</html>

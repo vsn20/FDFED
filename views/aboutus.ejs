@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Electroland</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            position: relative;
+            scroll-behavior: smooth;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1450px;
+            margin: 40px auto;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .container h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .container h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(135deg, #2E8B57, #155217);
+            border-radius: 2px;
+        }
+        .container p {
+            font-size: 1.2em;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .image-text-section {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin: 40px auto;
+            max-width: 1450px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .image-text-section img {
+            width: 50%;
+            height: auto;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        .text-content {
+            flex: 1;
+            text-align: left;
+        }
+        .text-content h2 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .text-content p {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.6;
+        }
+        /* Ensure the right image section is correctly ordered */
+        .image-right .text-content {
+            order: 1;
+        }
+        .image-right img {
+            order: 2;
+        }
+        .relationship-section {
+            max-width: 1450px;
+            margin: 40px auto;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 15px;
+            color: #333;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .relationship-section h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 15px;
+            color: #333;
+        }
+        .relationship-section h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(135deg, #2E8B57, #155217);
+            border-radius: 2px;
+        }
+        .relationship-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+        .relationship-card {
+            text-align: center;
+            padding: 25px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .relationship-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .relationship-card i {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #2E8B57;
+        }
+        .relationship-card h3 {
+            font-size: 1.4em;
+            margin: 10px 0;
+            color: #333;
+        }
+        .relationship-card p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #555;
+        }
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+                padding: 20px;
+            }
+            .container h1 {
+                font-size: 2em;
+            }
+            .container p {
+                font-size: 1em;
+            }
+            .image-text-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .image-text-section img {
+                width: 100%;
+                max-width: 400px;
+            }
+            .text-content {
+                text-align: center;
+            }
+            .text-content h2 {
+                font-size: 1.5em;
+            }
+            .text-content p {
+                font-size: 1em;
+            }
+            .image-right .text-content, .image-right img {
+                order: initial; /* Reset order on smaller screens */
+            }
+            .relationship-section h2 {
+                font-size: 2em;
+            }
+            .relationship-grid {
+                grid-template-columns: 1fr;
+                padding: 0 10px;
+            }
+            .relationship-card {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 450px) {
+            .container h1 {
+                font-size: 1.8em;
+            }
+            .container p {
+                font-size: 0.9em;
+            }
+            .image-text-section {
+                padding: 15px;
+            }
+            .text-content h2 {
+                font-size: 1.3em;
+            }
+            .text-content p {
+                font-size: 0.9em;
+            }
+            .relationship-section {
+                padding: 20px 15px;
+            }
+            .relationship-section h2 {
+                font-size: 1.8em;
+            }
+            .relationship-card h3 {
+                font-size: 1.2em;
+            }
+            .relationship-card p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+    <section id="AboutUs">
+        <div class="container">
+            <h1>About Electroland</h1>
+            <p>Welcome to Electroland, where innovation meets quality to transform your home. Since our founding in 2010, we’ve been dedicated to providing top-tier appliances that blend cutting-edge technology with timeless design. Our mission is simple: to enhance your lifestyle with reliable, efficient, and stylish solutions tailored to your needs.</p>
+        </div>
+
+        <div class="image-text-section">
+            <img src="https://cdn.pixabay.com/photo/2017/03/22/17/39/kitchen-2165756_1280.jpg" alt="Our Team">
+            <div class="text-content">
+                <h2>Our Journey</h2>
+                <p>Electroland started as a small family business with a vision to revolutionize home appliances. Over the past decade, we’ve grown into a trusted name, serving thousands of households with our commitment to excellence. Our team of experts works tirelessly to design and curate products that make your daily life easier and more enjoyable.</p>
+            </div>
+        </div>
+
+        <div class="image-text-section image-right">
+            <div class="text-content">
+                <h2>Our Values</h2>
+                <p>At the heart of Electroland is a set of core values: integrity, innovation, and customer satisfaction. We believe in building lasting relationships with our customers by offering not just products, but experiences. Every appliance we sell reflects our dedication to quality and our promise to stand by you every step of the way.</p>
+            </div>
+            <img src="/aboutusright.jpg" alt="Our Values">
+        </div>
+
+        <div class="relationship-section">
+            <h2>Our Customer-Company Relationship</h2>
+            <div class="relationship-grid">
+                <div class="relationship-card">
+                    <i class="fas fa-handshake"></i>
+                    <h3>Trust & Transparency</h3>
+                    <p>We value your trust above all. With over 95% customer satisfaction ratings and clear communication, we ensure you’re informed and confident in every purchase. Our no-hidden-fees policy and honest product descriptions reflect our commitment to transparency.</p>
+                </div>
+                <div class="relationship-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Community Focus</h3>
+                    <p>Our customers are our community. We’ve served over 50,000 happy households, hosting annual customer appreciation events and offering loyalty discounts to our returning clients. Your feedback shapes our future innovations.</p>
+                </div>
+                <div class="relationship-card">
+                    <i class="fas fa-tools"></i>
+                    <h3>Support & Service</h3>
+                    <p>We’re here for you long after the sale. Our 24/7 support team handles over 1,000 inquiries monthly, and our in-store service centers have repaired over 10,000 appliances, ensuring your investment lasts.</p>
+                </div>
+                <div class="relationship-card">
+                    <i class="fas fa-heart"></i>
+                    <h3>Personalized Care</h3>
+                    <p>Every customer matters. With personalized consultations available in-store and a dedicated account manager for bulk purchases, we’ve helped 80% of our clients find the perfect appliance for their unique needs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <%- include('partials/footer') %>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

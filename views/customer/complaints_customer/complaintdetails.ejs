@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Sale - ElectroLand</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    /* Content area with height and scroll */
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px); /* Match sidebar height */
+      overflow-y: hidden; /* Hide scrollbar by default */
+      transition: overflow-y 0.1s ease;
+    }
+
+    .content-area:hover {
+      overflow-y: auto; /* Show scrollbar on hover */
+    }
+
+    .content-area::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .content-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .content-area::-webkit-scrollbar-thumb {
+      background: #4a5568;
+      border-radius: 4px;
+    }
+
+    .content-area::-webkit-scrollbar-thumb:hover {
+      background: #636e72;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .content-area p {
+      color: #636e72;
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    /* Form-specific styles */
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+    }
+
+    .section-title {
+      color: #2d3436;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      font-weight: bold;
+      padding: 0 10px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .field-group > div {
+      flex: 1 1 45%;
+      min-width: 200px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    .field-input, .field-textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f0f0f0;
+      transition: border-color 0.3s;
+    }
+
+    .field-textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .field-input:focus, .field-textarea:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    .disabled-field {
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    .form-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form-btn:hover {
+      background-color: #555555;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto; /* Adjust for mobile */
+        overflow-y: hidden;
+      }
+
+      .content-area:hover {
+        overflow-y: auto;
+      }
+
+      .field-group > div {
+        flex: 1 1 100%;
+      }
+
+      .form-btn {
+        width: 100%;
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/customer_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <h1>View Sale</h1>
+      <% if (sale) { %>
+        <form action="/customer/complaints" method="POST">
+          <fieldset class="form-section">
+            <legend class="section-title">Sale Information</legend>
+            <div class="field-group">
+              <div>
+                <label for="sale-id" class="field-label">sale_id:</label>
+                <input type="text" id="sale-id" name="sale_id" value="<%= sale.sale_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-id" class="field-label">prod_id:</label>
+                <input type="text" id="prod-id" name="prod_id" value="<%= sale.prod_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-name" class="field-label">Prod_name:</label>
+                <input type="text" id="prod-name" name="Prod_name" value="<%= sale.Prod_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="com-id" class="field-label">Com_id:</label>
+                <input type="text" id="com-id" name="Com_id" value="<%= sale.Com_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="model-no" class="field-label">Model_no:</label>
+                <input type="text" id="model-no" name="Model_no" value="<%= sale.Model_no %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="com-name" class="field-label">com_name:</label>
+                <input type="text" id="com-name" name="com_name" value="<%= sale.com_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="warranty-period" class="field-label">warrantyperiod:</label>
+                <input type="text" id="warranty-period" name="warrantyperiod" value="<%= sale.warrantyperiod %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="purchase-date" class="field-label">purchasedate:</label>
+                <input type="text" id="purchase-date" name="purchasedate" value="<%= sale.purchasedate %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-description" class="field-label">prod_description:</label>
+                <textarea id="prod-description" name="prod_description" class="field-textarea disabled-field" readonly><%= sale.prod_description %></textarea>
+              </div>
+              <div>
+                <label for="installation" class="field-label">installation:</label>
+                <input type="text" id="installation" name="installation" value="<%= sale.installation %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="price" class="field-label">price:</label>
+                <input type="text" id="price" name="price" value="<%= sale.price %>" class="field-input disabled-field" readonly>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Complaint Section -->
+          <fieldset class="form-section">
+            <legend class="section-title">Complaint</legend>
+            <div class="field-group">
+              <div>
+                <label for="complaint" class="field-label">Complaint:</label>
+                <textarea id="complaint" name="complaint" class="field-textarea" placeholder="Enter your complaint here..." required></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Submit Button -->
+          <button type="submit" class="form-btn">Submit</button>
+        </form>
+      <% } else { %>
+        <p>Sale not found.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compose Message - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+    }
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    select, input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: #333333;
+      outline: none;
+    }
+    input[readonly] {
+      background: #e9ecef;
+      cursor: default;
+    }
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    button {
+      background: #333333;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background: #555555;
+    }
+    #sales-manager-field {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+      .content-area {
+        padding: 15px;
+      }
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .form-group {
+        min-width: 100%;
+      }
+      select, input, textarea {
+        font-size: 0.85rem;
+      }
+      button {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+      .form-row {
+        gap: 15px;
+      }
+      select, input, textarea {
+        font-size: 0.85rem;
+      }
+      button {
+        padding: 8px 15px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/company_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <h1>Compose Message</h1>
+      <form action="/company/messages/compose" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="from">From:</label>
+            <input type="text" name="from" id="from" value="<%= from %>" readonly>
+          </div>
+          <div class="form-group">
+            <label for="category">Recipient:</label>
+            <select name="category" id="category" required>
+              <option value="admin">Admin</option>
+              <option value="specific_sales_manager">Specific Sales Manager</option>
+              <option value="all_sales_manager">All Sales Managers</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" id="sales-manager-field">
+          <div class="form-group">
+            <label for="to">Sales Manager:</label>
+            <select name="to" id="to">
+              <% salesManagers.forEach(manager => { %>
+                <option value="<%= manager.e_id %>"><%= manager.e_id %> - <%= manager.f_name %> <%= manager.last_name %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="messages">Message:</label>
+          <textarea name="messages" id="messages" placeholder="Enter your message here..." required></textarea>
+        </div>
+
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    const categorySelect = document.getElementById('category');
+    const salesManagerField = document.getElementById('sales-manager-field');
+    const toSelect = document.getElementById('to');
+
+    categorySelect.addEventListener('change', function() {
+      if (this.value === 'specific_sales_manager') {
+        salesManagerField.style.display = 'flex';
+        toSelect.setAttribute('required', 'true');
+      } else {
+        salesManagerField.style.display = 'none';
+        toSelect.removeAttribute('required');
+      }
+    });
+
+    // Initial check on page load
+    if (categorySelect.value !== 'specific_sales_manager') {
+      salesManagerField.style.display = 'none';
+      toSelect.removeAttribute('required');
+    }
+  </script>
+</body>
+</html>

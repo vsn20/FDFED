@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - ElectroLand</title>
+  <style>
+    /* Structural CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .content-area p {
+      color: #636e72;
+      line-height: 1.6;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .graph-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .graph {
+      flex: 1 1 30%;
+      min-width: 300px;
+      max-width: 400px;
+      background: #f8f9fd;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .graph canvas {
+      width: 100% !important;
+      height: 250px !important;
+    }
+
+    .note {
+      color: #636e72;
+      font-size: 0.85rem;
+      font-style: italic;
+      margin-top: 10px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+
+      .content-area p {
+        font-size: 0.85rem;
+      }
+
+      .graph-container {
+        flex-direction: column;
+      }
+
+      .graph {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+
+      .graph canvas {
+        height: 200px !important;
+      }
+
+      .note {
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+
+      .content-area p {
+        font-size: 0.85rem;
+      }
+
+      .graph {
+        flex: 1 1 30%;
+        max-width: 350px;
+      }
+
+      .graph canvas {
+        height: 220px !important;
+      }
+
+      .note {
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../partials/admin_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <h1>Admin Dashboard</h1>
+      <p>Welcome to the ElectroLand Admin Dashboard. Use the sidebar to navigate to different management sections.</p>
+
+      <div class="graph-container">
+        <!-- Orders Graph -->
+        <div class="graph">
+          <canvas id="ordersChart"></canvas>
+        </div>
+
+        <!-- Sales Graph -->
+        <div class="graph">
+          <canvas id="salesChart"></canvas>
+        </div>
+
+        <!-- Profit/Loss Graph -->
+        <div class="graph">
+          <canvas id="profitLossChart"></canvas>
+        </div>
+      </div>
+
+      <p class="note">Note: Profits shown are for sales only. Realized profit, after removing salaries, can be verified from the Profits feature.</p>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <!-- Include Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script>
+    // Parse the data passed from the controller
+    const days = <%- days %>;
+    const orderCounts = <%- orderCounts %>;
+    const saleCounts = <%- saleCounts %>;
+    const profitLossTotals = <%- profitLossTotals %>;
+
+    // Orders Chart
+    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+    new Chart(ordersCtx, {
+      type: 'bar',
+      data: {
+        labels: days,
+        datasets: [{
+          label: 'Total Orders',
+          data: orderCounts,
+          backgroundColor: 'rgba(45, 52, 54, 0.7)',
+          borderColor: '#2d3436',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Number of Orders'
+            },
+            ticks: {
+              stepSize: 1
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Day of Month'
+            }
+          }
+        }
+      }
+    });
+
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    new Chart(salesCtx, {
+      type: 'bar',
+      data: {
+        labels: days,
+        datasets: [{
+          label: 'Total Sales',
+          data: saleCounts,
+          backgroundColor: 'rgba(212, 177, 6, 0.7)',
+          borderColor: '#d4b106',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Number of Sales'
+            },
+            ticks: {
+              stepSize: 1
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Day of Month'
+            }
+          }
+        }
+      }
+    });
+
+    // Profit/Loss Chart
+    const profitLossCtx = document.getElementById('profitLossChart').getContext('2d');
+    new Chart(profitLossCtx, {
+      type: 'bar',
+      data: {
+        labels: days,
+        datasets: [{
+          label: 'Total Profit/Loss ($)',
+          data: profitLossTotals,
+          backgroundColor: profitLossTotals.map(value => value >= 0 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'),
+          borderColor: profitLossTotals.map(value => value >= 0 ? '#2ecc71' : '#e74c3c'),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: 'Profit/Loss ($)'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Day of Month'
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

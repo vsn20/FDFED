@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Sale - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: auto;
+      height: calc(100vh - 90px);
+    }
+
+    h2 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #2d3436;
+      margin: 20px 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+      border-color: #333;
+      outline: none;
+    }
+
+    .form-group input[readonly] {
+      background: #e9ecef;
+      cursor: default;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .form-row .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .product-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      padding: 8px;
+      background: #f8f9fa;
+    }
+
+    .product-list option {
+      padding: 5px;
+      font-size: 0.9rem;
+    }
+
+    .button {
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .button:hover {
+      background-color: #555555;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 15px;
+      color: #2d3436;
+      text-decoration: none;
+      text-align: center;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      background: #333333;
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .back-link:hover {
+      background: #555555;
+    }
+
+    .error-message {
+      color: #d63031;
+      background: #ffeeee;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-row .form-group {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+
+      .form-group input,
+      .form-group select {
+        font-size: 0.85rem;
+      }
+
+      .button,
+      .back-link {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+      }
+
+      .form-row .form-group {
+        flex: 1 1 45%;
+      }
+
+      .form-group input,
+      .form-group select {
+        font-size: 0.85rem;
+      }
+
+      .button,
+      .back-link {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+  <div class="container">
+    <%- include('../../partials/salesman_sidebar') %>
+    <div class="content-area" id="content">
+      <h2>Add Sale</h2>
+
+      <% if (error) { %>
+        <div class="error-message"><%= error %></div>
+      <% } %>
+
+      <form id="saleForm" action="/salesman/add-sale" method="POST">
+        <h3>Sale Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Salesman Name</label>
+            <input type="text" name="salesman_name" value="<%= user?.emp_id || 'Unknown Salesman' %>" readonly>
+          </div>
+          <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" name="customer_name" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sale Date</label>
+            <input type="date" name="sales_date" required>
+          </div>
+          <div class="form-group">
+            <label>Unique Code</label>
+            <input type="text" name="unique_code" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Customer Phone Number</label>
+            <input type="tel" name="phone_number" required placeholder="+1234567890" pattern="\+?[1-9]\d{1,14}">
+          </div>
+          <div class="form-group">
+            <label>Customer Address</label>
+            <input type="text" name="address" placeholder="Enter customer address">
+          </div>
+        </div>
+
+        <h3>Product Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company Name</label>
+            <select name="company_id" id="companySelect" required onchange="fetchProducts()">
+              <option value="">Select Company</option>
+              <% companies.forEach(company => { %>
+                <option value="<%= company.c_id %>"><%= company.cname %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Product</label>
+            <select name="product_id" id="productSelect" class="product-list" required onchange="updateProductDetails()">
+              <option value="">Select Product</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Installation</label>
+            <input type="text" name="installation" id="installation" readonly required>
+          </div>
+          <div class="form-group">
+            <label>Installation Type</label>
+            <input type="text" name="installationType" id="installationType" readonly>
+          </div>
+          <div class="form-group">
+            <label>Installation Charge</label>
+            <input type="text" name="installationcharge" id="installationCharge" readonly>
+          </div>
+        </div>
+
+        <h3>Transaction Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Purchased Price</label>
+            <input type="number" name="purchased_price" id="purchasedPrice" step="0.01" readonly required>
+          </div>
+          <div class="form-group">
+            <label>Sold Price</label>
+            <input type="number" name="sold_price" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" name="quantity" required min="1" value="1">
+          </div>
+        </div>
+
+        <button type="submit" class="button">Add Sale</button>
+      </form>
+
+      <a href="/salesman/sales" class="back-link">Back to Sales</a>
+    </div>
+  </div>
+  <%- include('../../partials/footer') %>
+
+  <script>
+    let productsData = [];
+
+    async function fetchProducts() {
+      const companySelect = document.getElementById('companySelect');
+      const productSelect = document.getElementById('productSelect');
+      const purchasedPriceInput = document.getElementById('purchasedPrice');
+      const installationInput = document.getElementById('installation');
+      const installationTypeInput = document.getElementById('installationType');
+      const installationChargeInput = document.getElementById('installationCharge');
+      const companyId = companySelect.value;
+
+      // Clear previous products and related fields
+      productSelect.innerHTML = '<option value="">Select Product</option>';
+      purchasedPriceInput.value = '';
+      installationInput.value = '';
+      installationTypeInput.value = '';
+      installationChargeInput.value = '';
+      productsData = [];
+
+      if (companyId) {
+        try {
+          const response = await fetch(`/salesman/products-by-company/${companyId}`);
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          productsData = await response.json();
+
+          productsData.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product.prod_id;
+            option.textContent = `${product.Prod_name} (Model: ${product.Model_no})`;
+            productSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Error fetching products:', error);
+          alert('Failed to load products. Please try again.');
+        }
+      }
+    }
+
+    function updateProductDetails() {
+      const productSelect = document.getElementById('productSelect');
+      const purchasedPriceInput = document.getElementById('purchasedPrice');
+      const installationInput = document.getElementById('installation');
+      const installationTypeInput = document.getElementById('installationType');
+      const installationChargeInput = document.getElementById('installationCharge');
+      const selectedProductId = productSelect.value;
+
+      if (selectedProductId) {
+        const selectedProduct = productsData.find(product => product.prod_id === selectedProductId);
+        if (selectedProduct) {
+          purchasedPriceInput.value = selectedProduct.Retail_price || '';
+          installationInput.value = selectedProduct.installation || 'Not Required';
+          installationTypeInput.value = selectedProduct.installationType || '';
+          installationChargeInput.value = selectedProduct.installationcharge || '';
+        } else {
+          purchasedPriceInput.value = '';
+          installationInput.value = '';
+          installationTypeInput.value = '';
+          installationChargeInput.value = '';
+        }
+      } else {
+        purchasedPriceInput.value = '';
+        installationInput.value = '';
+        installationTypeInput.value = '';
+        installationChargeInput.value = '';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Branches - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f6fa 0%, #e0e7ff 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px);
+      overflow-y: auto;
+    }
+
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    .content-area {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2rem;
+      font-weight: 600;
+      position: relative;
+      display: inline-block;
+    }
+
+    .content-area h1::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      height: 4px;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      border-radius: 2px;
+    }
+
+    .error-message {
+      color: #e63946;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .branches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      padding: 10px;
+    }
+
+    .branch-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .branch-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .branch-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      transition: height 0.3s ease;
+    }
+
+    .branch-card:hover::before {
+      height: 10px;
+    }
+
+    .branch-card h3 {
+      color: #2d3436;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .branch-card h3::before {
+      content: '🏢';
+      font-size: 1.5rem;
+    }
+
+    .branch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: #4a5568;
+    }
+
+    .branch-info p {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .branch-info p span {
+      font-weight: 500;
+      color: #2d3436;
+    }
+
+    .branch-info p::before {
+      font-size: 1.1rem;
+    }
+
+    .branch-info p:nth-child(1)::before {
+      content: '👤';
+    }
+
+    .branch-info p:nth-child(2)::before {
+      content: '📧';
+    }
+
+    .branch-info p:nth-child(3)::before {
+      content: '📞';
+    }
+
+    .branch-info p:nth-child(4)::before {
+      content: '📍';
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto;
+      }
+
+      .content-area h1 {
+        font-size: 1.5rem;
+      }
+
+      .branches-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .branch-card {
+        padding: 15px;
+      }
+
+      .branch-card h3 {
+        font-size: 1.2rem;
+      }
+
+      .branch-info {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.8rem;
+      }
+
+      .branches-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+
+      .branch-card h3 {
+        font-size: 1.3rem;
+      }
+
+      .branch-info {
+        font-size: 0.92rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('./partials/navbar') %>
+
+  <div class="container">
+    <div class="content-area">
+      <h1>Our Branches</h1>
+
+      <% if (error) { %>
+        <p class="error-message"><%= error %></p>
+      <% } %>
+
+      <div class="branches-grid">
+        <% if (branches && branches.length > 0) { %>
+          <% branches.forEach(branch => { %>
+            <div class="branch-card">
+              <h3><%= branch.b_name %></h3>
+              <div class="branch-info">
+                <p><span>Manager:</span> <%= branch.manager_name %></p>
+                <p><span>Email:</span> <%= branch.manager_email %></p>
+                <p><span>Phone:</span> <%= branch.manager_ph_no %></p>
+                <p><span>Location:</span> <%= branch.location %></p>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="error-message">No active branches available</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <%- include('./partials/footer') %>
+</body>
+</html>

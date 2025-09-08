@@ -1,0 +1,201 @@
+<!露
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Products - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 20px;
+      padding: 0 20px !important; /* Standardized padding with !important to prevent override */
+      max-width: 100%;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px; /* Matches Sales page */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px); /* Matches sidebar height */
+      overflow-y: auto; /* Enable scrolling */
+      -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+      scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+    .content-area::-webkit-scrollbar {
+      display: none; /* Hide scrollbar in Webkit browsers */
+    }
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .products-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .product-item {
+      flex: 1 1 calc(33.33% - 20px); /* Consistent three-column layout */
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      min-width: 0; /* Allow shrinking */
+      max-width: calc(33.33% - 20px); /* Restrict maximum width */
+    }
+    .slideshow-container {
+      position: relative;
+      width: 100%;
+      margin: 0 auto 10px auto;
+    }
+    .slides {
+      display: none;
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+    .slides.active {
+      display: block;
+    }
+    .product-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .clickable {
+      cursor: pointer;
+      color: #2d3436;
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: color 0.3s ease;
+    }
+    .clickable:hover {
+      color: #636e72;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        margin-top: 60px; /* Matches Sales page */
+        flex-direction: column;
+        padding: 0 10px; /* Matches Sales page */
+        gap: 15px; /* Matches Sales page */
+      }
+      .content-area {
+        padding: 15px; /* Matches Sales page */
+        height: auto; /* Expand naturally on mobile */
+      }
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .content-area h1 {
+        font-size: 1.2rem; /* Matches Sales adjustment */
+      }
+      .product-item {
+        flex: 1 1 calc(33.33% - 13.33px); /* Adjust gap proportionately */
+        max-width: calc(33.33% - 13.33px); /* Maintain consistent width */
+      }
+      .slideshow-container {
+        width: 100%;
+      }
+      .clickable {
+        font-size: 1rem;
+      }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .container {
+        gap: 20px; /* Matches Sales page */
+        padding: 0 15px; /* Matches Sales page */
+      }
+      .content-area {
+        padding: 15px; /* Matches Sales page */
+      }
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .container {
+        margin-top: 50px; /* Matches Sales page */
+        padding: 0 5px; /* Matches Sales page */
+      }
+      .content-area {
+        padding: 10px; /* Matches Sales page */
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>New Products</h1>
+      </div>
+
+      <!-- Product items -->
+      <div class="products-container">
+        <% productData.forEach(product => { %>
+          <div class="product-item">
+            <div class="slideshow-container" data-pid="<%= product.prod_id %>" onclick="window.location.href='/admin/products/details/<%= product.prod_id %>'">
+              <% product.prod_photos.forEach((photo, index) => { %>
+                <img src="<%= photo %>" alt="Product Photo" class="slides <%= index === 0 ? 'active' : '' %>">
+              <% }) %>
+            </div>
+            <div class="product-details">
+              <span class="clickable" onclick="window.location.href='/admin/products/details/<%= product.prod_id %>'"><%= product.prod_id %></span>
+              <span class="clickable" onclick="window.location.href='/admin/products/details/<%= product.prod_id %>'"><%= product.Model_no %></span>
+              <span class="clickable" onclick="window.location.href='/admin/products/details/<%= product.prod_id %>'"><%= product.stock %></span>
+              <span class="clickable" onclick="window.location.href='/admin/products/details/<%= product.prod_id %>'"><%= product.Status %></span>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+  <%- include('../../partials/footer') %>
+
+  <script>
+    document.querySelectorAll('.slideshow-container').forEach(container => {
+      const slides = container.querySelectorAll('.slides');
+      let currentSlide = 0;
+      function showNextSlide() {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+      }
+      slides[0].classList.add('active');
+      setInterval(showNextSlide, 2000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px); /* Match sidebar height */
+      overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    }
+
+    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar in Firefox */
+    .content-area {
+      scrollbar-width: none;
+    }
+
+    /* Hide scrollbar in IE/Edge */
+    .content-area {
+      -ms-overflow-style: none;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #2d3436;
+      font-size: 1.5rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      font-size: 1rem;
+      border: 1px solid #eaeaea;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #333;
+      color: white;
+    }
+
+    tr:nth-child(odd) {
+      background: #f8f9fd;
+    }
+
+    tr:nth-child(even) {
+      background: #eef2f7;
+    }
+
+    td {
+      background: inherit;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    td:hover {
+      background-color: #f0f4f8;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin-top: 60px;
+        flex-direction: column;
+        padding: 0 10px;
+        gap: 15px;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto; /* Allow content area to expand on mobile */
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: block;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        background: #f8f9fd;
+        margin: 5px 0;
+        text-align: left;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        min-width: 100px;
+      }
+
+      tr:hover {
+        background-color: #f0f4f8;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .container {
+        gap: 20px;
+        padding: 0 15px;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.95rem;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin-top: 50px;
+        padding: 0 5px;
+      }
+
+      th, td {
+        font-size: 0.9rem;
+      }
+
+      td {
+        padding: 6px;
+      }
+
+      td:before {
+        min-width: 80px;
+      }
+
+      .content-area {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/company_sidebar') %>
+
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Sales</h1>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Sale ID</th>
+              <th>Branch Name</th>
+              <th>Product Name</th>
+              <th>Model No</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% salers.forEach(sale => { %>
+              <tr onclick="window.location='/company/sales/<%= sale.sales_id %>'">
+                <td data-label="Sale ID"><%= sale.sales_id %></td>
+                <td data-label="Branch Name"><%= sale.branch_name %></td>
+                <td data-label="Product Name"><%= sale.product_name %></td>
+                <td data-label="Model No"><%= sale.model_number || 'N/A' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

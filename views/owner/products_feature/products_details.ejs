@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important; /* Standardized padding with !important to prevent override */
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px); /* Match sidebar height */
+      overflow-y: auto; /* Enable scrolling */
+      -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+      scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+
+    .content-area::-webkit-scrollbar {
+      display: none; /* Hide scrollbar in Webkit browsers */
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .photos img {
+      max-width: 150px;
+      height: auto;
+      border-radius: 5px;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+    }
+
+    .section-title {
+      color: #2d3436;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .field-group > div {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 1rem;
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    .edit-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #2d3436;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+
+    .edit-btn:hover {
+      background: #636e72;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      color: #2d3436;
+      text-decoration: none;
+      margin-top: 20px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #636e72;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0; /* Keep sidebar flush left */
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto; /* Expand naturally on mobile */
+      }
+
+      .field-group {
+        flex-direction: column;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem; /* Adjusted for mobile */
+      }
+
+      .photos img {
+        max-width: 120px;
+      }
+
+      .edit-btn, .back-link {
+        font-size: 1rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <% if (product) { %>
+        <h1>Product Details</h1>
+        <div class="photos">
+          <% product.prod_photos.forEach(photo => { %>
+            <img src="<%= photo %>" alt="Product Photo">
+          <% }) %>
+        </div>
+        <div class="form-section">
+          <legend class="section-title">Product Information</legend>
+          <div class="field-group">
+            <div>
+              <label for="prod-id" class="field-label">Product ID</label>
+              <input type="text" id="prod-id" value="<%= product.prod_id %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="prod-name" class="field-label">Product Name</label>
+              <input type="text" id="prod-name" value="<%= product.Prod_name %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="com-id" class="field-label">Company ID</label>
+              <input type="text" id="com-id" value="<%= product.Com_id %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="model-no" class="field-label">Model Number</label>
+              <input type="text" id="model-no" value="<%= product.Model_no %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="com-name" class="field-label">Company Name</label>
+              <input type="text" id="com-name" value="<%= product.com_name %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="prod-year" class="field-label">Production Year</label>
+              <input type="text" id="prod-year" value="<%= product.prod_year %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="stock" class="field-label">Stock</label>
+              <input type="text" id="stock" value="<%= product.stock %>" class="field-input" disabled>
+            </div>
+            <!-- Add Stock Availability -->
+            <div>
+              <label for="stockavailability" class="field-label">Stock Availability</label>
+              <input type="text" id="stockavailability" value="<%= product.stockavailability %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="status" class="field-label">Status</label>
+              <input type="text" id="status" value="<%= product.Status %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="description" class="field-label">Description</label>
+              <input type="text" id="description" value="<%= product.prod_description %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="retail-price" class="field-label">Retail Price</label>
+              <input type="text" id="retail-price" value="<%= product.Retail_price %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="min-selling" class="field-label">Minimum Selling Price</label>
+              <input type="text" id="min-selling" value="<%= product.miniselling %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="created-at" class="field-label">Created At</label>
+              <input type="text" id="created-at" value="<%= product.createdAt %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="approved-at" class="field-label">Approved At</label>
+              <input type="text" id="approved-at" value="<%= product.approvedAt || 'N/A' %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="warranty" class="field-label">Warranty Period</label>
+              <input type="text" id="warranty" value="<%= product.warrantyperiod %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="installation" class="field-label">Installation</label>
+              <input type="text" id="installation" value="<%= product.installation %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="installation-type" class="field-label">Installation Type</label>
+              <input type="text" id="installation-type" value="<%= product.installationType %>" class="field-input" disabled>
+            </div>
+            <div>
+              <label for="installation-charge" class="field-label">Installation Charge</label>
+              <input type="text" id="installation-charge" value="<%= product.installationcharge %>" class="field-input" disabled>
+            </div>
+          </div>
+        </div>
+        <a href="/admin/products/edit/<%= product.prod_id %>" class="edit-btn">Edit Product</a>
+        <a href="/admin/products" class="back-link">Back to Products</a>
+      <% } else { %>
+        <p>Product not found.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

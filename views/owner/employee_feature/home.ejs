@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      position: relative;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    .add-employee-btn {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      padding: 10px 20px;
+      background-color: #2d3436;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .add-employee-btn:hover {
+      background-color: #FFD700;
+      color: #2d3436;
+    }
+
+    .table-wrapper {
+      max-height: calc(100vh - 230px);
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #2d3436;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 20px;
+      }
+
+      .content-area {
+        min-height: auto;
+      }
+
+      .add-employee-btn {
+        position: static;
+        display: block;
+        margin: 10px 0;
+      }
+
+      .table-wrapper {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <h1>Employee List</h1>
+      <a href="/admin/addemployee" class="add-employee-btn">Add Employee</a>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Role</th>
+              <th>Branch ID</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% employees.forEach(employee => { %>
+              <tr onclick="window.location='/admin/employee/<%= employee.e_id %>'">
+                <td><%= employee.e_id %></td>
+                <td><%= employee.f_name %></td>
+                <td><%= employee.last_name %></td>
+                <td><%= employee.role %></td>
+                <td><%= employee.bid ? employee.bid : 'Not Assigned' %></td>
+                <td><%= employee.status %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+</body>
+</html>

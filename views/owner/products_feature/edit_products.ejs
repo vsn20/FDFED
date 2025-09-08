@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Product - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px);
+      overflow-y: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+    }
+
+    .section-title {
+      color: #2d3436;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .field-group > div {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    .field-input, .field-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .field-input:disabled {
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    .form-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #2d3436;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .form-btn:hover {
+      background: #636e72;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin-top: 60px;
+        flex-direction: column;
+        padding: 0 10px;
+        gap: 15px;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+
+      .field-group {
+        flex-direction: column;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .container {
+        gap: 20px;
+        padding: 0 15px;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin-top: 50px;
+        padding: 0 5px;
+      }
+
+      .content-area {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/admin_sidebar') %>
+
+    <div class="content-area" id="content">
+      <h1>Edit Product</h1>
+      <% if (product) { %>
+        <form action="/admin/products/edit/<%= product.prod_id %>" method="POST">
+          <fieldset class="form-section">
+            <legend class="section-title">Product Information</legend>
+            <div class="field-group">
+              <div>
+                <label for="prod-id" class="field-label">Product ID</label>
+                <input type="text" id="prod-id" name="prod_id" value="<%= product.prod_id %>" class="field-input" disabled>
+              </div>
+              <div>
+                <label for="prod-name" class="field-label">Product Name</label>
+                <input type="text" id="prod-name" name="prod_name" value="<%= product.Prod_name %>" class="field-input" disabled>
+              </div>
+              <div>
+                <label for="com-id" class="field-label">Company ID</label>
+                <input type="text" id="com-id" name="com_id" value="<%= product.Com_id %>" class="field-input" disabled>
+              </div>
+              <div>
+                <label for="model-no" class="field-label">Model Number</label>
+                <input type="text" id="model-no" name="model_no" value="<%= product.Model_no %>" class="field-input" disabled>
+              </div>
+              <div>
+                <label for="com-name" class="field-label">Company Name</label>
+                <input type="text" id="com-name" name="com_name" value="<%= product.com_name %>" class="field-input" disabled>
+              </div>
+              <div>
+                <label for="status" class="field-label">Status</label>
+                <select id="status" name="status" class="field-select" required>
+                  <option value="Hold" <%= product.Status === 'Hold' ? 'selected' : '' %> disabled>Hold (Initial State)</option>
+                  <option value="Accepted" <%= product.Status === 'Accepted' ? 'selected' : '' %>>Accepted (Move to Products)</option>
+                  <option value="Rejected" <%= product.Status === 'Rejected' ? 'selected' : '' %>>Rejected (Move to Rejected)</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+          <button type="submit" class="form-btn">Update Product</button>
+        </form>
+      <% } else { %>
+        <p>Product not found.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>

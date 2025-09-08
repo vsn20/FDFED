@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sent Messages - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-y: auto; /* Enable vertical scrolling */
+      height: calc(100vh - 90px); /* Match sidebar height */
+    }
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .compose-btn {
+      background: #333333;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background-color 0.3s;
+      font-size: 0.9rem;
+    }
+    .compose-btn:hover {
+      background: #555555;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .table-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      border-spacing: 0;
+    }
+    thead {
+      background: #333333;
+    }
+    th {
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #ffffff;
+    }
+    td {
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e9f0;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+    tr {
+      cursor: pointer;
+    }
+    tr:hover {
+      background: #e9ecef;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+      .content-area {
+        padding: 15px;
+        height: auto; /* Adjust height for mobile */
+        overflow-y: auto; /* Still allow scrolling if content overflows */
+      }
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .compose-btn {
+        margin-top: 5px;
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+      table {
+        display: block;
+        min-width: 0;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+      td:last-child {
+        border-bottom: none;
+      }
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+      th, td {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.on("newMessage", (data) => {
+      const table = document.querySelector("table tbody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td data-label="From">${data.from}</td>
+        <td data-label="Message">${data.message}</td>
+        <td data-label="Timestamp">${new Date(data.timestamp).toLocaleString()}</td>
+      `;
+      row.onclick = () => window.location = `/salesmanager/messages/view?from=${encodeURIComponent(data.from)}&to=${encodeURIComponent(data.to)}&msg=${encodeURIComponent(data.message)}`;
+      table.prepend(row);
+    });
+  </script>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+  <div class="container">
+    <%- include('../../partials/salesmanager_sidebar') %>
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Sent Messages</h1>
+        <a href="/salesmanager/messages/compose" class="compose-btn">Compose</a>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>To</th>
+              <th>Message</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% messages.forEach(message => { %>
+              <tr onclick="window.location='/salesmanager/messages/view?from=<%= encodeURIComponent(message.fromDisplay) %>&to=<%= encodeURIComponent(message.toDisplay) %>&msg=<%= encodeURIComponent(message.message) %>'">
+                <td data-label="To"><%= message.toDisplay %></td>
+                <td data-label="Message"><%= message.message %></td>
+                <td data-label="Timestamp"><%= message.timestamp.toLocaleString() %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <%- include('../../partials/footer') %>
+</body>
+</html>

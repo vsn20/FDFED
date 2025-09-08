@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Orders - ElectroLand</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      height: calc(100vh - 90px); /* Match sidebar height */
+      overflow-y: auto; /* Enable vertical scrolling */
+      overflow-x: auto; /* Preserve existing horizontal scrolling */
+    }
+    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+    /* Hide scrollbar in Firefox */
+    .content-area {
+      scrollbar-width: none;
+    }
+    /* Hide scrollbar in IE/Edge */
+    .content-area {
+      -ms-overflow-style: none;
+    }
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+    }
+    thead {
+      background: #333333;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e9f0;
+    }
+    th {
+      color: white;
+      border-bottom: 2px solid #ffffff;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2d3748, #1a2a44);
+      border-radius: 15px;
+      padding: 30px 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      height: calc(100vh - 90px);
+      overflow-y: auto; /* Enable scrolling functionality */
+    }
+    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+    .sidebar::-webkit-scrollbar {
+      display: none; /* Completely hide the scrollbar */
+    }
+    /* Hide scrollbar in Firefox */
+    .sidebar {
+      scrollbar-width: none; /* Firefox */
+    }
+    /* Hide scrollbar in IE/Edge */
+    .sidebar {
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    .dashboard-btn {
+      display: block;
+      font-size: 1.5rem;
+      color: #fff;
+      background: linear-gradient(90deg, #4a5568, #2d3748);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    .dashboard-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, #FFD700, transparent);
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+    .dashboard-btn:hover {
+      background: linear-gradient(90deg, #636e72, #4a5568);
+      transform: scale(1.02);
+    }
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .feature-item:hover {
+      background: linear-gradient(to right, #4a5568, #2d3748);
+      color: #FFD700;
+      transform: translateX(5px);
+    }
+    .feature-item.active {
+      background: linear-gradient(to right, #FFD700, #d4b106);
+      color: #2d3748;
+      font-weight: bold;
+    }
+    .feature-icon {
+      font-size: 1.4rem;
+      width: 30px;
+      text-align: center;
+    }
+    .feature-title {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+      .content-area {
+        flex: none; /* Adjust for mobile */
+        width: 100%; /* Full width on mobile */
+        height: auto; /* Auto height on mobile like sidebar */
+        padding: 15px;
+      }
+      table {
+        display: block;
+        min-width: 0;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+      }
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        min-width: 100px;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        overflow-y: auto; /* Enable scrolling on mobile */
+      }
+      .sidebar::-webkit-scrollbar {
+        display: none; /* Hide scrollbar on mobile */
+      }
+      .sidebar {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+  <div class="container">
+    <div class="sidebar">
+      <a href="/admin/home" class="dashboard-btn">Admin Dashboard</a>
+      <div class="features">
+        <a href="/admin/sales" class="feature-item <%= activeRoute === 'sales' ? 'active' : '' %>">
+          <span class="feature-icon">💰</span>
+          <span class="feature-title">Sales</span>
+        </a>
+        <a href="/admin/orders" class="feature-item <%= activeRoute === 'orders' ? 'active' : '' %>">
+          <span class="feature-icon">📝</span>
+          <span class="feature-title">Orders</span>
+        </a>
+        <a href="/admin/products" class="feature-item <%= activeRoute === 'products' ? 'active' : '' %>">
+          <span class="feature-icon">📦</span>
+          <span class="feature-title">Products</span>
+        </a>
+        <a href="/admin/stocks" class="feature-item <%= activeRoute === 'stocks' ? 'active' : '' %>">
+          <span class="feature-icon">🏬</span>
+          <span class="feature-title">Inventory</span>
+        </a>
+        <a href="/admin/customers" class="feature-item <%= activeRoute === 'customers' ? 'active' : '' %>">
+          <span class="feature-icon">👤</span>
+          <span class="feature-title">Customers</span>
+        </a>
+        <a href="/admin/employees" class="feature-item <%= activeRoute === 'employees' ? 'active' : '' %>">
+          <span class="feature-icon">👥</span>
+          <span class="feature-title">Employees</span>
+        </a>
+        <a href="/admin/salaries" class="feature-item <%= activeRoute === 'salaries' ? 'active' : '' %>">
+          <span class="feature-icon">💸</span>
+          <span class="feature-title">Salaries</span>
+        </a>
+        <a href="/admin/profits" class="feature-item <%= activeRoute === 'profits' ? 'active' : '' %>">
+          <span class="feature-icon">📈</span>
+          <span class="feature-title">Profits</span>
+        </a>
+        <a href="/admin/branches" class="feature-item <%= activeRoute === 'branches' ? 'active' : '' %>">
+          <span class="feature-icon">🌐</span>
+          <span class="feature-title">Branches</span>
+        </a>
+        <a href="/admin/company" class="feature-item <%= activeRoute === 'company' ? 'active' : '' %>">
+          <span class="feature-icon">🏢</span>
+          <span class="feature-title">Company</span>
+        </a>
+        <a href="/admin/messages" class="feature-item <%= activeRoute === 'messages' ? 'active' : '' %>">
+          <span class="feature-icon">✉</span>
+          <span class="feature-title">Messages</span>
+        </a>
+      </div>
+    </div>
+    <div class="content-area">
+      <h1>All Orders</h1>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Branch</th>
+              <th>Company</th>
+              <th>Product</th>
+              <th>Status</th>
+              <th>Delivery Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(order => { %>
+              <tr>
+                <td data-label="Order ID"><%= order.order_id %></td>
+                <td data-label="Branch"><%= order.branch_name %></td>
+                <td data-label="Company"><%= order.company_name %></td>
+                <td data-label="Product"><%= order.product_name %></td>
+                <td data-label="Status"><%= order.status %></td>
+                <td data-label="Delivery Date">
+                  <%= order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set' %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <%- include('../../partials/footer') %>
+</body>
+</html>

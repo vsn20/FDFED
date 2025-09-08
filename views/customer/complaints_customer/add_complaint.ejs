@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Complaint - ElectroLand</title>
+  <style>
+    /* Structural CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    /* Header container styling */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* Table styling */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      border-spacing: 0;
+    }
+
+    thead {
+      background: #333333;
+    }
+
+    th {
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #ffffff;
+    }
+
+    td {
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e9f0;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+
+    /* Clickable button styling */
+    .clickable-btn {
+      background: none;
+      border: none;
+      color: #333333;
+      text-decoration: none;
+      cursor: pointer;
+      padding: 0;
+      font-size: inherit;
+      width: 100%;
+      text-align: left;
+    }
+
+    .clickable-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Form-specific styles */
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+    }
+
+    .section-title {
+      color: #2d3436;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      font-weight: bold;
+      padding: 0 10px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .field-group > div {
+      flex: 1 1 45%;
+      min-width: 200px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    .field-input, .field-textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f0f0f0;
+      transition: border-color 0.3s;
+    }
+
+    .field-textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .field-input:focus, .field-textarea:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    .disabled-field {
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    .form-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form-btn:hover {
+      background-color: #555555;
+    }
+
+    .error-message {
+      color: #d32f2f;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    /* Hidden class for form visibility */
+    .hidden {
+      display: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+
+      table {
+        display: block;
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+
+      .clickable-btn {
+        flex: 1;
+        text-align: right;
+      }
+
+      .field-group > div {
+        flex: 1 1 100%;
+      }
+
+      .form-btn {
+        width: 100%;
+        padding: 8px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      th, td {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/customer_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Add Complaint</h1>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Sale ID</th>
+              <th>Product ID</th>
+              <th>Product Name</th>
+              <th>Company Name</th>
+              <th>Purchase Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% sales.forEach(sale => { %>
+              <tr>
+                <td data-label="Sale ID"><%= sale.sale_id %></td>
+                <td data-label="Product ID"><%= sale.prod_id %></td>
+                <td data-label="Product Name"><%= sale.Prod_name %></td>
+                <td data-label="Company Name"><%= sale.com_name %></td>
+                <td data-label="Purchase Date"><%= sale.purchasedate %></td>
+                <td data-label="Action">
+                  <button class="clickable-btn" data-saleid="<%= sale.sale_id %>">File Complaint</button>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (sales.length === 0) { %>
+              <tr>
+                <td colspan="6" style="text-align: center;">No purchases found.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Complaint Form (Hidden by Default) -->
+      <form id="complaint-form" class="hidden" action="/customer/complaints/submit" method="POST">
+        <input type="hidden" name="sale_id" id="sale-id">
+        <fieldset class="form-section" id="complaint-section">
+          <legend class="section-title">File Complaint</legend>
+          <div class="field-group">
+            <div>
+              <label for="complaint" class="field-label">Complaint Description:</label>
+              <textarea id="complaint" name="complaint_info" class="field-textarea" placeholder="Enter your complaint here..." required></textarea>
+              <p id="complaint-error" class="error-message">Please enter a complaint description.</p>
+            </div>
+          </div>
+        </fieldset>
+        <button type="submit" class="form-btn">Submit Complaint</button>
+      </form>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    const complaintForm = document.getElementById('complaint-form');
+    const complaintSection = document.getElementById('complaint-section');
+    const saleIdInput = document.getElementById('sale-id');
+
+    document.querySelectorAll('.clickable-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const saleId = button.getAttribute('data-saleid');
+        console.log('[add_complaint] File Complaint button clicked, saleId:', saleId);
+
+        if (saleId) {
+          saleIdInput.value = saleId;
+          complaintForm.classList.remove('hidden');
+          complaintSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          console.error('[add_complaint] Sale ID not found on button');
+        }
+      });
+    });
+
+    complaintForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      console.log('[add_complaint] Form submission triggered');
+
+      // Client-side validation
+      const complaint = document.querySelector('#complaint').value.trim();
+      const complaintError = document.querySelector('#complaint-error');
+      complaintError.style.display = 'none';
+
+      if (!complaint) {
+        complaintError.style.display = 'block';
+        console.log('[add_complaint] Validation failed: Complaint description is empty');
+        return;
+      }
+
+      const form = event.target;
+      const formData = new FormData(form);
+      console.log('[add_complaint] Form data:', Object.fromEntries(formData));
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+        console.log('[add_complaint] Server response:', result);
+
+        if (result.success) {
+          window.location.href = result.redirect;
+        } else {
+          alert(result.message || 'Error submitting complaint');
+          console.error('[add_complaint] Submission failed:', result.message);
+        }
+      } catch (error) {
+        console.error('[add_complaint] Error submitting complaint:', error);
+        alert('An error occurred while submitting the complaint');
+      }
+    });
+  </script>
+</body>
+</html>

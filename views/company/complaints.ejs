@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Complaints - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: auto;
+      height: calc(100vh - 90px);
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #2d3436;
+      font-size: 1.5rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .table-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      min-width: 800px;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      border-spacing: 0;
+    }
+
+    thead {
+      background: #333333;
+    }
+
+    th {
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #ffffff;
+    }
+
+    td {
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e9f0;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 15px;
+      color: #2d3436;
+      text-decoration: none;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      table {
+        display: block;
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+
+      select {
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      h1 {
+        font-size: 1.3rem;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../partials/company_sidebar') %>
+
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Company Complaints</h1>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Complaint ID</th>
+              <th>Product ID</th>
+              <th>Sale ID</th>
+              <th>Complaint Info</th>
+              <th>Complaint Date</th>
+              <th>Phone Number</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% complaints.forEach(complaint => { %>
+              <tr>
+                <td data-label="Complaint ID"><%= complaint.complaint_id %></td>
+                <td data-label="Product ID"><%= complaint.product_id %></td>
+                <td data-label="Sale ID"><%= complaint.sale_id %></td>
+                <td data-label="Complaint Info"><%= complaint.complaint_info %></td>
+                <td data-label="Complaint Date"><%= complaint.complaint_date.toISOString().split('T')[0] %></td>
+                <td data-label="Phone Number"><%= complaint.phone_number %></td>
+                <td data-label="Status">
+                  <form action="/company/complaints/update-status/<%= complaint.complaint_id %>" method="POST">
+                    <select name="status" onchange="this.form.submit()">
+                      <option value="Open" <%= complaint.status === 'Open' ? 'selected' : '' %>>Open</option>
+                      <option value="Closed" <%= complaint.status === 'Closed' ? 'selected' : '' %>>Closed</option>
+                    </select>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <a href="/company/home" class="back-link">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

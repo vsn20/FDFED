@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Company - ElectroLand</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f5f6fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            margin-top: 90px;
+            display: flex;
+            flex: 1;
+            gap: 25px;
+            padding: 0 20px;
+        }
+        .content-area {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            overflow-x: auto;
+        }
+        .content-area h1 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .form-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e6e9f0;
+            border-radius: 5px;
+        }
+        .section-title {
+            color: #2d3436;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+            padding: 0 10px;
+        }
+        .field-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .field-group > div {
+            flex: 1 1 45%;
+            min-width: 200px;
+        }
+        .field-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2d3436;
+            font-weight: 500;
+        }
+        .field-input,
+        .field-textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e6e9f0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            background: #fff;
+            transition: border-color 0.3s;
+        }
+        .field-textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .field-input:focus,
+        .field-textarea:focus {
+            border-color: #333333;
+            outline: none;
+        }
+        .disabled-field {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+        .form-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .form-btn:hover {
+            background-color: #555555;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 0 10px;
+            }
+            .content-area {
+                padding: 15px;
+            }
+            .content-area h1 {
+                font-size: 1.2rem;
+            }
+            .section-title {
+                font-size: 1.1rem;
+            }
+            .field-group > div {
+                flex: 1 1 100%;
+            }
+            .form-btn {
+                width: 100%;
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .content-area h1 {
+                font-size: 1.3rem;
+            }
+            .field-group > div {
+                flex: 1 1 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../../partials/navbar') %>
+
+    <div class="container">
+        <%- include('../../partials/admin_sidebar') %>
+
+        <div class="content-area" id="content">
+            <h1>Edit Company</h1>
+            <% if (company) { %>
+                <form action="/admin/company/edit/<%= company.c_id %>" method="POST">
+                    <fieldset class="form-section">
+                        <legend class="section-title">Company Information</legend>
+                        <div class="field-group">
+                            <div>
+                                <label for="company-id" class="field-label">Company ID</label>
+                                <input type="text" id="company-id" name="c_id" value="<%= company.c_id %>" class="field-input disabled-field" readonly>
+                            </div>
+                            <div>
+                                <label for="company-name" class="field-label">Company Name</label>
+                                <input type="text" id="company-name" name="cname" value="<%= company.cname %>" class="field-input" required>
+                            </div>
+                            <div>
+                                <label for="email" class="field-label">Email</label>
+                                <input type="email" id="email" name="email" value="<%= company.email %>" class="field-input" required>
+                            </div>
+                            <div>
+                                <label for="phone" class="field-label">Phone</label>
+                                <input type="tel" id="phone" name="phone" value="<%= company.phone %>" class="field-input" required>
+                            </div>
+                            <div>
+                                <label for="address" class="field-label">Address</label>
+                                <textarea id="address" name="address" class="field-textarea" required><%= company.address %></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <button type="submit" class="form-btn">Update Company</button>
+                </form>
+            <% } else { %>
+                <p>Company not found.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../../partials/footer') %>
+</body>
+</html>

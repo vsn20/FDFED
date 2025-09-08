@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sale Details - ElectroLand</title>
+  <style>
+    /* Structural CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: auto;
+      height: calc(100vh - 90px);
+    }
+
+    h2 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #2d3436;
+      margin: 20px 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group input[readonly],
+    .form-group select[disabled],
+    .form-group textarea[readonly] {
+      background: #e9ecef;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    .form-group .star-rating {
+      display: inline-block;
+      font-size: 1.2rem;
+      color: #f1c40f; /* Gold color for filled stars */
+      margin-left: 10px;
+    }
+
+    .form-group .star-rating .empty-star {
+      color: #ccc; /* Gray color for empty stars */
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .form-row .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .button:hover {
+      background-color: #555555;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 15px;
+      color: #2d3436;
+      text-decoration: none;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+
+      .content-area {
+        padding: 15px;
+        height: auto;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-row .form-group {
+        flex: 1 1 100%;
+      }
+
+      .button {
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      .form-row .form-group {
+        flex: 1 1 45%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar', { activePage: 'sales' }) %>
+
+  <div class="container">
+    <%- include('../../partials/company_sidebar') %>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <h2>Sale Details</h2>
+
+      <h3>Sale Information</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sale ID</label>
+          <input type="text" value="<%= sale.sales_id %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Unique Code</label>
+          <input type="text" value="<%= sale.unique_code %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Sale Date</label>
+          <input type="text" value="<%= sale.sales_date %>" readonly>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Branch Name</label>
+          <input type="text" value="<%= sale.branch_name %>" readonly>
+        </div>
+      </div>
+
+      <h3>Product Information</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" value="<%= sale.product_name %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Model Number</label>
+          <input type="text" value="<%= sale.model_number %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" value="<%= sale.company_name %>" readonly>
+        </div>
+      </div>
+
+      <h3>Customer Information</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Customer Name</label>
+          <input type="text" value="<%= sale.customer_name %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="text" value="<%= sale.phone_number %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" value="<%= sale.address || 'N/A' %>" readonly>
+        </div>
+      </div>
+
+      <h3>Installation Details</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Installation Required</label>
+          <input type="text" value="<%= sale.installation %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Installation Type</label>
+          <input type="text" value="<%= sale.installationType || 'N/A' %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Installation Charge</label>
+          <input type="text" value="<%= sale.installationcharge || 'N/A' %>" readonly>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Installation Status</label>
+          <form action="/company/sales/update-installation/<%= sale.sales_id %>" method="POST">
+            <select name="installation_status" onchange="this.form.submit()">
+              <option value="Pending" <%= sale.installation_status === 'Pending' ? 'selected' : '' %>>Pending</option>
+              <option value="Completed" <%= sale.installation_status === 'Completed' ? 'selected' : '' %>>Completed</option>
+              <option value="" <%= !sale.installation_status ? 'selected' : '' %>>None</option>
+            </select>
+          </form>
+        </div>
+      </div>
+
+      <h3>Customer Feedback</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Review</label>
+          <textarea readonly><%= sale.review || 'N/A' %></textarea>
+        </div>
+        <div class="form-group">
+          <label>Rating</label>
+          <input type="text" value="<%= sale.rating || 'N/A' %>" readonly>
+          <span class="star-rating">
+            <%- Array(5).fill().map((_, i) => i < (sale.rating || 0) ? '<span>★</span>' : '<span class="empty-star">☆</span>').join('') %>
+          </span>
+        </div>
+      </div>
+
+      <a href="/company/sales" class="back-link">Back to Sales</a>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer', { activePage: 'sales' }) %>
+</body>
+</html>

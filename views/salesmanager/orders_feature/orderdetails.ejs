@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details - ElectroLand</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
+    }
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      flex: 1;
+    }
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .detail-row {
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+    .detail-row label {
+      font-weight: bold;
+      color: #2d3436;
+      display: inline-block;
+      width: 150px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important;
+      }
+      .content-area {
+        padding: 15px;
+      }
+      .detail-row label {
+        width: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+  <div class="container">
+    <%- include('../../partials/salesmanager_sidebar') %>
+    <div class="content-area">
+      <h1>Order Details</h1>
+      <div class="detail-row">
+        <label>Order ID:</label>
+        <span><%= order.order_id %></span>
+      </div>
+      <div class="detail-row">
+        <label>Branch:</label>
+        <span><%= order.branch_name %></span>
+      </div>
+      <div class="detail-row">
+        <label>Company:</label>
+        <span><%= order.company_name %></span>
+      </div>
+      <div class="detail-row">
+        <label>Product:</label>
+        <span><%= order.product_name %></span>
+      </div>
+      <div class="detail-row">
+        <label>Quantity:</label>
+        <span><%= order.quantity %></span>
+      </div>
+      <div class="detail-row">
+        <label>Ordered Date:</label>
+        <span><%= new Date(order.ordered_date).toLocaleDateString() %></span>
+      </div>
+      <div class="detail-row">
+        <label>Delivery Date:</label>
+        <span><%= order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set' %></span>
+      </div>
+      <div class="detail-row">
+        <label>Status:</label>
+        <span><%= order.status %></span>
+      </div>
+      <div class="detail-row">
+        <label>Installation Type:</label>
+        <span><%= order.installation_type %></span>
+      </div>
+    </div>
+  </div>
+  <%- include('../../partials/footer') %>
+</body>
+</html>

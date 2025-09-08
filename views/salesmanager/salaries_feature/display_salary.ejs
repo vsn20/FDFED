@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Manager Dashboard - Salaries - ElectroLand</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1a1a1a;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      flex: 1;
+      overflow-x: auto;
+      border: 1px solid #ebedf0;
+    }
+
+    .content-area h1 {
+      color: #2c3e50;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .salary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .salary-entry {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.04);
+      font-size: 0.95rem;
+      border-left: 4px solid #3498db;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .salary-entry:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .salary-entry div {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .salary-entry div:last-child {
+      margin-bottom: 0;
+    }
+
+    .salary-entry span.label {
+      font-weight: 600;
+      min-width: 120px;
+      color: #34495e;
+      display: inline-block;
+    }
+
+    .date-range {
+      font-size: 1.3rem;
+      color: #2980b9;
+      font-weight: 500;
+    }
+
+    .date-range h1 {
+      font-size: inherit;
+      color: inherit;
+      margin: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .month-year-select {
+      padding: 10px 15px;
+      border: 1px solid #dfe6e9;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #fff;
+      cursor: pointer;
+      min-width: 150px;
+      transition: border-color 0.2s;
+    }
+
+    .month-year-select:hover,
+    .month-year-select:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    .generate-btn {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .note {
+      color: #e74c3c;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px;
+      }
+
+      .content-area {
+        padding: 20px;
+      }
+
+      .content-area h1 {
+        font-size: 1.5rem;
+      }
+
+      .header-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+
+      .generate-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .salary-entry {
+        padding: 15px;
+        font-size: 0.9rem;
+      }
+
+      .date-range {
+        font-size: 1.2rem;
+      }
+
+      .controls {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .month-year-select {
+        width: 100%;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.6rem;
+      }
+
+      .salary-entry {
+        font-size: 0.9rem;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/salesmanager_sidebar') %>
+    
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Salaries</h1>
+        <div class="date-range">
+          <h1><%= selectedMonthYear %> Salaries</h1>
+        </div>
+        <div class="controls">
+          <select class="month-year-select" id="month-year">
+            <% monthYearOptions.forEach(option => { %>
+              <option value="<%= option %>" <%= selectedMonthYear === option ? 'selected' : '' %>>
+                <%= option.replace('-', ' ') %>
+              </option>
+            <% }) %>
+          </select>
+          <button class="generate-btn" onclick="filterSalaries()">Generate</button>
+        </div>
+      </div>
+      <div class="salary-list">
+        <% if (salary.length === 0) { %>
+          <div class="salary-entry">
+            <div>No salaries found for <%= selectedMonthYear %>.</div>
+          </div>
+        <% } else { %>
+          <% salary.forEach(s => { %>
+            <div class="salary-entry">
+              <div><span class="label">Employee Name:</span> <%= s.employee_name %></div>
+              <div><span class="label">Role:</span> <%= s.role %></div>
+              <div><span class="label">Base Salary:</span> $<%= s.salary %></div>
+              <div><span class="label">Commission (<%= selectedMonthYear %>):</span> $<%= s.commission %></div>
+              <div><span class="label">Total Salary:</span> $<%= s.totalsalary %></div>
+              <% if (s.note) { %>
+                <div><span class="label">Note:</span> <span class="note"><%= s.note %></span></div>
+              <% } %>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    function filterSalaries() {
+      const monthYear = document.getElementById('month-year').value;
+      console.log('[filterSalaries] Redirecting to:', `/salesmanager/salaries?monthYear=${monthYear}`);
+      window.location.href = `/salesmanager/salaries?monthYear=${monthYear}`;
+    }
+  </script>
+</body>
+</html>

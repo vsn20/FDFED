@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory - ElectroLand</title>
+  <style>
+    /* Structural CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      margin-top: 90px;
+      display: flex;
+      flex: 1;
+      gap: 25px; /* Standardized gap */
+      padding: 0 20px !important; /* Standardized padding with !important to prevent override */
+      max-width: 100%; /* Ensure it doesn’t exceed viewport */
+    }
+
+    .content-area {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px; /* Standardized padding */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Standardized shadow */
+      flex: 1;
+      overflow-x: auto;
+    }
+
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 20px; /* Standardized margin */
+      font-size: 1.5rem; /* Standardized font size */
+    }
+
+    /* Header container styling */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px; /* Standardized margin */
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+    }
+
+    /* Add button styling (not used here but kept for consistency) */
+    .add-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .add-button:hover {
+      background-color: #555555;
+    }
+
+    /* Branch fields styling */
+    .form-row {
+      display: flex;
+      gap: 15px; /* Standardized gap */
+      flex-wrap: wrap;
+      margin-bottom: 20px; /* Space before table */
+    }
+
+    .form-group {
+      flex: 1 1 45%; /* Two columns by default */
+      min-width: 200px; /* Consistent min-width */
+      max-width: 400px; /* Consistent max-width */
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input[readonly] {
+      background: #e9ecef; /* Slightly darker for readonly */
+      cursor: default;
+    }
+
+    .form-group input:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    /* Table styling */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
+      scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+
+    .table-wrapper::-webkit-scrollbar {
+      display: none; /* Hide scrollbar in Webkit browsers */
+    }
+
+    table {
+      width: 100%;
+      min-width: 600px; /* Standardized min-width */
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      border-spacing: 0;
+    }
+
+    thead {
+      background: #333333;
+    }
+
+    th {
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #ffffff;
+    }
+
+    td {
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e9f0;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 0 10px !important; /* Consistent responsive padding */
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .content-area h1 {
+        font-size: 1.2rem;
+      }
+
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .add-button {
+        margin-top: 5px;
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        font-size: 0.85rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%; /* Stack fields on smaller screens */
+      }
+
+      table {
+        display: block;
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+
+      .form-group {
+        flex: 1 1 45%;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/navbar') %>
+
+  <div class="container">
+    <%- include('../../partials/salesman_sidebar') %>
+    
+    <!-- Content Area -->
+    <div class="content-area" id="content">
+      <div class="header-container">
+        <h1>Inventory</h1>
+        <!-- Add button can be added here if needed, e.g., <a href="/salesman/inventory/add" class="add-button">Add Stock</a> -->
+      </div>
+
+      <!-- Branch Fields -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Branch ID</label>
+          <input type="text" value="<%= branchid %>" readonly>
+        </div>
+        <div class="form-group">
+          <label>Branch Name</label>
+          <input type="text" value="<%= branchname %>" readonly>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Product Name</th>
+              <th>Company Name</th>
+              <th>Model No</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% stocks.forEach(s => { %>
+              <tr>
+                <td data-label="Product ID"><%= s.pid %></td>
+                <td data-label="Product Name"><%= s.pname %></td>
+                <td data-label="Company Name"><%= s.cname %></td>
+                <td data-label="Model No"><%= s.modelno %></td>
+                <td data-label="Quantity"><%= s.quantity %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+  <script>
+    // Add any necessary script logic here if needed
+  </script>
+</body>
+</html>
