@@ -91,7 +91,7 @@ async function update_branch(req, res) {
     res.redirect("/admin/branches");
   } catch (error) {
     console.error("Error updating branch:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send(" Server Error");
   }
 }
 
