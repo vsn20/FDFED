@@ -21,7 +21,7 @@ async function admin_messages_display(req, res) {
     });
   } catch (error) {
     console.error("Error rendering messages:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Server Error");
   }
 }
 
