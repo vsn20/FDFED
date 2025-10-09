@@ -59,3 +59,6 @@ async function customers_display(req, res) {
 }
 
 module.exports = { customerData, customers_display };
+
+//removed trailing commas and added missing semicolons
+//added fetch api functionality to admin_customers_display.ejs
