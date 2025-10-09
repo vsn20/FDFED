@@ -31,7 +31,7 @@ async function add_company(req, res) {
         const { cname, address, email, phone } = req.body;
 
         if (!cname || !address || !email || !phone) {
-            return res.status(400).send("All fields are required");
+            return res.status(400).send("All above fields are required");
         }
 
         const lastCompany = await Company.findOne().sort({ c_id: -1 });
