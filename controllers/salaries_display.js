@@ -117,7 +117,7 @@ async function salary_display(req, res) {
     });
   } catch (error) {
     console.error("[salary_display] Error rendering salaries:", error);
-    res.status(500).send("Internal server error");
+    res.status(500).send("server error");
   }
 }
 
