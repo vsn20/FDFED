@@ -83,7 +83,7 @@ async function addemployee(req, res) {
 
     res.status(201).json({
       success: true,
-      message: 'Employee added successfully',
+      message: 'New employee added',
       redirect: '/admin/employees'
     });
 
