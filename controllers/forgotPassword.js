@@ -25,7 +25,7 @@ async function sendOtp(req, res) {
 
     // Check for missing credentials
     if (!EMAIL_USER || !EMAIL_PASS) {
-      console.error("Missing email credentials in controller.");
+      console.error("email credentials missing in controller.");
       return res.status(500).json({ success: false, message: "Server configuration error: Email credentials missing." });
     }
 
