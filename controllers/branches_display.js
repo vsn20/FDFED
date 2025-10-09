@@ -25,7 +25,7 @@ async function branches_display(req, res) {
         res.status(500).render("ourbranches", { 
             branches: [], 
             activePage: 'our-branches',
-            error: "Internal Server Error"
+            error: "Server Error"
         });
     }
 }
