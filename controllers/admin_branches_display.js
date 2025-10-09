@@ -102,3 +102,10 @@ module.exports = {
   render_edit_branch_form,
   update_branch,
 };
+
+
+//controllers/owner/addemployee.js
+//controllers/owner/addemployee.js
+//controllers/owner/addemployee.js
+//controllers/owner/addemployee.js
+//controllers/owner/addemployee.js
