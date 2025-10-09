@@ -22,6 +22,10 @@ async function addemployee(req, res) {
     // Generate unique employee ID
     const employeeCount = await Employee.countDocuments();
     const e_id = `EMP${employeeCount + 1}`;
+    //base employee id on count of employees in db
+    // Check for existing email
+    // Assuming email should be unique
+    // If not, this check can be removed
 
     // Handle branch assignment
     const bid = bidFromForm === 'null' ? null : bidFromForm;
