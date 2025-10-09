@@ -37,7 +37,7 @@ async function inventory_display(req, res) {
     const stocks = await Inventory.find({ branch_id: branch.bid }).lean();
     
     if (stocks.length === 0) {
-      console.log("[InventoryDisplay] No inventory records found for branch:", branch.bid);
+      console.log("[InventoryDisplay] No inventory records found for the branch:", branch.bid);
     } else {
       console.log("[InventoryDisplay] Fetched stocks:", stocks.map(s => ({
         product_id: s.product_id,
@@ -56,7 +56,7 @@ async function inventory_display(req, res) {
       hasStocks: stocks.length > 0,
       branchid: branch.bid,
       branchname: branch.b_name,
-      successMessage: req.query.success ? 'Inventory updated successfully!' : undefined
+      successMessage: req.query.success ? 'Inventory is updated successfully!' : undefined
     });
   } catch (error) {
     console.error("[InventoryDisplay] Error:", error);
@@ -124,7 +124,7 @@ async function getProductsByCompany(req, res) {
     res.json(products);
   } catch (error) {
     console.error("[GetProducts] Error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Server Error" });
   }
 }
 
