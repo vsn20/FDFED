@@ -20,8 +20,7 @@ const renderAddSaleForm = async (req, res) => {
     res.render("salesmanager/sales_feature/addsale", {
       branchName: branchName,
       activePage: 'employee',
-      activeRoute: 'sales',
-      error: req.query.error || null,
+      activeRoute: 'sales'
     });
   } catch (error) {
     console.error("[renderAddSaleForm] Error rendering add sale form:", error);
@@ -134,10 +133,8 @@ const sales_details = async (req, res) => {
         product_name: productName,
         model_number: modelNumber,
         branch_name: branchName,
-        total_amount: sale.amount,
         saledate: sale.sales_date,
-        price: sale.sold_price,
-        phone_number: sale.phone_number || "N/A",
+        price: sale.sold_price
       }
     });
   } catch (error) {
@@ -151,13 +148,14 @@ const addsale_post = async (req, res) => {
   session.startTransaction();
   try {
     const user = res.locals.user;
-    const employee = await Employee.findOne({ e_id: user.emp_id }).lean();
+    const employee = await Employee.findOne({ e_id: user.emp_id, role: "Sales Manager", status: "active" });
     if (!employee) {
       await session.abortTransaction();
       return res.status(404).json({ success: false, message: "Sales Manager not found" });
     }
 
     const {
+      salesman_name,
       customer_name,
       saledate,
       unique_code,
@@ -166,7 +164,6 @@ const addsale_post = async (req, res) => {
       purchased_price,
       sold_price,
       quantity,
-      salesman_name,
       phone_number,
       address,
       installation,
@@ -174,18 +171,13 @@ const addsale_post = async (req, res) => {
       installationcharge
     } = req.body;
 
-    if (parseInt(quantity) <= 0) {
-      await session.abortTransaction();
-      return res.status(400).json({ success: false, message: "Quantity must be greater than 0" });
-    }
-
-    const existingSale = await Sale.findOne({ unique_code }).session(session);
-    if (existingSale) {
-      await session.abortTransaction();
-      return res.status(400).json({
-        success: false,
-        message: `Unique code ${unique_code} already exists. Please use a different code.`,
-      });
+    // Validate unique_code if provided
+    if (unique_code) {
+      const existingSale = await Sale.findOne({ unique_code }).session(session);
+      if (existingSale) {
+        await session.abortTransaction();
+        return res.status(400).json({ success: false, message: `Unique code '${unique_code}' already exists. Please use a different code.` });
+      }
     }
 
     const salesman = await Employee.findOne({
@@ -270,7 +262,7 @@ const addsale_post = async (req, res) => {
 
     await newSale.save({ session });
     await session.commitTransaction();
-    res.json({ success: true, redirect: '/salesmanager/sales' });
+    res.json({ success: true });
   } catch (error) {
     await session.abortTransaction();
     console.error("[AddSale] Error:", error);
