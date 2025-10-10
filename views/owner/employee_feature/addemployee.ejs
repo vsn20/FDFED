@@ -106,12 +106,24 @@
       transition: background-color 0.3s;
     }
 
-    button[type="submit"]:hover {
+    button[type="submit"]:hover:not(:disabled) {
       background-color: #555555;
+    }
+
+    button[type="submit"]:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
     }
 
     #error-message {
       color: #e74c3c;
+      font-size: 0.85rem;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    #success-message {
+      color: #27ae60;
       font-size: 0.85rem;
       margin: 10px 0;
       text-align: center;
@@ -123,6 +135,12 @@
 
     .branch-option.show {
       display: block;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
     }
 
     @media (max-width: 768px) {
@@ -156,78 +174,77 @@
     <div class="content-area" id="content">
       <div class="form-container">
         <h2>Add Employee</h2>
-        <form id="employee-login-form" action="/admin/addemployee" method="POST">
-          <fieldset>
-            <legend>Personal Details</legend>
-            <div class="field-group">
-              <div>
-                <label for="f_name">First Name</label>
-                <input type="text" id="f_name" name="f_name" required placeholder="Enter first name">
+        <div id="loading">Loading branch data...</div>
+        <div id="form-container" style="display: none;">
+          <form id="employee-login-form">
+            <fieldset>
+              <legend>Personal Details</legend>
+              <div class="field-group">
+                <div>
+                  <label for="f_name">First Name</label>
+                  <input type="text" id="f_name" name="f_name" required placeholder="Enter first name">
+                </div>
+                <div>
+                  <label for="last_name">Last Name</label>
+                  <input type="text" id="last_name" name="last_name" required placeholder="Enter last name">
+                </div>
+                <div>
+                  <label for="role">Role</label>
+                  <select id="role" name="role" required>
+                    <option value="" disabled selected>Select role</option>
+                    <option value="Sales Manager">Sales Manager</option>
+                    <option value="Salesman">Salesman</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="bid">Branch</label>
+                  <select id="bid" name="bid">
+                    <option value="" disabled selected>Select branch</option>
+                    <!-- Options populated via JS -->
+                  </select>
+                </div>
+                <div>
+                  <label for="email">Email</label>
+                  <input type="email" id="email" name="email" required placeholder="Enter email">
+                </div>
+                <div>
+                  <label for="phone_no">Phone Number</label>
+                  <input type="tel" id="phone_no" name="phone_no" placeholder="Enter phone number" pattern="[0-9]{10}">
+                </div>
               </div>
-              <div>
-                <label for="last_name">Last Name</label>
-                <input type="text" id="last_name" name="last_name" required placeholder="Enter last name">
-              </div>
-              <div>
-                <label for="role">Role</label>
-                <select id="role" name="role" required>
-                  <option value="" disabled selected>Select role</option>
-                  <option value="Sales Manager">Sales Manager</option>
-                  <option value="Salesman">Salesman</option>
-                </select>
-              </div>
-              <div>
-                <label for="bid">Branch</label>
-                <select id="bid" name="bid">
-                  <option value="" disabled selected>Select branch</option>
-                  <% allBranches.forEach(branch => { %>
-                    <option value="<%= branch.bid %>" class="branch-option all-branches <%= unassignedBranches.some(ub => ub.bid === branch.bid) ? 'unassigned' : '' %>">
-                      <%= branch.bid %> - <%= branch.b_name %>
-                    </option>
-                  <% }) %>
-                  <option value="null" class="branch-option all-branches unassigned">Not Assigned</option>
-                </select>
-              </div>
-              <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required placeholder="Enter email">
-              </div>
-              <div>
-                <label for="phone_no">Phone Number</label>
-                <input type="tel" id="phone_no" name="phone_no" placeholder="Enter phone number" pattern="[0-9]{10}">
-              </div>
-            </div>
-          </fieldset>
+            </fieldset>
 
-          <fieldset>
-            <legend>Account and Salaries</legend>
-            <div class="field-group">
-              <div>
-                <label for="acno">Account Number</label>
-                <input type="text" id="acno" name="acno" required placeholder="Enter account number">
+            <fieldset>
+              <legend>Account and Salaries</legend>
+              <div class="field-group">
+                <div>
+                  <label for="acno">Account Number</label>
+                  <input type="text" id="acno" name="acno" required placeholder="Enter account number">
+                </div>
+                <div>
+                  <label for="ifsc">IFSC Code</label>
+                  <input type="text" id="ifsc" name="ifsc" required placeholder="Enter IFSC code">
+                </div>
+                <div>
+                  <label for="bankname">Bank Name</label>
+                  <input type="text" id="bankname" name="bankname" required placeholder="Enter bank name">
+                </div>
+                <div>
+                  <label for="base_salary">Monthly Salary</label>
+                  <input type="number" id="base_salary" name="base_salary" required placeholder="Enter monthly salary" step="0.01">
+                </div>
+                <div>
+                  <label for="address">Address</label>
+                  <textarea id="address" name="address" placeholder="Enter address"></textarea>
+                </div>
               </div>
-              <div>
-                <label for="ifsc">IFSC Code</label>
-                <input type="text" id="ifsc" name="ifsc" required placeholder="Enter IFSC code">
-              </div>
-              <div>
-                <label for="bankname">Bank Name</label>
-                <input type="text" id="bankname" name="bankname" required placeholder="Enter bank name">
-              </div>
-              <div>
-                <label for="base_salary">Monthly Salary</label>
-                <input type="number" id="base_salary" name="base_salary" required placeholder="Enter monthly salary" step="0.01">
-              </div>
-              <div>
-                <label for="address">Address</label>
-                <textarea id="address" name="address" placeholder="Enter address"></textarea>
-              </div>
-            </div>
-          </fieldset>
+            </fieldset>
 
-          <div id="error-message"></div>
-          <button type="submit">Add Employee</button>
-        </form>
+            <div id="error-message"></div>
+            <div id="success-message" style="display: none;"></div>
+            <button type="submit">Add Employee</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -241,21 +258,64 @@
     const email = document.getElementById('email');
     const phone = document.getElementById('phone_no');
     const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const formContainer = document.getElementById('form-container');
+    const loading = document.getElementById('loading');
+
+    let allBranches = [];
+
+    async function loadBranches() {
+      try {
+        const response = await fetch('/admin/branches/data');
+        if (!response.ok) throw new Error('Failed to fetch branches');
+        allBranches = await response.json();
+        populateBranchSelect();
+        loading.style.display = 'none';
+        formContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading branches:', error);
+        loading.textContent = 'Error loading branches. Please refresh.';
+      }
+    }
+
+    function populateBranchSelect() {
+      branchSelect.innerHTML = '<option value="" disabled selected>Select branch</option>';
+      allBranches.forEach(branch => {
+        const option = document.createElement('option');
+        option.value = branch.bid;
+        option.textContent = `${branch.bid} - ${branch.b_name}`;
+        option.className = `branch-option all-branches ${!branch.manager_assigned ? 'unassigned' : ''}`;
+        branchSelect.appendChild(option);
+      });
+      const nullOption = document.createElement('option');
+      nullOption.value = 'null';
+      nullOption.textContent = 'Not Assigned';
+      nullOption.className = 'branch-option all-branches unassigned';
+      branchSelect.appendChild(nullOption);
+      updateBranchDropdown();
+    }
 
     function updateBranchDropdown() {
       const options = branchSelect.querySelectorAll('.branch-option');
       options.forEach(option => {
         if (roleSelect.value === 'Sales Manager') {
-          option.classList.contains('unassigned') ? option.classList.add('show') : option.classList.remove('show');
+          if (option.classList.contains('unassigned')) {
+            option.classList.add('show');
+            option.style.display = 'block';
+          } else {
+            option.classList.remove('show');
+            option.style.display = 'none';
+          }
         } else {
-          option.classList.contains('all-branches') ? option.classList.add('show') : option.classList.remove('show');
+          option.classList.add('show');
+          option.style.display = 'block';
         }
       });
       branchSelect.value = '';
     }
 
     roleSelect.addEventListener('change', updateBranchDropdown);
-    updateBranchDropdown();
 
     form.addEventListener('submit', async function(event) {
       event.preventDefault();
@@ -265,6 +325,7 @@
       phone.style.borderColor = '#e6e9f0';
       phone.style.backgroundColor = '#fff';
       errorMessage.textContent = '';
+      successMessage.style.display = 'none';
 
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailPattern.test(email.value)) {
@@ -297,7 +358,11 @@
         const result = await response.json();
 
         if (result.success) {
-          window.location.href = result.redirect;
+          successMessage.textContent = result.message || 'Employee added successfully!';
+          successMessage.style.display = 'block';
+          setTimeout(() => {
+            window.location.href = result.redirect || '/admin/employees';
+          }, 1500);
         } else {
           errorMessage.textContent = result.message || 'An error occurred while adding the employee.';
         }
@@ -305,6 +370,9 @@
         errorMessage.textContent = 'Network error: ' + error.message;
       }
     });
+
+    // Initial load
+    loadBranches();
   </script>
 </body>
 </html>

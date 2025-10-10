@@ -2,15 +2,38 @@ const Branch = require("../models/branches");
 
 async function branches_display(req, res) {
   try {
-    const activeBranches = await Branch.find({ active: "active" });
+    // Render empty page; data loaded via API
     res.render("owner/branch_feature/branch_admin", {
-      branches: activeBranches,
       activePage: "employee",
       activeRoute: "branches",
     });
   } catch (error) {
-    console.error("Error fetching branches:", error);
+    console.error("Error rendering branches page:", error);
     res.status(500).send("Internal Server Error");
+  }
+}
+
+async function getBranchesData(req, res) {
+  try {
+    const branches = await Branch.find({ active: "active" }).lean();
+    res.json(branches);
+  } catch (error) {
+    console.error("Error fetching branches:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function getBranchById(req, res) {
+  try {
+    const { bid } = req.params;
+    const branch = await Branch.findOne({ bid, active: "active" }).lean();
+    if (!branch) {
+      return res.status(404).json({ error: "Branch not found" });
+    }
+    res.json(branch);
+  } catch (error) {
+    console.error("Error fetching branch:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
@@ -49,22 +72,19 @@ async function add_branch(req, res) {
     });
 
     await newBranch.save();
-    res.redirect("/admin/branches");
+    res.json({ success: true, message: 'Branch added successfully!', bid: newBid });
   } catch (error) {
     console.error("Error adding branch:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
 async function render_edit_branch_form(req, res) {
   try {
-    const branchId = req.params.bid;
-    const branch = await Branch.findOne({ bid: branchId });
-    if (!branch) {
-      return res.status(404).send("Branch not found");
-    }
+    const { bid } = req.params;
+    // Render empty page; data loaded via API, pass bid for URL parsing
     res.render("owner/branch_feature/edit_branch", {
-      branch,
+      bid,
       activePage: "employee",
       activeRoute: "branches",
     });
@@ -76,36 +96,31 @@ async function render_edit_branch_form(req, res) {
 
 async function update_branch(req, res) {
   try {
-    const branchId = req.params.bid;
+    const { bid } = req.params;
     const { b_name, address } = req.body;
 
     const branch = await Branch.findOneAndUpdate(
-      { bid: branchId },
+      { bid, active: "active" },
       { b_name, location: address },
       { new: true }
     );
 
     if (!branch) {
-      return res.status(404).send("Branch not found");
+      return res.status(404).json({ error: "Branch not found" });
     }
-    res.redirect("/admin/branches");
+    res.json({ success: true, message: 'Branch updated successfully!' });
   } catch (error) {
     console.error("Error updating branch:", error);
-    res.status(500).send(" Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 }
 
 module.exports = {
   branches_display,
+  getBranchesData,
+  getBranchById,
   render_add_branch_form,
   add_branch,
   render_edit_branch_form,
   update_branch,
 };
-
-
-//controllers/owner/addemployee.js
-//controllers/owner/addemployee.js
-//controllers/owner/addemployee.js
-//controllers/owner/addemployee.js
-//controllers/owner/addemployee.js

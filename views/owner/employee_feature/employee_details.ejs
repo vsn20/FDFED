@@ -62,6 +62,12 @@
       cursor: not-allowed;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -84,105 +90,168 @@
     <div class="content-area" id="content">
       <div class="form-container">
         <h2>Employee Details</h2>
-        <form>
-          <!-- Personal Details Section -->
-          <fieldset>
-            <legend>Personal Details</legend>
-            <div class="field-group">
-              <div>
-                <label for="e_id">Employee ID</label>
-                <input type="text" id="e_id" value="<%= employee.e_id %>" readonly>
+        <div id="loading">Loading employee details...</div>
+        <div id="details-container" style="display: none;">
+          <form>
+            <!-- Personal Details Section -->
+            <fieldset>
+              <legend>Personal Details</legend>
+              <div class="field-group">
+                <div>
+                  <label for="e_id">Employee ID</label>
+                  <input type="text" id="e_id" readonly>
+                </div>
+                <div>
+                  <label for="f_name">First Name</label>
+                  <input type="text" id="f_name" readonly>
+                </div>
+                <div>
+                  <label for="last_name">Last Name</label>
+                  <input type="text" id="last_name" readonly>
+                </div>
+                <div>
+                  <label for="role">Role</label>
+                  <input type="text" id="role" readonly>
+                </div>
+                <div>
+                  <label for="bid">Branch</label>
+                  <input type="text" id="bid" readonly>
+                </div>
+                <div>
+                  <label for="status">Status</label>
+                  <input type="text" id="status" readonly>
+                </div>
+                <div>
+                  <label for="email">Email</label>
+                  <input type="email" id="email" readonly>
+                </div>
+                <div>
+                  <label for="phone_no">Phone Number</label>
+                  <input type="tel" id="phone_no" readonly>
+                </div>
               </div>
-              <div>
-                <label for="f_name">First Name</label>
-                <input type="text" id="f_name" value="<%= employee.f_name %>" readonly>
-              </div>
-              <div>
-                <label for="last_name">Last Name</label>
-                <input type="text" id="last_name" value="<%= employee.last_name %>" readonly>
-              </div>
-              <div>
-                <label for="role">Role</label>
-                <input type="text" id="role" value="<%= employee.role %>" readonly>
-              </div>
-              <div>
-                <label for="bid">Branch</label>
-                <input type="text" id="bid" value="<%= employee.bid || 'Not Assigned' %>" readonly>
-              </div>
-              <div>
-                <label for="status">Status</label>
-                <input type="text" id="status" value="<%= employee.status %>" readonly>
-              </div>
-              <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" value="<%= employee.email %>" readonly>
-              </div>
-              <div>
-                <label for="phone_no">Phone Number</label>
-                <input type="tel" id="phone_no" value="<%= employee.phone_no || 'N/A' %>" readonly>
-              </div>
-            </div>
-          </fieldset>
+            </fieldset>
 
-          <!-- Account and Salaries Section -->
-          <fieldset>
-            <legend>Account and Salaries</legend>
-            <div class="field-group">
-              <div>
-                <label for="acno">Account Number</label>
-                <input type="text" id="acno" value="<%= employee.acno %>" readonly>
+            <!-- Account and Salaries Section -->
+            <fieldset>
+              <legend>Account and Salaries</legend>
+              <div class="field-group">
+                <div>
+                  <label for="acno">Account Number</label>
+                  <input type="text" id="acno" readonly>
+                </div>
+                <div>
+                  <label for="ifsc">IFSC Code</label>
+                  <input type="text" id="ifsc" readonly>
+                </div>
+                <div>
+                  <label for="bankname">Bank Name</label>
+                  <input type="text" id="bankname" readonly>
+                </div>
+                <div>
+                  <label for="base_salary">Monthly Salary</label>
+                  <input type="number" id="base_salary" readonly>
+                </div>
+                <div>
+                  <label for="address">Address</label>
+                  <textarea id="address" readonly></textarea>
+                </div>
               </div>
-              <div>
-                <label for="ifsc">IFSC Code</label>
-                <input type="text" id="ifsc" value="<%= employee.ifsc %>" readonly>
-              </div>
-              <div>
-                <label for="bankname">Bank Name</label>
-                <input type="text" id="bankname" value="<%= employee.bankname %>" readonly>
-              </div>
-              <div>
-                <label for="base_salary">Monthly Salary</label>
-                <input type="number" id="base_salary" value="<%= employee.base_salary %>" readonly>
-              </div>
-              <div>
-                <label for="address">Address</label>
-                <textarea id="address" readonly><%= employee.address || 'N/A' %></textarea>
-              </div>
-            </div>
-          </fieldset>
+            </fieldset>
 
-          <!-- Additional Details -->
-          <fieldset>
-            <legend>Additional Details</legend>
-            <div class="field-group">
-              <div>
-                <label for="hiredAt">Hired At</label>
-                <input type="text" id="hiredAt" value="<%= employee.hiredAt.toDateString() %>" readonly>
+            <!-- Additional Details -->
+            <fieldset>
+              <legend>Additional Details</legend>
+              <div class="field-group">
+                <div>
+                  <label for="hiredAt">Hired At</label>
+                  <input type="text" id="hiredAt" readonly>
+                </div>
+                <div>
+                  <label for="createdBy">Created By</label>
+                  <input type="text" id="createdBy" readonly>
+                </div>
+                <div>
+                  <label for="resignation_date">Resignation Date</label>
+                  <input type="text" id="resignation_date" readonly>
+                </div>
+                <div>
+                  <label for="fired_date">Fired Date</label>
+                  <input type="text" id="fired_date" readonly>
+                </div>
+                <div>
+                  <label for="reason_for_exit">Reason for Exit</label>
+                  <input type="text" id="reason_for_exit" readonly>
+                </div>
               </div>
-              <div>
-                <label for="createdBy">Created By</label>
-                <input type="text" id="createdBy" value="<%= employee.createdBy %>" readonly>
-              </div>
-              <div>
-                <label for="resignation_date">Resignation Date</label>
-                <input type="text" id="resignation_date" value="<%= employee.resignation_date ? employee.resignation_date.toDateString() : 'N/A' %>" readonly>
-              </div>
-              <div>
-                <label for="fired_date">Fired Date</label>
-                <input type="text" id="fired_date" value="<%= employee.fired_date ? employee.fired_date.toDateString() : 'N/A' %>" readonly>
-              </div>
-              <div>
-                <label for="reason_for_exit">Reason for Exit</label>
-                <input type="text" id="reason_for_exit" value="<%= employee.reason_for_exit || 'N/A' %>" readonly>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-        <a href="/admin/employee/edit/<%= employee.e_id %>" class="edit-button">Edit Employee</a>
+            </fieldset>
+          </form>
+          <a id="edit-link" class="edit-button" style="display: none;">Edit Employee</a>
+        </div>
+        <p id="not-found" style="display: none;">Employee not found.</p>
       </div>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    const urlParts = window.location.pathname.split('/');
+    const e_id = urlParts[urlParts.length - 1];
+    const loading = document.getElementById('loading');
+    const detailsContainer = document.getElementById('details-container');
+    const notFound = document.getElementById('not-found');
+    const editLink = document.getElementById('edit-link');
+
+    async function loadEmployee() {
+      try {
+        const response = await fetch(`/admin/employee/data/${e_id}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            loading.style.display = 'none';
+            notFound.style.display = 'block';
+            return;
+          }
+          throw new Error('Failed to fetch');
+        }
+        const employee = await response.json();
+        // Populate form
+        document.getElementById('e_id').value = employee.e_id;
+        document.getElementById('f_name').value = employee.f_name;
+        document.getElementById('last_name').value = employee.last_name;
+        document.getElementById('role').value = employee.role;
+        document.getElementById('bid').value = employee.bid || 'Not Assigned';
+        document.getElementById('status').value = employee.status;
+        document.getElementById('email').value = employee.email;
+        document.getElementById('phone_no').value = employee.phone_no || 'N/A';
+        document.getElementById('acno').value = employee.acno;
+        document.getElementById('ifsc').value = employee.ifsc;
+        document.getElementById('bankname').value = employee.bankname;
+        document.getElementById('base_salary').value = employee.base_salary;
+        document.getElementById('address').value = employee.address || 'N/A';
+        document.getElementById('hiredAt').value = new Date(employee.hiredAt).toDateString();
+        document.getElementById('createdBy').value = employee.createdBy;
+        document.getElementById('resignation_date').value = employee.resignation_date ? new Date(employee.resignation_date).toDateString() : 'N/A';
+        document.getElementById('fired_date').value = employee.fired_date ? new Date(employee.fired_date).toDateString() : 'N/A';
+        document.getElementById('reason_for_exit').value = employee.reason_for_exit || 'N/A';
+        // Set edit link
+        editLink.href = `/admin/employee/edit/${employee.e_id}`;
+        editLink.style.display = 'inline-block';
+        loading.style.display = 'none';
+        detailsContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading employee:', error);
+        loading.textContent = 'Error loading employee details. Please refresh.';
+      }
+    }
+
+    // Initial load
+    if (e_id) {
+      loadEmployee();
+    } else {
+      loading.textContent = 'Invalid employee ID.';
+      loading.style.display = 'block';
+    }
+  </script>
 </body>
 </html>

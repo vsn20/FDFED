@@ -99,8 +99,28 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        .form-btn:hover {
+        .form-btn:hover:not(:disabled) {
             background-color: #555555;
+        }
+        .form-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #error-message, #success-message {
+            font-size: 0.85rem;
+            margin: 10px 0;
+            text-align: center;
+        }
+        #error-message {
+            color: #e74c3c;
+        }
+        #success-message {
+            color: #27ae60;
+        }
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: #636e72;
         }
         @media (max-width: 768px) {
             .container {
@@ -143,41 +163,128 @@
 
         <div class="content-area" id="content">
             <h1>Edit Company</h1>
-            <% if (company) { %>
-                <form action="/admin/company/edit/<%= company.c_id %>" method="POST">
+            <div id="loading">Loading company details...</div>
+            <div id="form-container" style="display: none;">
+                <form id="edit-company-form">
                     <fieldset class="form-section">
                         <legend class="section-title">Company Information</legend>
                         <div class="field-group">
                             <div>
                                 <label for="company-id" class="field-label">Company ID</label>
-                                <input type="text" id="company-id" name="c_id" value="<%= company.c_id %>" class="field-input disabled-field" readonly>
+                                <input type="text" id="company-id" name="c_id" class="field-input disabled-field" readonly>
                             </div>
                             <div>
                                 <label for="company-name" class="field-label">Company Name</label>
-                                <input type="text" id="company-name" name="cname" value="<%= company.cname %>" class="field-input" required>
+                                <input type="text" id="company-name" name="cname" class="field-input" required>
                             </div>
                             <div>
                                 <label for="email" class="field-label">Email</label>
-                                <input type="email" id="email" name="email" value="<%= company.email %>" class="field-input" required>
+                                <input type="email" id="email" name="email" class="field-input" required>
                             </div>
                             <div>
                                 <label for="phone" class="field-label">Phone</label>
-                                <input type="tel" id="phone" name="phone" value="<%= company.phone %>" class="field-input" required>
+                                <input type="tel" id="phone" name="phone" class="field-input" required>
                             </div>
                             <div>
                                 <label for="address" class="field-label">Address</label>
-                                <textarea id="address" name="address" class="field-textarea" required><%= company.address %></textarea>
+                                <textarea id="address" name="address" class="field-textarea" required></textarea>
                             </div>
                         </div>
                     </fieldset>
+                    <div id="error-message"></div>
+                    <div id="success-message"></div>
                     <button type="submit" class="form-btn">Update Company</button>
                 </form>
-            <% } else { %>
-                <p>Company not found.</p>
-            <% } %>
+            </div>
+            <p id="not-found" style="display: none;">Company not found.</p>
         </div>
     </div>
 
     <%- include('../../partials/footer') %>
+
+    <script>
+        const urlParts = window.location.pathname.split('/');
+        const cid = urlParts[urlParts.length - 1];
+        const loading = document.getElementById('loading');
+        const formContainer = document.getElementById('form-container');
+        const notFound = document.getElementById('not-found');
+        const form = document.getElementById('edit-company-form');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        async function loadCompany() {
+            try {
+                const response = await fetch(`/admin/company/data/${cid}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        loading.style.display = 'none';
+                        notFound.style.display = 'block';
+                        return;
+                    }
+                    throw new Error('Failed to fetch');
+                }
+                const company = await response.json();
+                // Populate form
+                document.getElementById('company-id').value = company.c_id;
+                document.getElementById('company-name').value = company.cname;
+                document.getElementById('email').value = company.email;
+                document.getElementById('phone').value = company.phone;
+                document.getElementById('address').value = company.address;
+                // Ensure ID field is readonly
+                const idInput = document.getElementById('company-id');
+                idInput.readOnly = true;
+                idInput.classList.add('disabled-field');
+                loading.style.display = 'none';
+                formContainer.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading company:', error);
+                loading.textContent = 'Error loading company details. Please refresh.';
+            }
+        }
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            errorMessage.textContent = '';
+            successMessage.textContent = '';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(`/admin/company/edit/${cid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = result.message || 'Company updated successfully!';
+                    setTimeout(() => {
+                        window.location.href = '/admin/company';
+                    }, 1500);
+                } else {
+                    errorMessage.textContent = result.error || 'Error updating company';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Network error: ' + error.message;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Initial load
+        if (cid) {
+            loadCompany();
+        } else {
+            loading.textContent = 'Invalid company ID.';
+            loading.style.display = 'block';
+        }
+    </script>
 </body>
 </html>

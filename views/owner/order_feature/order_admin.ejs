@@ -168,6 +168,11 @@
       font-weight: 500;
       font-size: 1rem;
     }
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -277,7 +282,9 @@
     </div>
     <div class="content-area">
       <h1>All Orders</h1>
-      <div class="table-wrapper">
+      <div id="loading">Loading orders...</div>
+
+      <div class="table-wrapper" id="table-container" style="display: none;">
         <table>
           <thead>
             <tr>
@@ -289,24 +296,49 @@
               <th>Delivery Date</th>
             </tr>
           </thead>
-          <tbody>
-            <% orders.forEach(order => { %>
-              <tr>
-                <td data-label="Order ID"><%= order.order_id %></td>
-                <td data-label="Branch"><%= order.branch_name %></td>
-                <td data-label="Company"><%= order.company_name %></td>
-                <td data-label="Product"><%= order.product_name %></td>
-                <td data-label="Status"><%= order.status %></td>
-                <td data-label="Delivery Date">
-                  <%= order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set' %>
-                </td>
-              </tr>
-            <% }) %>
+          <tbody id="orders-tbody">
+            <!-- Data populated via JS -->
           </tbody>
         </table>
       </div>
     </div>
   </div>
   <%- include('../../partials/footer') %>
+
+  <script>
+    const tbody = document.getElementById('orders-tbody');
+    const loading = document.getElementById('loading');
+    const tableContainer = document.getElementById('table-container');
+
+    async function loadOrders() {
+      try {
+        const response = await fetch('/admin/orders/data');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const orders = await response.json();
+        tbody.innerHTML = ''; // Clear existing rows
+        orders.forEach(order => {
+          const row = document.createElement('tr');
+          const deliveryDate = order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set';
+          row.innerHTML = `
+            <td data-label="Order ID">${order.order_id}</td>
+            <td data-label="Branch">${order.branch_name}</td>
+            <td data-label="Company">${order.company_name}</td>
+            <td data-label="Product">${order.product_name}</td>
+            <td data-label="Status">${order.status}</td>
+            <td data-label="Delivery Date">${deliveryDate}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        loading.style.display = 'none';
+        tableContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        loading.textContent = 'Error loading orders. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadOrders();
+  </script>
 </body>
 </html>

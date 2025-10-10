@@ -122,6 +122,12 @@
             text-decoration: underline;
         }
 
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: #636e72;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -217,7 +223,9 @@
                 <a href="/admin/branches/add" class="add-button">Add Branch</a>
             </div>
 
-            <div class="table-wrapper">
+            <div id="loading">Loading branches...</div>
+
+            <div class="table-wrapper" id="table-container" style="display: none;">
                 <table id="branches-table">
                     <thead>
                         <tr>
@@ -230,16 +238,7 @@
                         </tr>
                     </thead>
                     <tbody id="branches-tbody">
-                        <% branches.forEach(branch => { %>
-                            <tr>
-                                <td data-label="Branch ID"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.bid %></button></td>
-                                <td data-label="Branch Name"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.b_name %></button></td>
-                                <td data-label="Manager Name"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.manager_name %></button></td>
-                                <td data-label="Manager Email"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.manager_email %></button></td>
-                                <td data-label="Manager Phone"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.manager_ph_no %></button></td>
-                                <td data-label="Address"><button class="clickable-btn" data-bid="<%= branch.bid %>"><%= branch.location %></button></td>
-                            </tr>
-                        <% }) %>
+                        <!-- Data populated via JS -->
                     </tbody>
                 </table>
             </div>
@@ -249,48 +248,54 @@
     <%- include('../../partials/footer') %>
 
     <script>
-        // Navigate to edit branch page on button click
-        document.querySelectorAll('.clickable-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const bid = button.getAttribute('data-bid');
-                window.location.href = `/admin/branches/edit/${bid}`;
-            });
-        });
+        const tbody = document.getElementById('branches-tbody');
+        const loading = document.getElementById('loading');
+        const tableContainer = document.getElementById('table-container');
 
-        // Listen for messages from employee forms to refresh branch data
+        async function loadBranches() {
+            try {
+                const response = await fetch('/admin/branches/data');
+                if (!response.ok) throw new Error('Failed to fetch');
+                const branches = await response.json();
+                tbody.innerHTML = ''; // Clear existing rows
+                branches.forEach(branch => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td data-label="Branch ID"><button class="clickable-btn" data-bid="${branch.bid}">${branch.bid}</button></td>
+                        <td data-label="Branch Name"><button class="clickable-btn" data-bid="${branch.bid}">${branch.b_name}</button></td>
+                        <td data-label="Manager Name"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_name}</button></td>
+                        <td data-label="Manager Email"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_email}</button></td>
+                        <td data-label="Manager Phone"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_ph_no}</button></td>
+                        <td data-label="Address"><button class="clickable-btn" data-bid="${branch.bid}">${branch.location}</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                attachEventListeners();
+                loading.style.display = 'none';
+                tableContainer.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading branches:', error);
+                loading.textContent = 'Error loading branches. Please refresh.';
+            }
+        }
+
+        function attachEventListeners() {
+            document.querySelectorAll('.clickable-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const bid = button.getAttribute('data-bid');
+                    window.location.href = `/admin/branches/edit/${bid}`;
+                });
+            });
+        }
+
+        // Initial load
+        loadBranches();
+
+        // Listen for messages from other forms to refresh branch data
         window.addEventListener('message', async (event) => {
             if (event.origin !== window.location.origin) return; // Security check
             if (event.data.type === 'refreshBranches') {
-                try {
-                    const response = await fetch('/admin/branches/data', {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                    const branches = await response.json();
-                    const tbody = document.getElementById('branches-tbody');
-                    tbody.innerHTML = ''; // Clear existing rows
-                    branches.forEach(branch => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td data-label="Branch ID"><button class="clickable-btn" data-bid="${branch.bid}">${branch.bid}</button></td>
-                            <td data-label="Branch Name"><button class="clickable-btn" data-bid="${branch.bid}">${branch.b_name}</button></td>
-                            <td data-label="Manager Name"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_name}</button></td>
-                            <td data-label="Manager Email"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_email}</button></td>
-                            <td data-label="Manager Phone"><button class="clickable-btn" data-bid="${branch.bid}">${branch.manager_ph_no}</button></td>
-                            <td data-label="Address"><button class="clickable-btn" data-bid="${branch.bid}">${branch.location}</button></td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                    // Re-attach event listeners for new buttons
-                    document.querySelectorAll('.clickable-btn').forEach(button => {
-                        button.addEventListener('click', () => {
-                            const bid = button.getAttribute('data-bid');
-                            window.location.href = `/admin/branches/edit/${bid}`;
-                        });
-                    });
-                } catch (error) {
-                    console.error('Error refreshing branches:', error);
-                }
+                loadBranches();
             }
         });
     </script>

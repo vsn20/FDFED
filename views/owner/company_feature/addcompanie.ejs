@@ -100,11 +100,21 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        button[type="submit"]:hover {
+        button[type="submit"]:hover:not(:disabled) {
             background-color: #555555;
+        }
+        button[type="submit"]:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
         }
         #error-message {
             color: #e74c3c;
+            font-size: 0.85rem;
+            margin: 10px 0;
+            text-align: center;
+        }
+        #success-message {
+            color: #27ae60;
             font-size: 0.85rem;
             margin: 10px 0;
             text-align: center;
@@ -151,7 +161,7 @@
 
         <div class="content-area form-container" id="content">
             <h1>Add Company</h1>
-            <form id="company-details-form" action="/admin/company/add" method="POST">
+            <form id="company-details-form">
                 <fieldset>
                     <legend>Company Information</legend>
                     <div class="field-group">
@@ -174,6 +184,7 @@
                     </div>
                 </fieldset>
                 <div id="error-message"></div>
+                <div id="success-message"></div>
                 <button type="submit">Submit Company</button>
             </form>
         </div>
@@ -184,8 +195,42 @@
     <script>
         const form = document.getElementById('company-details-form');
         const errorMessage = document.getElementById('error-message');
-        form.addEventListener('submit', function(event) {
+        const successMessage = document.getElementById('success-message');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
             errorMessage.textContent = '';
+            successMessage.textContent = '';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/admin/company/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = result.message || 'Company added successfully!';
+                    setTimeout(() => {
+                        window.location.href = '/admin/company';
+                    }, 1500);
+                } else {
+                    errorMessage.textContent = result.error || 'Error adding company';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Network error: ' + error.message;
+            } finally {
+                submitBtn.disabled = false;
+            }
         });
     </script>
 </body>

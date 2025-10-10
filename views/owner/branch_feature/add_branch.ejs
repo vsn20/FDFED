@@ -116,12 +116,24 @@
             transition: background-color 0.3s;
         }
 
-        button[type="submit"]:hover {
+        button[type="submit"]:hover:not(:disabled) {
             background-color: #555555;
+        }
+
+        button[type="submit"]:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
         }
 
         #error-message {
             color: #e74c3c;
+            font-size: 0.85rem;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        #success-message {
+            color: #27ae60;
             font-size: 0.85rem;
             margin: 10px 0;
             text-align: center;
@@ -171,7 +183,7 @@
 
         <div class="content-area form-container" id="content">
             <h1>Add Branch</h1>
-            <form id="branch-details-form" action="/admin/branches/add" method="POST">
+            <form id="branch-details-form">
                 <fieldset>
                     <legend>Branch Information</legend>
                     <div class="field-group">
@@ -186,6 +198,7 @@
                     </div>
                 </fieldset>
                 <div id="error-message"></div>
+                <div id="success-message"></div>
                 <button type="submit">Submit Branch</button>
             </form>
         </div>
@@ -196,9 +209,42 @@
     <script>
         const form = document.getElementById('branch-details-form');
         const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const submitBtn = form.querySelector('button[type="submit"]');
 
-        form.addEventListener('submit', function(event) {
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
             errorMessage.textContent = '';
+            successMessage.textContent = '';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/admin/branches/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = result.message || 'Branch added successfully!';
+                    setTimeout(() => {
+                        window.location.href = '/admin/branches';
+                    }, 1500);
+                } else {
+                    errorMessage.textContent = result.error || 'Error adding branch';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Network error: ' + error.message;
+            } finally {
+                submitBtn.disabled = false;
+            }
         });
     </script>
 </body>

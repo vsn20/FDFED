@@ -104,6 +104,11 @@
         .clickable-btn:hover {
             text-decoration: underline;
         }
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: #636e72;
+        }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -185,7 +190,9 @@
                 <h1>Our Companies</h1>
                 <a href="/admin/addcompanie" class="add-button">Add Company</a>
             </div>
-            <div class="table-wrapper">
+            <div id="loading">Loading companies...</div>
+
+            <div class="table-wrapper" id="table-container" style="display: none;">
                 <table>
                     <thead>
                         <tr>
@@ -196,36 +203,8 @@
                             <th>Address</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <% companies.forEach(company => { %>
-                            <tr>
-                                <td data-label="Company ID">
-                                    <button class="clickable-btn" data-cid="<%= company.c_id %>">
-                                        <%= company.c_id %>
-                                    </button>
-                                </td>
-                                <td data-label="Company Name">
-                                    <button class="clickable-btn" data-cid="<%= company.c_id %>">
-                                        <%= company.cname %>
-                                    </button>
-                                </td>
-                                <td data-label="Email">
-                                    <button class="clickable-btn" data-cid="<%= company.c_id %>">
-                                        <%= company.email %>
-                                    </button>
-                                </td>
-                                <td data-label="Phone">
-                                    <button class="clickable-btn" data-cid="<%= company.c_id %>">
-                                        <%= company.phone %>
-                                    </button>
-                                </td>
-                                <td data-label="Address">
-                                    <button class="clickable-btn" data-cid="<%= company.c_id %>">
-                                        <%= company.address %>
-                                    </button>
-                                </td>
-                            </tr>
-                        <% }) %>
+                    <tbody id="companies-tbody">
+                        <!-- Data populated via JS -->
                     </tbody>
                 </table>
             </div>
@@ -235,12 +214,47 @@
     <%- include('../../partials/footer') %>
 
     <script>
-        document.querySelectorAll('.clickable-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const cid = button.getAttribute('data-cid');
-                window.location.href = `/admin/company/edit/${cid}`;
+        const tbody = document.getElementById('companies-tbody');
+        const loading = document.getElementById('loading');
+        const tableContainer = document.getElementById('table-container');
+
+        async function loadCompanies() {
+            try {
+                const response = await fetch('/admin/company/data');
+                if (!response.ok) throw new Error('Failed to fetch');
+                const companies = await response.json();
+                tbody.innerHTML = ''; // Clear existing rows
+                companies.forEach(company => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td data-label="Company ID"><button class="clickable-btn" data-cid="${company.c_id}">${company.c_id}</button></td>
+                        <td data-label="Company Name"><button class="clickable-btn" data-cid="${company.c_id}">${company.cname}</button></td>
+                        <td data-label="Email"><button class="clickable-btn" data-cid="${company.c_id}">${company.email}</button></td>
+                        <td data-label="Phone"><button class="clickable-btn" data-cid="${company.c_id}">${company.phone}</button></td>
+                        <td data-label="Address"><button class="clickable-btn" data-cid="${company.c_id}">${company.address}</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                attachEventListeners();
+                loading.style.display = 'none';
+                tableContainer.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading companies:', error);
+                loading.textContent = 'Error loading companies. Please refresh.';
+            }
+        }
+
+        function attachEventListeners() {
+            document.querySelectorAll('.clickable-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const cid = button.getAttribute('data-cid');
+                    window.location.href = `/admin/company/edit/${cid}`;
+                });
             });
-        });
+        }
+
+        // Initial load
+        loadCompanies();
     </script>
 </body>
 </html>

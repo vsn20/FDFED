@@ -118,8 +118,33 @@
             transition: background-color 0.3s;
         }
 
-        .form-btn:hover {
+        .form-btn:hover:not(:disabled) {
             background-color: #555555;
+        }
+
+        .form-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        #error-message, #success-message {
+            font-size: 0.85rem;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        #error-message {
+            color: #e74c3c;
+        }
+
+        #success-message {
+            color: #27ae60;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: #636e72;
         }
 
         @media (max-width: 768px) {
@@ -170,45 +195,135 @@
 
         <div class="content-area" id="content">
             <h1>Edit Branch</h1>
-            <% if (branch) { %>
-                <form action="/admin/branches/edit/<%= branch.bid %>" method="POST">
+            <div id="loading">Loading branch details...</div>
+            <div id="form-container" style="display: none;">
+                <form id="edit-branch-form">
                     <fieldset class="form-section">
                         <legend class="section-title">Branch Information</legend>
                         <div class="field-group">
                             <div>
                                 <label for="branch-id" class="field-label">Branch ID</label>
-                                <input type="text" id="branch-id" name="bid" value="<%= branch.bid %>" class="field-input disabled-field" readonly>
+                                <input type="text" id="branch-id" name="bid" class="field-input disabled-field" readonly>
                             </div>
                             <div>
                                 <label for="branch-name" class="field-label">Branch Name</label>
-                                <input type="text" id="branch-name" name="b_name" value="<%= branch.b_name %>" class="field-input" required>
+                                <input type="text" id="branch-name" name="b_name" class="field-input" required>
                             </div>
                             <div>
                                 <label for="manager-name" class="field-label">Manager Name</label>
-                                <input type="text" id="manager-name" name="manager_name" value="<%= branch.manager_name %>" class="field-input disabled-field" readonly>
+                                <input type="text" id="manager-name" name="manager_name" class="field-input disabled-field" readonly>
                             </div>
                             <div>
                                 <label for="manager-email" class="field-label">Manager Email</label>
-                                <input type="email" id="manager-email" name="manager_email" value="<%= branch.manager_email %>" class="field-input disabled-field" readonly>
+                                <input type="email" id="manager-email" name="manager_email" class="field-input disabled-field" readonly>
                             </div>
                             <div>
                                 <label for="manager-phone" class="field-label">Manager Phone</label>
-                                <input type="tel" id="manager-phone" name="manager_ph_no" value="<%= branch.manager_ph_no %>" class="field-input disabled-field" readonly>
+                                <input type="tel" id="manager-phone" name="manager_ph_no" class="field-input disabled-field" readonly>
                             </div>
-                            <div>
+                            <div class="field-group">
                                 <label for="address" class="field-label">Address</label>
-                                <textarea id="address" name="address" class="field-textarea" required><%= branch.location %></textarea>
+                                <textarea id="address" name="address" class="field-textarea" required></textarea>
                             </div>
                         </div>
                     </fieldset>
+                    <div id="error-message"></div>
+                    <div id="success-message"></div>
                     <button type="submit" class="form-btn">Update Branch</button>
                 </form>
-            <% } else { %>
-                <p>Branch not found.</p>
-            <% } %>
+            </div>
+            <p id="not-found" style="display: none;">Branch not found.</p>
         </div>
     </div>
 
     <%- include('../../partials/footer') %>
+
+    <script>
+        const urlParts = window.location.pathname.split('/');
+        const bid = urlParts[urlParts.length - 1];
+        const loading = document.getElementById('loading');
+        const formContainer = document.getElementById('form-container');
+        const notFound = document.getElementById('not-found');
+        const form = document.getElementById('edit-branch-form');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        async function loadBranch() {
+            try {
+                const response = await fetch(`/admin/branches/data/${bid}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        loading.style.display = 'none';
+                        notFound.style.display = 'block';
+                        return;
+                    }
+                    throw new Error('Failed to fetch');
+                }
+                const branch = await response.json();
+                // Populate form
+                document.getElementById('branch-id').value = branch.bid;
+                document.getElementById('branch-name').value = branch.b_name;
+                document.getElementById('manager-name').value = branch.manager_name;
+                document.getElementById('manager-email').value = branch.manager_email;
+                document.getElementById('manager-phone').value = branch.manager_ph_no;
+                document.getElementById('address').value = branch.location;
+                // Ensure readonly fields have attributes
+                ['branch-id', 'manager-name', 'manager-email', 'manager-phone'].forEach(id => {
+                    const input = document.getElementById(id);
+                    input.readOnly = true;
+                    input.classList.add('disabled-field');
+                });
+                loading.style.display = 'none';
+                formContainer.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading branch:', error);
+                loading.textContent = 'Error loading branch details. Please refresh.';
+            }
+        }
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            errorMessage.textContent = '';
+            successMessage.textContent = '';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(`/admin/branches/edit/${bid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = result.message || 'Branch updated successfully!';
+                    setTimeout(() => {
+                        window.location.href = '/admin/branches';
+                    }, 1500);
+                } else {
+                    errorMessage.textContent = result.error || 'Error updating branch';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Network error: ' + error.message;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Initial load
+        if (bid) {
+            loadBranch();
+        } else {
+            loading.textContent = 'Invalid branch ID.';
+            loading.style.display = 'block';
+        }
+    </script>
 </body>
 </html>

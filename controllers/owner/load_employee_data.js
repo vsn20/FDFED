@@ -3,27 +3,46 @@ const Branch = require('../../models/branches');
 
 async function loademployeedata(req, res) {
   try {
-    const employees = await Employee.find().lean();
+    // Render empty page; data loaded via API
     res.render('owner/employee_feature/home.ejs', {
       activePage: 'employee',
       activeRoute: 'employees',
-      employees: employees
     });
   } catch (error) {
     res.status(500).send(`Error loading employee data: ${error.message}`);
   }
 }
 
+async function getEmployeesData(req, res) {
+  try {
+    const employees = await Employee.find().lean();
+    res.json(employees);
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function getEmployeeById(req, res) {
+  try {
+    const { e_id } = req.params;
+    const employee = await Employee.findOne({ e_id }).lean();
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    res.json(employee);
+  } catch (error) {
+    console.error('Error fetching employee:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
 async function getEmployeeDetails(req, res) {
   try {
-    const employee = await Employee.findOne({ e_id: req.params.e_id });
-    if (!employee) {
-      return res.status(404).send('Employee not found');
-    }
+    // Render empty page; data loaded via API
     res.render('owner/employee_feature/employee_details.ejs', {
       activePage: 'employee',
       activeRoute: 'employees',
-      employee: employee
     });
   } catch (error) {
     res.status(500).send(`Error loading employee details: ${error.message}`);
@@ -32,28 +51,10 @@ async function getEmployeeDetails(req, res) {
 
 async function getEditEmployee(req, res) {
   try {
-    const employee = await Employee.findOne({ e_id: req.params.e_id }).lean();
-    if (!employee) {
-      return res.status(404).send('Employee not found');
-    }
-    const allBranches = await Branch.find({ active: "active" }).lean();
-    const unassignedBranches = await Branch.find({
-      active: "active",
-      manager_assigned: false
-    }).lean();
-    let currentBranch = null;
-    if (employee.bid) {
-      currentBranch = await Branch.findOne({ bid: employee.bid }).lean();
-    }
-    const isEditable = employee.status === 'active';
+    // Render empty page; data loaded via API
     res.render('owner/employee_feature/edit_employee.ejs', {
       activePage: 'employee',
       activeRoute: 'employees',
-      employee,
-      allBranches,
-      unassignedBranches,
-      currentBranch,
-      isEditable
     });
   } catch (error) {
     res.status(500).send(`Error loading edit employee page: ${error.message}`);
@@ -80,7 +81,7 @@ async function updateEmployee(req, res) {
 
     const employee = await Employee.findOne({ e_id });
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ success: false, message: 'Employee not found' });
     }
 
     // Determine final bid
@@ -93,7 +94,7 @@ async function updateEmployee(req, res) {
     if (finalBid && finalBid !== 'null') {
       const branchExists = await Branch.findOne({ bid: finalBid });
       if (!branchExists) {
-        return res.status(400).json({ message: `Invalid branch ID: ${finalBid}` });
+        return res.status(400).json({ success: false, message: `Invalid branch ID: ${finalBid}` });
       }
     }
 
@@ -115,10 +116,10 @@ async function updateEmployee(req, res) {
     if (role === 'Sales Manager' && finalBid && status === 'active') {
       const branch = await Branch.findOne({ bid: finalBid });
       if (!branch) {
-        return res.status(404).json({ message: `Branch ${finalBid} not found` });
+        return res.status(404).json({ success: false, message: `Branch ${finalBid} not found` });
       }
       if (branch.manager_assigned && branch.manager_id && branch.manager_id.toString() !== employee._id.toString()) {
-        return res.status(400).json({ message: `Branch ${finalBid} already has a Sales Manager assigned` });
+        return res.status(400).json({ success: false, message: `Branch ${finalBid} already has a Sales Manager assigned` });
       }
     }
 
@@ -145,7 +146,7 @@ async function updateEmployee(req, res) {
     );
 
     if (!updatedEmployee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ success: false, message: 'Employee not found' });
     }
 
     // Update new branch if Sales Manager is active and assigned
@@ -162,9 +163,10 @@ async function updateEmployee(req, res) {
       );
     }
 
-    res.redirect(`/admin/employee/${e_id}`);
+    res.json({ success: true, message: 'Employee updated successfully' });
   } catch (error) {
-    res.status(500).json({ message: `Error updating employee: ${error.message}` });
+    console.error('Error updating employee:', error);
+    res.status(500).json({ success: false, message: `Error updating employee: ${error.message}` });
   }
 }
 
@@ -209,6 +211,8 @@ async function syncEmployeeBranchData(req, res) {
 
 module.exports = { 
   loademployeedata, 
+  getEmployeesData,
+  getEmployeeById,
   getEmployeeDetails, 
   getEditEmployee, 
   updateEmployee, 

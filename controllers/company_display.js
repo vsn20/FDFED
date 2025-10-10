@@ -2,15 +2,38 @@ const Company = require("../models/company");
 
 async function company_display(req, res) {
     try {
-        const activeCompanies = await Company.find({ active: "active" });
+        // Render empty page; data loaded via API
         res.render("owner/company_feature/displaycomapny", {
-            companies: activeCompanies,
             activePage: "employee",
             activeRoute: "company",
         });
     } catch (error) {
-        console.error("Error fetching companies:", error);
+        console.error("Error rendering companies page:", error);
         res.status(500).send("Internal Server Error");
+    }
+}
+
+async function getCompaniesData(req, res) {
+    try {
+        const companies = await Company.find({ active: "active" }).lean();
+        res.json(companies);
+    } catch (error) {
+        console.error("Error fetching companies:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+async function getCompanyById(req, res) {
+    try {
+        const { cid } = req.params;
+        const company = await Company.findOne({ c_id: cid, active: "active" }).lean();
+        if (!company) {
+            return res.status(404).json({ error: "Company not found" });
+        }
+        res.json(company);
+    } catch (error) {
+        console.error("Error fetching company:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 }
 
@@ -31,7 +54,7 @@ async function add_company(req, res) {
         const { cname, address, email, phone } = req.body;
 
         if (!cname || !address || !email || !phone) {
-            return res.status(400).send("All above fields are required");
+            return res.status(400).json({ error: "All fields are required" });
         }
 
         const lastCompany = await Company.findOne().sort({ c_id: -1 });
@@ -42,7 +65,7 @@ async function add_company(req, res) {
         }
 
         const newCompany = new Company({
-            c_id: newCId, // Changed from cid
+            c_id: newCId,
             cname,
             email,
             phone,
@@ -51,22 +74,17 @@ async function add_company(req, res) {
         });
 
         await newCompany.save();
-        res.redirect("/admin/company");
+        res.json({ success: true, message: 'Company added successfully!', c_id: newCId });
     } catch (error) {
         console.error("Error adding company:", error.message);
-        res.status(500).send("Internal Server Error: " + error.message);
+        res.status(500).json({ error: "Internal Server Error: " + error.message });
     }
 }
 
 async function render_edit_company_form(req, res) {
     try {
-        const companyId = req.params.cid; // Kept as cid for route compatibility
-        const company = await Company.findOne({ c_id: companyId });
-        if (!company) {
-            return res.status(404).send("Company not found");
-        }
+        // Render empty page; data loaded via API
         res.render("owner/company_feature/editcompany", {
-            company,
             activePage: "employee",
             activeRoute: "company",
         });
@@ -78,27 +96,29 @@ async function render_edit_company_form(req, res) {
 
 async function update_company(req, res) {
     try {
-        const companyId = req.params.cid; // Kept as cid for route compatibility
+        const { cid } = req.params;
         const { cname, address, email, phone } = req.body;
 
         const company = await Company.findOneAndUpdate(
-            { c_id: companyId },
+            { c_id: cid, active: "active" },
             { cname, email, phone, address },
             { new: true, runValidators: true }
         );
 
         if (!company) {
-            return res.status(404).send("Company not found");
+            return res.status(404).json({ error: "Company not found" });
         }
-        res.redirect("/admin/company");
+        res.json({ success: true, message: 'Company updated successfully!' });
     } catch (error) {
         console.error("Error updating company:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ error: "Internal Server Error" });
     }
 }
 
 module.exports = {
     company_display,
+    getCompaniesData,
+    getCompanyById,
     render_add_company_form,
     add_company,
     render_edit_company_form,

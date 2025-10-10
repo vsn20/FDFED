@@ -89,6 +89,12 @@
       cursor: pointer;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -121,7 +127,8 @@
     <div class="content-area" id="content">
       <h1>Employee List</h1>
       <a href="/admin/addemployee" class="add-employee-btn">Add Employee</a>
-      <div class="table-wrapper">
+      <div id="loading">Loading employees...</div>
+      <div class="table-wrapper" id="table-container" style="display: none;">
         <table>
           <thead>
             <tr>
@@ -133,17 +140,8 @@
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            <% employees.forEach(employee => { %>
-              <tr onclick="window.location='/admin/employee/<%= employee.e_id %>'">
-                <td><%= employee.e_id %></td>
-                <td><%= employee.f_name %></td>
-                <td><%= employee.last_name %></td>
-                <td><%= employee.role %></td>
-                <td><%= employee.bid ? employee.bid : 'Not Assigned' %></td>
-                <td><%= employee.status %></td>
-              </tr>
-            <% }) %>
+          <tbody id="employees-tbody">
+            <!-- Data populated via JS -->
           </tbody>
         </table>
       </div>
@@ -151,5 +149,41 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    const tbody = document.getElementById('employees-tbody');
+    const loading = document.getElementById('loading');
+    const tableContainer = document.getElementById('table-container');
+
+    async function loadEmployees() {
+      try {
+        const response = await fetch('/admin/employees/data');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const employees = await response.json();
+        tbody.innerHTML = ''; // Clear existing rows
+        employees.forEach(employee => {
+          const row = document.createElement('tr');
+          row.onclick = () => window.location = `/admin/employee/${employee.e_id}`;
+          row.innerHTML = `
+            <td>${employee.e_id}</td>
+            <td>${employee.f_name}</td>
+            <td>${employee.last_name}</td>
+            <td>${employee.role}</td>
+            <td>${employee.bid || 'Not Assigned'}</td>
+            <td>${employee.status}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        loading.style.display = 'none';
+        tableContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading employees:', error);
+        loading.textContent = 'Error loading employees. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadEmployees();
+  </script>
 </body>
 </html>
