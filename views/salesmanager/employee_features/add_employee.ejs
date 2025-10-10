@@ -94,7 +94,7 @@
       outline: none;
     }
 
-    button[type="submit"] {
+    button[type="button"] {
       display: inline-block;
       padding: 10px 20px;
       background-color: #333333;
@@ -106,7 +106,7 @@
       transition: background-color 0.3s;
     }
 
-    button[type="submit"]:hover {
+    button[type="button"]:hover {
       background-color: #555555;
     }
 
@@ -115,6 +115,16 @@
       font-size: 0.85rem;
       margin: 10px 0;
       text-align: center;
+    }
+
+    #success-message {
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+      display: none;
     }
 
     @media (max-width: 768px) {
@@ -131,7 +141,7 @@
         flex: 1 1 100%;
       }
 
-      button[type="submit"] {
+      button[type="button"] {
         width: 100%;
         padding: 8px;
         font-size: 0.85rem;
@@ -151,7 +161,8 @@
         <% if (error) { %>
           <p id="error-message"><%= error %></p>
         <% } %>
-        <form id="employee-login-form" action="/salesmanager/add-employee" method="POST">
+        <div id="success-message"></div>
+        <div id="employee-login-form">
           <fieldset>
             <legend>Personal Details</legend>
             <div class="field-group">
@@ -201,8 +212,8 @@
           </fieldset>
 
           <div id="error-message"></div>
-          <button type="submit">Add Employee</button>
-        </form>
+          <button type="button" onclick="addEmployee()">Add Employee</button>
+        </div>
       </div>
     </div>
   </div>
@@ -210,19 +221,19 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    const form = document.getElementById('employee-login-form');
-    const email = document.getElementById('email');
-    const phone = document.getElementById('phone_no');
-    const errorMessage = document.getElementById('error-message');
-
-    form.addEventListener('submit', async function(event) {
-      event.preventDefault();
+    async function addEmployee() {
+      const form = document.getElementById('employee-login-form');
+      const email = document.getElementById('email');
+      const phone = document.getElementById('phone_no');
+      const errorMessage = document.getElementById('error-message');
+      const successMessage = document.getElementById('success-message');
 
       email.style.borderColor = '#e6e9f0';
       email.style.backgroundColor = '#fff';
       phone.style.borderColor = '#e6e9f0';
       phone.style.backgroundColor = '#fff';
       errorMessage.textContent = '';
+      successMessage.style.display = 'none';
 
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailPattern.test(email.value)) {
@@ -240,8 +251,27 @@
         return;
       }
 
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
+      const data = {
+        f_name: document.getElementById('f_name').value,
+        last_name: document.getElementById('last_name').value,
+        email: email.value,
+        phone_no: phone.value,
+        acno: document.getElementById('acno').value,
+        ifsc: document.getElementById('ifsc').value,
+        bankname: document.getElementById('bankname').value,
+        base_salary: parseFloat(document.getElementById('base_salary').value),
+        address: document.getElementById('address').value,
+      };
+
+      if (!data.f_name || !data.last_name || !data.email || !data.acno || !data.ifsc || !data.bankname || isNaN(data.base_salary)) {
+        errorMessage.textContent = 'All required fields must be filled';
+        return;
+      }
+
+      if (data.base_salary < 0) {
+        errorMessage.textContent = 'Monthly salary cannot be negative';
+        return;
+      }
 
       try {
         const response = await fetch('/salesmanager/add-employee', {
@@ -257,10 +287,16 @@
         if (result.error) {
           errorMessage.textContent = result.error;
         } else if (result.success) {
-          window.location.href = result.redirect;
+          successMessage.textContent = 'Employee added successfully';
+          successMessage.style.display = 'block';
+          setTimeout(() => {
+            window.location.href = result.redirect;
+          }, 1000);
         }
       } catch (error) {
         errorMessage.textContent = 'Network error: ' + error.message;
       }
-    });
+    }
   </script>
+</body>
+</html>

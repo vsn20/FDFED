@@ -213,7 +213,7 @@ async function fireEmployee(req, res) {
     employee.reason_for_exit = reason_for_exit;
     await employee.save();
 
-    res.redirect('/salesmanager/employees?message=Employee fired successfully');
+    res.json({ success: true, message: 'Employee fired successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -245,6 +245,7 @@ async function updateSalesmanSalary(req, res) {
       e_id,
       bid: salesManager.bid.trim(),
       role: { $regex: '^Salesman$', $options: 'i' },
+      status: 'active',
       $and: [
         { bid: { $ne: null } },
         { bid: { $ne: 'Not Assigned' } },
@@ -253,30 +254,18 @@ async function updateSalesmanSalary(req, res) {
     });
 
     if (!employee) {
-      return res.status(404).json({ error: 'Employee not found, not a Salesman, or not in your branch' });
+      return res.status(404).json({ error: 'Employee not found, not a Salesman, not active, or not in your branch' });
     }
 
     const { base_salary } = req.body;
-    if (base_salary === undefined || base_salary === null) {
-      return res.status(400).json({ error: 'Monthly salary is required' });
+    if (base_salary === undefined || base_salary === null || isNaN(base_salary) || base_salary < 0) {
+      return res.status(400).json({ error: 'Invalid or negative salary provided' });
     }
 
-    const salaryValue = parseFloat(base_salary);
-    if (isNaN(salaryValue) || salaryValue < 0) {
-      return res.status(400).json({ error: 'Monthly salary must be a non-negative number' });
-    }
-
-    employee.base_salary = salaryValue;
+    employee.base_salary = parseFloat(base_salary);
     await employee.save();
 
-    const updatedEmployee = await Employee.findOne({ e_id }).lean();
-    res.render('salesmanager/employee_features/employee_details', {
-      error: null,
-      employee: updatedEmployee,
-      activePage: 'employee',
-      activeRoute: 'employees',
-      message: 'Salary updated successfully'
-    });
+    res.json({ success: true, message: 'Salary updated successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -381,7 +370,7 @@ async function updateSalesManager(req, res) {
       }
     );
 
-    res.redirect('/salesmanager/employees?message=Profile updated successfully');
+    res.json({ success: true, message: 'Profile updated successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
