@@ -160,8 +160,7 @@ async function renderAddSaleForm(req, res) {
       companies,
       branchName: branchName,
       activePage: 'employee',
-      activeRoute: 'sales',
-      error: req.query.error || null
+      activeRoute: 'sales'
     });
   } catch (error) {
     console.error("Error rendering add sale form:", error);
@@ -177,7 +176,7 @@ async function addSale(req, res) {
     const employee = await Employee.findOne({ e_id: user.emp_id });
     if (!employee) {
       await session.abortTransaction();
-      return res.redirect(`/salesman/add-sale?error=Salesman not found`);
+      return res.status(404).json({ error: "Salesman not found" });
     }
 
     const {
@@ -197,21 +196,21 @@ async function addSale(req, res) {
     const existingSale = await Sale.findOne({ unique_code }).session(session);
     if (existingSale) {
       await session.abortTransaction();
-      return res.redirect(`/salesman/add-sale?error=Unique code ${unique_code} already exists. Please use a different code.`);
+      return res.status(400).json({ error: `Unique code ${unique_code} already exists. Please use a different code.` });
     }
 
     // Validate company
     const company = await Company.findOne({ c_id: company_id }).lean();
     if (!company) {
       await session.abortTransaction();
-      return res.redirect(`/salesman/add-sale?error=Company not found`);
+      return res.status(400).json({ error: "Company not found" });
     }
 
     // Validate product
     const product = await Product.findOne({ prod_id: product_id }).lean();
     if (!product) {
       await session.abortTransaction();
-      return res.redirect(`/salesman/add-sale?error=Product not found`);
+      return res.status(400).json({ error: "Product not found" });
     }
 
     // Validate inventory
@@ -222,7 +221,7 @@ async function addSale(req, res) {
     }).session(session);
     if (!inventory || inventory.quantity < parseInt(quantity)) {
       await session.abortTransaction();
-      return res.redirect(`/salesman/add-sale?error=Insufficient inventory for ${product.Prod_name} (Available: ${inventory ? inventory.quantity : 0})`);
+      return res.status(400).json({ error: `Insufficient inventory for ${product.Prod_name} (Available: ${inventory ? inventory.quantity : 0})` });
     }
 
     // Generate sales_id
@@ -269,11 +268,11 @@ async function addSale(req, res) {
 
     await newSale.save({ session });
     await session.commitTransaction();
-    res.redirect("/salesman/sales?success=true");
+    res.json({ success: true });
   } catch (error) {
     await session.abortTransaction();
     console.error("Error adding sale:", error);
-    res.redirect(`/salesman/add-sale?error=Failed to add sale: ${error.message}`);
+    res.status(500).json({ error: `Failed to add sale: ${error.message}` });
   } finally {
     session.endSession();
   }
