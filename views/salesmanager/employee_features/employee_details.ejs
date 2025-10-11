@@ -236,109 +236,148 @@
 
       <div id="error-message" style="color: red;"></div>
       <div id="success-message" class="success-message" style="display: none;"></div>
-
-      <script>
-        const editButton = document.getElementById('editButton');
-        const fireButton = document.getElementById('fireButton');
-        const salaryInput = document.getElementById('base_salary');
-        const errorMessage = document.getElementById('error-message');
-        const successMessage = document.getElementById('success-message');
-
-        if (editButton) {
-          editButton.addEventListener('click', () => {
-            salaryInput.readOnly = false;
-            editButton.style.display = 'none';
-
-            const submitButton = document.createElement('button');
-            submitButton.type = 'button';
-            submitButton.className = 'submit-button';
-            submitButton.textContent = 'Submit';
-            submitButton.onclick = () => updateSalary('<%= employee.e_id %>');
-            document.getElementById('employeeForm').appendChild(submitButton);
-          });
-        }
-
-        if (fireButton) {
-          fireButton.addEventListener('click', () => {
-            document.getElementById('fireForm').style.display = 'block';
-            fireButton.style.display = 'none';
-          });
-        }
-
-        async function updateSalary(employeeId) {
-          const salaryValue = parseFloat(salaryInput.value);
-          errorMessage.textContent = '';
-          successMessage.style.display = 'none';
-
-          if (isNaN(salaryValue) || salaryValue < 0) {
-            errorMessage.textContent = 'Monthly salary must be a non-negative number.';
-            return;
-          }
-
-          try {
-            const response = await fetch(`/salesmanager/employee/update-salary/${employeeId}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ base_salary: salaryValue }),
-            });
-
-            const result = await response.json();
-
-            if (result.error) {
-              errorMessage.textContent = result.error;
-            } else {
-              successMessage.textContent = 'Salary updated successfully';
-              successMessage.style.display = 'block';
-              salaryInput.readOnly = true;
-              document.querySelector('.submit-button').remove();
-              editButton.style.display = 'inline-block';
-            }
-          } catch (error) {
-            errorMessage.textContent = 'Network error: ' + error.message;
-          }
-        }
-
-        async function fireEmployee(employeeId) {
-          const reasonInput = document.getElementById('reason_for_exit');
-          const reason = reasonInput.value.trim();
-          errorMessage.textContent = '';
-          successMessage.style.display = 'none';
-
-          if (!reason) {
-            errorMessage.textContent = 'Reason for exit is required';
-            return;
-          }
-
-          if (!confirm('Are you sure you want to fire this employee?')) {
-            return;
-          }
-
-          try {
-            const response = await fetch(`/salesmanager/employee/fire/${employeeId}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ reason_for_exit: reason }),
-            });
-
-            const result = await response.json();
-
-            if (result.error) {
-              errorMessage.textContent = result.error;
-            } else {
-              window.location.href = '/salesmanager/employees?message=Employee fired successfully';
-            }
-          } catch (error) {
-            errorMessage.textContent = 'Network error: ' + error.message;
-          }
-        }
-      </script>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    const editButton = document.getElementById('editButton');
+    const fireButton = document.getElementById('fireButton');
+    const salaryInput = document.getElementById('base_salary');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    if (editButton) {
+      editButton.addEventListener('click', () => {
+        salaryInput.readOnly = false;
+        salaryInput.focus();
+        editButton.style.display = 'none';
+
+        // Remove any existing salaryButtons container to prevent duplicates
+        const existingButtonContainer = document.getElementById('salaryButtons');
+        if (existingButtonContainer) {
+          existingButtonContainer.remove();
+        }
+
+        // Create new buttons
+        const submitButton = document.createElement('button');
+        submitButton.type = 'button';
+        submitButton.className = 'submit-button';
+        submitButton.textContent = 'Submit';
+        submitButton.onclick = () => updateSalary('<%= employee.e_id %>');
+
+        const cancelButton = document.createElement('button');
+        cancelButton.type = 'button';
+        cancelButton.className = 'cancel-button';
+        cancelButton.textContent = 'Cancel';
+        cancelButton.onclick = () => cancelEdit();
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.id = 'salaryButtons';
+        buttonContainer.appendChild(submitButton);
+        buttonContainer.appendChild(cancelButton);
+        document.getElementById('employeeForm').appendChild(buttonContainer);
+      });
+    }
+
+    if (fireButton) {
+      fireButton.addEventListener('click', () => {
+        document.getElementById('fireForm').style.display = 'block';
+        fireButton.style.display = 'none';
+      });
+    }
+
+    function cancelEdit() {
+      salaryInput.readOnly = true;
+      editButton.style.display = 'inline-block';
+      const buttonContainer = document.getElementById('salaryButtons');
+      if (buttonContainer) {
+        buttonContainer.remove();
+      }
+      errorMessage.textContent = '';
+      successMessage.style.display = 'none';
+    }
+
+    async function updateSalary(employeeId) {
+      const salaryValue = parseFloat(salaryInput.value);
+      errorMessage.textContent = '';
+      successMessage.style.display = 'none';
+
+      if (isNaN(salaryValue) || salaryValue < 0) {
+        errorMessage.textContent = 'Monthly salary must be a non-negative number.';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/salesmanager/employee/update-salary/${employeeId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ base_salary: salaryValue }),
+        });
+
+        const result = await response.json();
+
+        if (result.error) {
+          errorMessage.textContent = result.error;
+        } else {
+          successMessage.textContent = 'Salary updated successfully';
+          successMessage.style.display = 'block';
+          salaryInput.readOnly = true;
+          editButton.style.display = 'inline-block';
+          const buttonContainer = document.getElementById('salaryButtons');
+          if (buttonContainer) {
+            buttonContainer.remove();
+          }
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error: ' + error.message;
+        const buttonContainer = document.getElementById('salaryButtons');
+        if (buttonContainer) {
+          buttonContainer.remove();
+        }
+        editButton.style.display = 'inline-block';
+        salaryInput.readOnly = true;
+      }
+    }
+
+    async function fireEmployee(employeeId) {
+      const reasonInput = document.getElementById('reason_for_exit');
+      const reason = reasonInput.value.trim();
+      errorMessage.textContent = '';
+      successMessage.style.display = 'none';
+
+      if (!reason) {
+        errorMessage.textContent = 'Reason for exit is required';
+        return;
+      }
+
+      if (!confirm('Are you sure you want to fire this employee?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/salesmanager/employee/fire/${employeeId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reason_for_exit: reason }),
+        });
+
+        const result = await response.json();
+
+        if (result.error) {
+          errorMessage.textContent = result.error;
+        } else {
+          window.location.href = '/salesmanager/employees?message=Employee fired successfully';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error: ' + error.message;
+      }
+    }
+  </script>
 </body>
 </html>
