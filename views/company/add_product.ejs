@@ -134,6 +134,12 @@
       color: #636e72;
     }
 
+    #error-message {
+      color: #e74c3c;
+      margin: 10px 0;
+      min-height: 20px;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -173,7 +179,7 @@
 
     <div class="content-area" id="content">
       <h1>Add New Product</h1>
-      <form action="/company/products/add" method="POST" enctype="multipart/form-data">
+      <div id="add-product-form">
         <div class="form-section">
           <legend class="section-title">Product Information</legend>
           <div class="field-group">
@@ -184,7 +190,7 @@
             <div>
               <label for="com-id" class="field-label">Company ID</label>
               <input type="text" id="com-id" value="<%= companyId %>" class="field-input" disabled>
-              <input type="hidden" name="Com_id" value="<%= companyId %>">
+              <input type="hidden" id="Com_id" name="Com_id" value="<%= companyId %>">
             </div>
             <div>
               <label for="model-no" class="field-label">Model Number</label>
@@ -193,7 +199,7 @@
             <div>
               <label for="com-name" class="field-label">Company Name</label>
               <input type="text" id="com-name" value="<%= companyName %>" class="field-input" disabled>
-              <input type="hidden" name="com_name" value="<%= companyName %>">
+              <input type="hidden" id="com_name" name="com_name" value="<%= companyName %>">
             </div>
             <div>
               <label for="prod-year" class="field-label">Production Year</label>
@@ -248,8 +254,9 @@
             </div>
           </div>
         </div>
-        <button type="submit" class="submit-btn">Add Product</button>
-      </form>
+        <button class="submit-btn" onclick="addProduct()">Add Product</button>
+        <div id="error-message"></div>
+      </div>
       <a href="/company/products" class="back-link">Back to Products</a>
     </div>
   </div>
@@ -281,6 +288,48 @@
         installationCharge.value = '';
       }
     });
+
+    async function addProduct() {
+      const errorMessage = document.getElementById('error-message');
+      errorMessage.textContent = '';
+
+      const formData = new FormData();
+      formData.append('Prod_name', document.getElementById('prod-name').value);
+      formData.append('Com_id', document.getElementById('Com_id').value);
+      formData.append('Model_no', document.getElementById('model-no').value);
+      formData.append('com_name', document.getElementById('com_name').value);
+      formData.append('prod_year', document.getElementById('prod-year').value);
+      formData.append('stock', document.getElementById('stock').value);
+      formData.append('stockavailability', document.getElementById('stockavailability').value);
+      formData.append('prod_description', document.getElementById('description').value);
+      formData.append('Retail_price', document.getElementById('company-selling-price').value);
+      formData.append('warrantyperiod', document.getElementById('warranty').value);
+      formData.append('installation', document.getElementById('installation').value);
+      formData.append('installationType', document.getElementById('installation-type').value);
+      formData.append('installationcharge', document.getElementById('installation-charge').value);
+
+      const files = document.getElementById('prod-photos').files;
+      for (let i = 0; i < files.length; i++) {
+        formData.append('prod_photos', files[i]);
+      }
+
+      try {
+        const response = await fetch('/company/products/add', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.href = '/company/products';
+        } else {
+          errorMessage.textContent = result.message || 'An error occurred while adding the product.';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error: ' + error.message;
+      }
+    }
   </script>
 </body>
 </html>
