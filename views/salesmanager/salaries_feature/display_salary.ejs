@@ -149,6 +149,12 @@
       font-style: italic;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -215,7 +221,7 @@
       <div class="header-container">
         <h1>Salaries</h1>
         <div class="date-range">
-          <h1><%= selectedMonthYear %> Salaries</h1>
+          <h1 id="date-range"><%= selectedMonthYear %> Salaries</h1>
         </div>
         <div class="controls">
           <select class="month-year-select" id="month-year">
@@ -225,28 +231,12 @@
               </option>
             <% }) %>
           </select>
-          <button class="generate-btn" onclick="filterSalaries()">Generate</button>
+          <button class="generate-btn" onclick="loadSalaries()">Generate</button>
         </div>
       </div>
-      <div class="salary-list">
-        <% if (salary.length === 0) { %>
-          <div class="salary-entry">
-            <div>No salaries found for <%= selectedMonthYear %>.</div>
-          </div>
-        <% } else { %>
-          <% salary.forEach(s => { %>
-            <div class="salary-entry">
-              <div><span class="label">Employee Name:</span> <%= s.employee_name %></div>
-              <div><span class="label">Role:</span> <%= s.role %></div>
-              <div><span class="label">Base Salary:</span> $<%= s.salary %></div>
-              <div><span class="label">Commission (<%= selectedMonthYear %>):</span> $<%= s.commission %></div>
-              <div><span class="label">Total Salary:</span> $<%= s.totalsalary %></div>
-              <% if (s.note) { %>
-                <div><span class="label">Note:</span> <span class="note"><%= s.note %></span></div>
-              <% } %>
-            </div>
-          <% }) %>
-        <% } %>
+      <div id="loading">Loading salaries...</div>
+      <div class="salary-list" id="salary-list" style="display: none;">
+        <!-- Salaries populated via JS -->
       </div>
     </div>
   </div>
@@ -254,11 +244,53 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    function filterSalaries() {
-      const monthYear = document.getElementById('month-year').value;
-      console.log('[filterSalaries] Redirecting to:', `/salesmanager/salaries?monthYear=${monthYear}`);
-      window.location.href = `/salesmanager/salaries?monthYear=${monthYear}`;
+    const salaryList = document.getElementById('salary-list');
+    const loading = document.getElementById('loading');
+    const dateRange = document.getElementById('date-range');
+    const monthYearSelect = document.getElementById('month-year');
+
+    async function loadSalaries() {
+      const monthYear = monthYearSelect.value;
+      try {
+        loading.style.display = 'block';
+        salaryList.style.display = 'none';
+        const response = await fetch(`/salesmanager/salaries/data?monthYear=${monthYear}`);
+        if (!response.ok) throw new Error('Failed to fetch salary data');
+        const salaryData = await response.json();
+        
+        salaryList.innerHTML = ''; // Clear existing entries
+        if (salaryData.length === 0) {
+          salaryList.innerHTML = `
+            <div class="salary-entry">
+              <div>No salaries found for ${monthYear}.</div>
+            </div>
+          `;
+        } else {
+          salaryData.forEach(s => {
+            const entry = document.createElement('div');
+            entry.className = 'salary-entry';
+            entry.innerHTML = `
+              <div><span class="label">Employee Name:</span> ${s.employee_name}</div>
+              <div><span class="label">Role:</span> ${s.role}</div>
+              <div><span class="label">Base Salary:</span> $${s.salary}</div>
+              <div><span class="label">Commission (${monthYear}):</span> $${s.commission}</div>
+              <div><span class="label">Total Salary:</span> $${s.totalsalary}</div>
+              ${s.note ? `<div><span class="label">Note:</span> <span class="note">${s.note}</span></div>` : ''}
+            `;
+            salaryList.appendChild(entry);
+          });
+        }
+        dateRange.textContent = `${monthYear} Salaries`;
+        loading.style.display = 'none';
+        salaryList.style.display = 'flex';
+      } catch (error) {
+        console.error('Error loading salaries:', error);
+        loading.textContent = 'Error loading salaries. Please try again.';
+      }
     }
+
+    // Initial load
+    loadSalaries();
   </script>
 </body>
 </html>
