@@ -3,12 +3,42 @@ const Sale = require("../../models/sale");
 
 async function salary_display(req, res) {
   try {
-    const user = res.locals.user;
-    console.log('[salary_display] User:', user);
-    const employee = await Employee.findOne({ e_id: user.emp_id, role: "Salesman", status: "active" });
+    console.log("[SalaryDisplay] Session user:", req.user);
+    const employee = await Employee.findOne({ e_id: req.user.emp_id, role: "Salesman", status: "active" }).lean();
     if (!employee) {
-      console.log('[salary_display] Salesman not found for emp_id:', user.emp_id);
-      return res.status(404).send("Salesman not found");
+      console.log("[SalaryDisplay] Salesman not found:", req.user.emp_id);
+      return res.status(403).send(`No employee found for emp_id: ${req.user.emp_id}.`);
+    }
+
+    if (!employee.bid) {
+      console.log("[SalaryDisplay] No bid assigned:", { e_id: employee.e_id });
+      return res.status(403).send(`No branch assigned to employee (e_id: ${employee.e_id}).`);
+    }
+
+    // Render empty page; data loaded via API
+    res.render("salesman/salaries_feature/display_salary", {
+      activePage: 'employee',
+      activeRoute: 'salaries',
+      successMessage: req.query.success ? 'Salary data loaded successfully!' : undefined
+    });
+  } catch (error) {
+    console.error("[SalaryDisplay] Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+}
+
+async function get_salary_data(req, res) {
+  try {
+    console.log("[GetSalaryData] Session user:", req.user);
+    const employee = await Employee.findOne({ e_id: req.user.emp_id, role: "Salesman", status: "active" }).lean();
+    if (!employee) {
+      console.log("[GetSalaryData] Salesman not found:", req.user.emp_id);
+      return res.status(403).json({ error: `No employee found for emp_id: ${req.user.emp_id}.` });
+    }
+
+    if (!employee.bid) {
+      console.log("[GetSalaryData] No bid assigned:", { e_id: employee.e_id });
+      return res.status(403).json({ error: `No branch assigned to employee (e_id: ${employee.e_id}).` });
     }
 
     // Get current date and calculate 6-month range (X-7 to X-1)
@@ -36,8 +66,8 @@ async function salary_display(req, res) {
 
     // Validate month and year
     if (!monthMap.hasOwnProperty(normalizedMonth) || isNaN(yearStr)) {
-      console.log('[salary_display] Invalid month-year format:', monthYear);
-      return res.status(400).send("Invalid month-year format");
+      console.log('[GetSalaryData] Invalid month-year format:', monthYear);
+      return res.status(400).json({ error: "Invalid month-year format" });
     }
 
     const month = monthMap[normalizedMonth];
@@ -49,8 +79,8 @@ async function salary_display(req, res) {
     const earliestDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 7, 1);
     const latestDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     if (startDate < earliestDate || startDate >= latestDate) {
-      console.log('[salary_display] Month-year out of allowed range:', monthYear);
-      return res.status(400).send("Selected month-year is outside the allowed 6-month range");
+      console.log('[GetSalaryData] Month-year out of allowed range:', monthYear);
+      return res.status(400).json({ error: "Selected month-year is outside the allowed 6-month range" });
     }
 
     // Check if employee was hired in or before the selected month
@@ -85,17 +115,15 @@ async function salary_display(req, res) {
       }];
     }
 
-    res.render("salesman/salaries_feature/display_salary", {
+    res.json({
       salary: salaryData,
-      activePage: 'employee',
-      activeRoute: 'salaries',
-      selectedMonthYear: monthYear,
-      monthYearOptions: monthYearOptions
+      monthYearOptions: monthYearOptions,
+      selectedMonthYear: monthYear
     });
   } catch (error) {
-    console.error("[salary_display] Error rendering salaries:", error);
-    res.status(500).send("Internal server error");
+    console.error("[GetSalaryData] Error fetching salary data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
-module.exports = { salary_display };
+module.exports = { salary_display, get_salary_data };
