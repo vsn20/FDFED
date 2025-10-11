@@ -184,7 +184,7 @@
         <% if (message) { %>
           <div class="success-message"><%= message %></div>
         <% } %>
-        <form id="employeeForm" action="/salesmanager/employee/update-salary/<%= employee.e_id %>" method="POST">
+        <div id="employeeForm">
           <fieldset>
             <legend>Personal Details</legend>
             <div class="field-group">
@@ -205,7 +205,7 @@
               <div><label for="acno">Account Number</label><input type="text" id="acno" value="<%= employee.acno %>" readonly></div>
               <div><label for="ifsc">IFSC Code</label><input type="text" id="ifsc" value="<%= employee.ifsc %>" readonly></div>
               <div><label for="bankname">Bank Name</label><input type="text" id="bankname" value="<%= employee.bankname %>" readonly></div>
-              <div><label for="base_salary">Monthly Salary</label><input type="number" id="base_salary" name="base_salary" value="<%= employee.base_salary %>" readonly></div>
+              <div><label for="base_salary">Monthly Salary</label><input type="number" id="base_salary" value="<%= employee.base_salary %>" readonly></div>
               <div><label for="address">Address</label><textarea id="address" readonly><%= employee.address || 'N/A' %></textarea></div>
             </div>
           </fieldset>
@@ -225,22 +225,24 @@
             <button type="button" id="editButton" class="edit-button">Edit Salary</button>
             <button type="button" id="fireButton" class="fire-button">Fire Employee</button>
             <div id="fireForm" style="display:none;">
-              <form action="/salesmanager/employee/fire/<%= employee.e_id %>" method="POST">
-                <label for="reason_for_exit">Reason for Exit:</label>
-                <input type="text" id="reason_for_exit" name="reason_for_exit" required>
-                <button type="submit" class="submit-button" onclick="return confirm('Are you sure you want to fire this employee?')">Submit</button>
-                <button type="button" class="cancel-button" onclick="document.getElementById('fireForm').style.display='none';">Cancel</button>
-              </form>
+              <label for="reason_for_exit">Reason for Exit:</label>
+              <input type="text" id="reason_for_exit" required>
+              <button type="button" class="submit-button" onclick="fireEmployee('<%= employee.e_id %>')">Submit</button>
+              <button type="button" class="cancel-button" onclick="document.getElementById('fireForm').style.display='none';">Cancel</button>
             </div>
           <% } %>
-        </form>
+        </div>
       <% } %>
+
+      <div id="error-message" style="color: red;"></div>
+      <div id="success-message" class="success-message" style="display: none;"></div>
 
       <script>
         const editButton = document.getElementById('editButton');
         const fireButton = document.getElementById('fireButton');
-        const employeeForm = document.getElementById('employeeForm');
         const salaryInput = document.getElementById('base_salary');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
 
         if (editButton) {
           editButton.addEventListener('click', () => {
@@ -248,10 +250,11 @@
             editButton.style.display = 'none';
 
             const submitButton = document.createElement('button');
-            submitButton.type = 'submit';
+            submitButton.type = 'button';
             submitButton.className = 'submit-button';
             submitButton.textContent = 'Submit';
-            employeeForm.appendChild(submitButton);
+            submitButton.onclick = () => updateSalary('<%= employee.e_id %>');
+            document.getElementById('employeeForm').appendChild(submitButton);
           });
         }
 
@@ -262,14 +265,75 @@
           });
         }
 
-        if (employeeForm) {
-          employeeForm.addEventListener('submit', (e) => {
-            const salaryValue = parseFloat(salaryInput.value);
-            if (isNaN(salaryValue) || salaryValue < 0) {
-              e.preventDefault();
-              alert('Monthly salary must be a non-negative number.');
+        async function updateSalary(employeeId) {
+          const salaryValue = parseFloat(salaryInput.value);
+          errorMessage.textContent = '';
+          successMessage.style.display = 'none';
+
+          if (isNaN(salaryValue) || salaryValue < 0) {
+            errorMessage.textContent = 'Monthly salary must be a non-negative number.';
+            return;
+          }
+
+          try {
+            const response = await fetch(`/salesmanager/employee/update-salary/${employeeId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ base_salary: salaryValue }),
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+              errorMessage.textContent = result.error;
+            } else {
+              successMessage.textContent = 'Salary updated successfully';
+              successMessage.style.display = 'block';
+              salaryInput.readOnly = true;
+              document.querySelector('.submit-button').remove();
+              editButton.style.display = 'inline-block';
             }
-          });
+          } catch (error) {
+            errorMessage.textContent = 'Network error: ' + error.message;
+          }
+        }
+
+        async function fireEmployee(employeeId) {
+          const reasonInput = document.getElementById('reason_for_exit');
+          const reason = reasonInput.value.trim();
+          errorMessage.textContent = '';
+          successMessage.style.display = 'none';
+
+          if (!reason) {
+            errorMessage.textContent = 'Reason for exit is required';
+            return;
+          }
+
+          if (!confirm('Are you sure you want to fire this employee?')) {
+            return;
+          }
+
+          try {
+            const response = await fetch(`/salesmanager/employee/fire/${employeeId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ reason_for_exit: reason }),
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+              errorMessage.textContent = result.error;
+            } else {
+              window.location.href = '/salesmanager/employees?message=Employee fired successfully';
+            }
+          } catch (error) {
+            errorMessage.textContent = 'Network error: ' + error.message;
+          }
         }
       </script>
     </div>

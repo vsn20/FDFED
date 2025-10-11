@@ -35,22 +35,16 @@
       padding: 25px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
-      height: calc(100vh - 90px); /* Match sidebar height */
-      overflow-y: auto; /* Enable vertical scrolling if content overflows */
+      height: calc(100vh - 90px);
+      overflow-y: auto;
     }
 
-    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
     .content-area::-webkit-scrollbar {
       display: none;
     }
 
-    /* Hide scrollbar in Firefox */
     .content-area {
       scrollbar-width: none;
-    }
-
-    /* Hide scrollbar in IE/Edge */
-    .content-area {
       -ms-overflow-style: none;
     }
 
@@ -140,7 +134,7 @@
       }
 
       .content-area {
-        height: auto; /* Allow content area to expand on mobile */
+        height: auto;
       }
     }
   </style>
@@ -195,13 +189,13 @@
                 <td>
                   <a href="/salesmanager/employee-details/<%= employee.e_id %>" class="edit-btn">Details</a>
                   <% if (employee.status === 'active') { %>
-                    <a href="#" class="fire-btn" onclick="document.getElementById('fireForm-<%= employee.e_id %>').style.display='block'; return false;">Fire</a>
-                    <form id="fireForm-<%= employee.e_id %>" action="/salesmanager/employee/fire/<%= employee.e_id %>" method="POST" style="display:none;">
+                    <a href="#" class="fire-btn" onclick="showFireForm('<%= employee.e_id %>'); return false;">Fire</a>
+                    <div id="fireForm-<%= employee.e_id %>" style="display:none;">
                       <label for="reason_for_exit-<%= employee.e_id %>">Reason for Exit:</label>
                       <input type="text" id="reason_for_exit-<%= employee.e_id %>" name="reason_for_exit" required>
-                      <button type="submit" onclick="return confirm('Are you sure you want to fire this employee?')">Submit</button>
+                      <button type="button" onclick="fireEmployee('<%= employee.e_id %>')">Submit</button>
                       <button type="button" onclick="document.getElementById('fireForm-<%= employee.e_id %>').style.display='none';">Cancel</button>
-                    </form>
+                    </div>
                   <% } %>
                 </td>
               </tr>
@@ -215,5 +209,51 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    function showFireForm(employeeId) {
+      document.getElementById(`fireForm-${employeeId}`).style.display = 'block';
+    }
+
+    async function fireEmployee(employeeId) {
+      const reasonInput = document.getElementById(`reason_for_exit-${employeeId}`);
+      const reason = reasonInput.value.trim();
+      const errorMessage = document.createElement('p');
+      errorMessage.style.color = 'red';
+      const parentDiv = document.getElementById(`fireForm-${employeeId}`);
+
+      if (!reason) {
+        errorMessage.textContent = 'Reason for exit is required';
+        parentDiv.insertBefore(errorMessage, reasonInput.nextSibling);
+        return;
+      }
+
+      if (!confirm('Are you sure you want to fire this employee?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/salesmanager/employee/fire/${employeeId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reason_for_exit: reason }),
+        });
+
+        const result = await response.json();
+
+        if (result.error) {
+          errorMessage.textContent = result.error;
+          parentDiv.insertBefore(errorMessage, reasonInput.nextSibling);
+        } else {
+          window.location.href = '/salesmanager/employees?message=Employee fired successfully';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error: ' + error.message;
+        parentDiv.insertBefore(errorMessage, reasonInput.nextSibling);
+      }
+    }
+  </script>
 </body>
 </html>
