@@ -14,8 +14,9 @@ const { inventory_display } = require("../controllers/salesman/inventory_display
 router.get("/stocks", inventory_display);
 
 // Salesman salary
-const { salary_display } = require("../controllers/salesman/salary");
+const { salary_display, get_salary_data } = require("../controllers/salesman/salary");
 router.get("/salaries", salary_display);
+router.get("/salaries/data", get_salary_data);
 
 // Salesman profile
 const { getSalesmanDetails, updateSalesmanDetails } = require("../controllers/salesman/profile");

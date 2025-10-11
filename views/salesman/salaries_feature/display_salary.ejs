@@ -149,6 +149,13 @@
       font-style: italic;
     }
 
+    .success-message {
+      color: #2ecc71;
+      font-weight: 500;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -212,52 +219,107 @@
     <%- include('../../partials/salesman_sidebar') %>
     
     <div class="content-area" id="content">
+      <% if (successMessage) { %>
+        <div class="success-message"><%= successMessage %></div>
+      <% } %>
       <div class="header-container">
         <h1>Salary</h1>
         <div class="date-range">
-          <h1><%= selectedMonthYear %> Salary</h1>
+          <h1 id="date-range-title"></h1>
         </div>
         <div class="controls">
-          <select class="month-year-select" id="month-year">
-            <% monthYearOptions.forEach(option => { %>
-              <option value="<%= new Date(option.replace('-', ' ')).toLocaleString('en-US', { month: 'short', year: 'numeric' }).replace(' ', '-') %>" <%= selectedMonthYear === option ? 'selected' : '' %>>
-                <%= new Date(option.replace('-', ' ')).toLocaleString('en-US', { month: 'long', year: 'numeric' }) %>
-              </option>
-            <% }) %>
-          </select>
-          <button class="generate-btn" onclick="filterSalaries()">Generate</button>
+          <select class="month-year-select" id="month-year"></select>
+          <button class="generate-btn" onclick="refreshSalaries()">Generate</button>
         </div>
       </div>
-      <div class="salary-list">
-        <% if (salary.length === 0) { %>
-          <div class="salary-entry">
-            <div>No salary data found for <%= selectedMonthYear %>.</div>
-          </div>
-        <% } else { %>
-          <% salary.forEach(s => { %>
-            <div class="salary-entry">
-              <div><span class="label">Employee Name:</span> <%= s.employee_name %></div>
-              <div><span class="label">Base Salary:</span> $<%= s.salary %></div>
-              <div><span class="label">Commission (<%= selectedMonthYear %>):</span> $<%= s.commission %></div>
-              <div><span class="label">Total Salary:</span> $<%= s.totalsalary %></div>
-              <% if (s.note) { %>
-                <div><span class="label">Note:</span> <span class="note"><%= s.note %></span></div>
-              <% } %>
-            </div>
-          <% }) %>
-        <% } %>
-      </div>
+      <div class="salary-list" id="salary-list"></div>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
 
   <script>
-    function filterSalaries() {
-      const monthYear = document.getElementById('month-year').value;
-      console.log('[filterSalaries] Redirecting to:', `/salesman/salaries?monthYear=${monthYear}`);
-      window.location.href = `/salesman/salaries?monthYear=${monthYear}`;
+    async function refreshSalaries() {
+      const monthYear = document.getElementById('month-year').value || '';
+      console.log('[refreshSalaries] Fetching salary data for:', monthYear);
+      try {
+        const response = await fetch(`/salesman/salaries/data${monthYear ? '?monthYear=' + monthYear : ''}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const salaryList = document.getElementById('salary-list');
+        const dateRangeTitle = document.getElementById('date-range-title');
+        const monthYearSelect = document.getElementById('month-year');
+
+        // Update month-year dropdown
+        monthYearSelect.innerHTML = '';
+        data.monthYearOptions.forEach(option => {
+          const opt = document.createElement('option');
+          opt.value = option;
+          opt.textContent = new Date(option.replace('-', ' ')).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+          opt.selected = option === data.selectedMonthYear;
+          monthYearSelect.appendChild(opt);
+        });
+
+        // Update date range title
+        dateRangeTitle.textContent = `${data.selectedMonthYear} Salary`;
+
+        // Update salary list
+        salaryList.innerHTML = '';
+        if (data.salary.length === 0) {
+          salaryList.innerHTML = `
+            <div class="salary-entry">
+              <div>No salary data found for ${data.selectedMonthYear}.</div>
+            </div>
+          `;
+        } else {
+          data.salary.forEach(s => {
+            const salaryEntry = document.createElement('div');
+            salaryEntry.className = 'salary-entry';
+            salaryEntry.innerHTML = `
+              <div><span class="label">Employee Name:</span> ${s.employee_name}</div>
+              <div><span class="label">Base Salary:</span> $${s.salary}</div>
+              <div><span class="label">Commission (${data.selectedMonthYear}):</span> $${s.commission}</div>
+              <div><span class="label">Total Salary:</span> $${s.totalsalary}</div>
+              ${s.note ? `<div><span class="label">Note:</span> <span class="note">${s.note}</span></div>` : ''}
+            `;
+            salaryList.appendChild(salaryEntry);
+          });
+        }
+      } catch (error) {
+        console.error('[refreshSalaries] Error fetching salary data:', error);
+        const salaryList = document.getElementById('salary-list');
+        salaryList.innerHTML = `
+          <div class="salary-entry">
+            <div>Error loading salary data.</div>
+          </div>
+        `;
+      }
     }
+
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'refreshSalaries') {
+        console.log('[message] Received refreshSalaries');
+        refreshSalaries();
+      }
+    });
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('[DOMContentLoaded] Initializing salary data');
+      refreshSalaries();
+    });
+
+    // Refresh on month-year change
+    document.getElementById('month-year').addEventListener('change', () => {
+      console.log('[month-year] Change detected');
+      refreshSalaries();
+    });
   </script>
 </body>
 </html>
