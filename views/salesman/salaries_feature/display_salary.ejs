@@ -220,8 +220,8 @@
         <div class="controls">
           <select class="month-year-select" id="month-year">
             <% monthYearOptions.forEach(option => { %>
-              <option value="<%= option %>" <%= selectedMonthYear === option ? 'selected' : '' %>>
-                <%= option.replace('-', ' ') %>
+              <option value="<%= new Date(option.replace('-', ' ')).toLocaleString('en-US', { month: 'short', year: 'numeric' }).replace(' ', '-') %>" <%= selectedMonthYear === option ? 'selected' : '' %>>
+                <%= new Date(option.replace('-', ' ')).toLocaleString('en-US', { month: 'long', year: 'numeric' }) %>
               </option>
             <% }) %>
           </select>
