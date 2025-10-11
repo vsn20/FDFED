@@ -280,7 +280,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="base_salary">Monthly Salary</label>
-                <input type="number" id="base_salary" name="base_salary" value="<%= salesManager.base_salary %>" required min="0">
+                <input type="number" id="base_salary" name="base_salary" value="<%= salesManager.base_salary %>" readonly>
               </div>
             </div>
           </div>
@@ -334,17 +334,10 @@
         acno: document.getElementById('acno').value,
         ifsc: document.getElementById('ifsc').value,
         bankname: document.getElementById('bankname').value,
-        base_salary: parseFloat(document.getElementById('base_salary').value),
       };
 
-      if (!data.f_name || !data.last_name || !data.email || !data.acno || !data.ifsc || !data.bankname || isNaN(data.base_salary)) {
+      if (!data.f_name || !data.last_name || !data.email || !data.acno || !data.ifsc || !data.bankname) {
         errorMessage.textContent = 'All required fields must be filled';
-        form.insertBefore(errorMessage, form.firstChild);
-        return;
-      }
-
-      if (data.base_salary < 0) {
-        errorMessage.textContent = 'Monthly salary cannot be negative';
         form.insertBefore(errorMessage, form.firstChild);
         return;
       }
