@@ -17,29 +17,30 @@ async function salary_display(req, res) {
     for (let i = 7; i >= 1; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       const monthYear = date
-        .toLocaleString('default', { month: 'short', year: 'numeric' })
+        .toLocaleString('en-US', { month: 'short', year: 'numeric' })
         .replace(' ', '-');
       monthYearOptions.push(monthYear);
     }
 
     // Get month-year from query, default to previous month (X-1)
     const defaultMonthYear = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-      .toLocaleString('default', { month: 'short', year: 'numeric' })
+      .toLocaleString('en-US', { month: 'short', year: 'numeric' })
       .replace(' ', '-');
     const monthYear = req.query.monthYear || defaultMonthYear;
     const [monthStr, yearStr] = monthYear.split("-");
+    const normalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).toLowerCase();
     const monthMap = {
       Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
       Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
     };
 
     // Validate month and year
-    if (!monthMap.hasOwnProperty(monthStr) || isNaN(yearStr)) {
+    if (!monthMap.hasOwnProperty(normalizedMonth) || isNaN(yearStr)) {
       console.log('[salary_display] Invalid month-year format:', monthYear);
       return res.status(400).send("Invalid month-year format");
     }
 
-    const month = monthMap[monthStr];
+    const month = monthMap[normalizedMonth];
     const year = parseInt(yearStr);
     const startDate = new Date(year, month, 1);
     const endDate = new Date(year, month + 1, 1);
