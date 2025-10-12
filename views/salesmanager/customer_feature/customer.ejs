@@ -69,6 +69,48 @@
       background-color: #555555;
     }
 
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -158,6 +200,18 @@
         font-size: 0.85rem;
       }
 
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+
+      .search-group {
+        max-width: 100%;
+      }
+
       table {
         display: block;
         min-width: 0;
@@ -204,6 +258,14 @@
         font-size: 1.3rem;
       }
 
+      .form-group {
+        flex: 1 1 45%;
+      }
+
+      .search-group {
+        max-width: 250px;
+      }
+
       th, td {
         padding: 10px;
         font-size: 0.85rem;
@@ -222,6 +284,13 @@
       <div class="header-container">
         <h1>Our Customers</h1>
         <!-- Add button can be added later if needed -->
+      </div>
+
+      <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchCustomer">Search by Phone Number</label>
+          <input type="text" id="searchCustomer" placeholder="Enter Phone Number (e.g., +123)" oninput="filterCustomers()">
+        </div>
       </div>
 
       <div id="loading">Loading customers...</div>
@@ -276,9 +345,26 @@
         }
         loading.style.display = 'none';
         tableContainer.style.display = 'block';
+        filterCustomers(); // Apply filter after loading data
       } catch (error) {
         console.error('Error loading customers:', error);
         loading.textContent = 'Error loading customers. Please refresh.';
+      }
+    }
+
+    function filterCustomers() {
+      const searchInput = document.getElementById('searchCustomer').value.toLowerCase();
+      const rows = tbody.getElementsByTagName('tr');
+
+      for (let row of rows) {
+        const phoneNumber = row.cells[3].textContent.toLowerCase();
+        if (row.cells[0].classList.contains('no-data')) {
+          row.style.display = searchInput === '' ? '' : 'none';
+        } else if (searchInput === '' || phoneNumber.startsWith(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
       }
     }
 

@@ -198,7 +198,7 @@
         <div class="profit-card">
           <h3>Total Profit</h3>
           <p id="total-profit" class="<%= profits.reduce((sum, profit) => sum + profit.profit, 0) < 0 ? 'negative' : '' %>">
-            $<%= Math.abs(profits.reduce((sum, profit) => sum + profit.profit, 0)).toLocaleString() %>
+            ₹<%= Math.abs(profits.reduce((sum, profit) => sum + profit.profit, 0)).toLocaleString() %>
           </p>
         </div>
 
@@ -207,7 +207,7 @@
           <div class="profit-card">
             <h3><%= profit.branch_name %> (<%= profit.branch_id %>)</h3>
             <p class="<%= profit.profit < 0 ? 'negative' : '' %>">
-              $<%= Math.abs(profit.profit).toLocaleString() %>
+              ₹<%= Math.abs(profit.profit).toLocaleString() %>
             </p>
           </div>
         <% }) %>
@@ -254,14 +254,14 @@
           <div class="profit-card">
             <h3>Total Profit</h3>
             <p id="total-profit" class="${totalProfit < 0 ? 'negative' : ''}">
-              $${Math.abs(totalProfit).toLocaleString()}
+              ₹${Math.abs(totalProfit).toLocaleString()}
             </p>
           </div>
           ${data.profits.length > 0 ? data.profits.map(profit => `
             <div class="profit-card">
               <h3>${profit.branch_name} (${profit.branch_id})</h3>
               <p class="${profit.profit < 0 ? 'negative' : ''}">
-                $${Math.abs(profit.profit).toLocaleString()}
+                ₹${Math.abs(profit.profit).toLocaleString()}
               </p>
             </div>
           `).join('') : '<div class="message">No sales data available for this month</div>'}

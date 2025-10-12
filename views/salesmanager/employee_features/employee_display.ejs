@@ -35,38 +35,122 @@
       padding: 25px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
-      height: calc(100vh - 90px);
+      min-height: calc(100vh - 90px);
       overflow-y: auto;
+      position: relative;
+      transition: opacity 0.3s ease;
     }
 
     .content-area::-webkit-scrollbar {
-      display: none;
+      width: 8px;
+    }
+
+    .content-area::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+    }
+
+    .content-area::-webkit-scrollbar-track {
+      background: transparent;
     }
 
     .content-area {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
     }
 
     .content-area h1 {
       color: #2d3436;
       margin-bottom: 20px;
+      font-size: 1.8em;
+      text-align: center;
+    }
+
+    .content-area h2 {
+      color: #2d3436;
+      margin: 20px 0 10px;
+      font-size: 1.4em;
+      font-weight: 600;
     }
 
     .success-message {
       color: #28a745;
       margin-bottom: 15px;
       font-weight: bold;
+      padding: 10px;
+      background-color: #dff0d8;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 0 0 auto;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    .add-employee-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.9rem;
+      flex: 0 0 auto;
+    }
+
+    .add-employee-btn:hover {
+      background-color: #218838;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    table.visible {
+      opacity: 1;
     }
 
     th, td {
-      padding: 10px;
+      padding: 12px;
       text-align: left;
       border-bottom: 1px solid #ddd;
     }
@@ -74,10 +158,12 @@
     th {
       background-color: #2d3436;
       color: white;
+      font-weight: 600;
     }
 
     tr {
       cursor: pointer;
+      transition: background-color 0.2s ease;
     }
 
     tr:hover {
@@ -86,13 +172,14 @@
 
     .edit-btn, .fire-btn {
       color: white;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
-      margin-right: 5px;
+      margin-right: 8px;
+      font-size: 0.85rem;
     }
 
     .edit-btn {
@@ -111,30 +198,158 @@
       background-color: #c82333;
     }
 
-    .add-employee-btn {
-      background-color: #28a745;
-      color: white;
-      padding: 10px 20px;
+    .fire-form {
+      margin-top: 10px;
+      padding: 10px;
+      background: #fff3f3;
+      border-radius: 5px;
+      display: none;
+    }
+
+    .fire-form input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+    }
+
+    .fire-form button {
+      padding: 6px 12px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      margin-bottom: 20px;
+      margin-right: 8px;
     }
 
-    .add-employee-btn:hover {
-      background-color: #218838;
+    .fire-form button:first-of-type {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .fire-form button:first-of-type:hover {
+      background-color: #c82333;
+    }
+
+    .fire-form button:last-of-type {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .fire-form button:last-of-type:hover {
+      background-color: #5a6268;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+      font-size: 1rem;
+    }
+
+    #sales-manager-table, #salesmen-table {
+      min-height: 100px; /* Reserve space to prevent layout shift */
     }
 
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
-        padding: 0 20px;
+        padding: 0 15px;
       }
 
       .content-area {
-        height: auto;
+        min-height: auto;
+        padding: 15px;
+      }
+
+      .content-area h1 {
+        font-size: 1.5em;
+      }
+
+      .controls-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-group {
+        max-width: 100%;
+      }
+
+      .add-employee-btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      table {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+
+      .fire-form {
+        margin-top: 10px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area {
+        padding: 20px;
+      }
+
+      .content-area h1 {
+        font-size: 1.6em;
+      }
+
+      .form-group {
+        max-width: 350px;
+      }
+
+      .add-employee-btn {
+        padding: 8px 16px;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -146,15 +361,23 @@
     <%- include('../../partials/salesmanager_sidebar') %>
 
     <div class="content-area" id="content">
-      <h1>Employee List</h1>
+      <h1>Sales Manager and Salesmen List</h1>
       <% if (message) { %>
-        <p class="success-message"><%= message %></p>
+        <div class="success-message"><%= message %></div>
       <% } %>
-      <% if (error) { %>
-        <p style="color: red;"><%= error %></p>
-      <% } %>
-      <a href="/salesmanager/add-employee" class="add-employee-btn">Add Employees</a>
-      <table id="employeeTable">
+
+      <div class="controls-row">
+        <div class="form-group">
+          <label for="searchEmployee">Search by Employee ID/Name</label>
+          <input type="text" id="searchEmployee" placeholder="Enter Employee ID/Name" oninput="filterEmployees()">
+        </div>
+        <a href="/salesmanager/add-employee" class="add-employee-btn">Add Employee</a>
+      </div>
+
+      <div id="loading">Loading employees...</div>
+
+      <h2>Sales Manager</h2>
+      <table id="sales-manager-table">
         <thead>
           <tr>
             <th>Employee ID</th>
@@ -164,45 +387,24 @@
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>
-          <% if (salesManager) { %>
-            <tr>
-              <td><%= salesManager.e_id %></td>
-              <td><%= salesManager.f_name %></td>
-              <td><%= salesManager.last_name %></td>
-              <td><%= salesManager.status %></td>
-              <td>
-                <a href="/salesmanager/edit-salesmanager" class="edit-btn">Edit</a>
-              </td>
-            </tr>
-          <% } else { %>
-            <tr><td colspan="5">Sales Manager data not available</td></tr>
-          <% } %>
+        <tbody id="sales-manager-tbody">
+          <!-- Data populated via JS -->
+        </tbody>
+      </table>
 
-          <% if (employeeData && Array.isArray(employeeData) && employeeData.length > 0) { %>
-            <% employeeData.forEach(employee => { %>
-              <tr>
-                <td><%= employee.e_id %></td>
-                <td><%= employee.f_name %></td>
-                <td><%= employee.last_name %></td>
-                <td><%= employee.status %></td>
-                <td>
-                  <a href="/salesmanager/employee-details/<%= employee.e_id %>" class="edit-btn">Details</a>
-                  <% if (employee.status === 'active') { %>
-                    <a href="#" class="fire-btn" onclick="showFireForm('<%= employee.e_id %>'); return false;">Fire</a>
-                    <div id="fireForm-<%= employee.e_id %>" style="display:none;">
-                      <label for="reason_for_exit-<%= employee.e_id %>">Reason for Exit:</label>
-                      <input type="text" id="reason_for_exit-<%= employee.e_id %>" name="reason_for_exit" required>
-                      <button type="button" onclick="fireEmployee('<%= employee.e_id %>')">Submit</button>
-                      <button type="button" onclick="document.getElementById('fireForm-<%= employee.e_id %>').style.display='none';">Cancel</button>
-                    </div>
-                  <% } %>
-                </td>
-              </tr>
-            <% }) %>
-          <% } else { %>
-            <tr><td colspan="5">No salesmen available</td></tr>
-          <% } %>
+      <h2>Salesmen</h2>
+      <table id="salesmen-table">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="salesmen-tbody">
+          <!-- Data populated via JS -->
         </tbody>
       </table>
     </div>
@@ -211,6 +413,80 @@
   <%- include('../../partials/footer') %>
 
   <script>
+    const loading = document.getElementById('loading');
+    const salesManagerTable = document.getElementById('sales-manager-table');
+    const salesmenTable = document.getElementById('salesmen-table');
+    const salesManagerTbody = document.getElementById('sales-manager-tbody');
+    const salesmenTbody = document.getElementById('salesmen-tbody');
+
+    async function loadSelf() {
+      try {
+        const response = await fetch('/salesmanager/self/data');
+        if (!response.ok) throw new Error('Failed to fetch sales manager');
+        const salesManager = await response.json();
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td data-label="Employee ID">${salesManager.e_id}</td>
+          <td data-label="First Name">${salesManager.f_name}</td>
+          <td data-label="Last Name">${salesManager.last_name}</td>
+          <td data-label="Status">${salesManager.status}</td>
+          <td data-label="Action">
+            <a href="/salesmanager/edit-salesmanager" class="edit-btn">Edit</a>
+          </td>
+        `;
+        salesManagerTbody.appendChild(row);
+        salesManagerTable.classList.add('visible');
+      } catch (error) {
+        console.error('Error loading sales manager:', error);
+        salesManagerTbody.innerHTML = '<tr><td colspan="5" class="no-data">Error loading sales manager</td></tr>';
+        salesManagerTable.classList.add('visible');
+      }
+    }
+
+    async function loadEmployees() {
+      try {
+        const response = await fetch('/salesmanager/employees/data');
+        if (!response.ok) throw new Error('Failed to fetch employees');
+        const employees = await response.json();
+        salesmenTbody.innerHTML = '';
+        if (employees.length === 0) {
+          const row = document.createElement('tr');
+          row.innerHTML = '<td colspan="5" class="no-data">No salesmen available</td>';
+          salesmenTbody.appendChild(row);
+        } else {
+          employees.forEach(employee => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td data-label="Employee ID">${employee.e_id}</td>
+              <td data-label="First Name">${employee.f_name}</td>
+              <td data-label="Last Name">${employee.last_name}</td>
+              <td data-label="Status">${employee.status}</td>
+              <td data-label="Action">
+                <a href="/salesmanager/employee-details/${employee.e_id}" class="edit-btn">Details</a>
+                ${employee.status === 'active' ? `
+                  <a href="#" class="fire-btn" onclick="showFireForm('${employee.e_id}'); return false;">Fire</a>
+                  <div id="fireForm-${employee.e_id}" class="fire-form">
+                    <label for="reason_for_exit-${employee.e_id}">Reason for Exit:</label>
+                    <input type="text" id="reason_for_exit-${employee.e_id}" name="reason_for_exit" required>
+                    <button type="button" onclick="fireEmployee('${employee.e_id}')">Submit</button>
+                    <button type="button" onclick="document.getElementById('fireForm-${employee.e_id}').style.display='none';">Cancel</button>
+                  </div>
+                ` : ''}
+              </td>
+            `;
+            salesmenTbody.appendChild(row);
+          });
+        }
+        salesmenTable.classList.add('visible');
+        loading.style.display = 'none';
+      } catch (error) {
+        console.error('Error loading employees:', error);
+        salesmenTbody.innerHTML = '<tr><td colspan="5" class="no-data">Error loading employees</td></tr>';
+        salesmenTable.classList.add('visible');
+        loading.style.display = 'none';
+      }
+    }
+
     function showFireForm(employeeId) {
       document.getElementById(`fireForm-${employeeId}`).style.display = 'block';
     }
@@ -254,6 +530,37 @@
         parentDiv.insertBefore(errorMessage, reasonInput.nextSibling);
       }
     }
+
+    function filterEmployees() {
+      const searchInput = document.getElementById('searchEmployee').value.toLowerCase();
+      const rows = salesmenTbody.getElementsByTagName('tr');
+
+      for (let row of rows) {
+        const employeeId = row.cells[0].textContent.toLowerCase();
+        const firstName = row.cells[1].textContent.toLowerCase();
+        const lastName = row.cells[2].textContent.toLowerCase();
+        const fullName = `${firstName} ${lastName}`;
+        if (row.cells[0].classList.contains('no-data')) {
+          row.style.display = searchInput === '' ? '' : 'none';
+        } else if (searchInput === '' || employeeId.includes(searchInput) || fullName.includes(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    }
+
+    // Initial load
+    loadSelf();
+    loadEmployees();
+
+    // Listen for refresh
+    window.addEventListener('message', async (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data.type === 'refreshEmployees') {
+        loadEmployees();
+      }
+    });
   </script>
 </body>
 </html>

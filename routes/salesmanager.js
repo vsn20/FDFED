@@ -227,10 +227,18 @@ router.get("/customers/data", (req, res) => {
   getCustomersData(req, res);
 });
 
-const { renderAddSaleForm, sales_display, sales_details, addsale_post, getSalesmen, getCompanies } = require('../controllers/salesmanager/sales');
+const { renderAddSaleForm, sales_display, getSalesData, sales_details, getSaleById, addsale_post, getSalesmen, getCompanies } = require('../controllers/salesmanager/sales');
 router.get('/sales', (req, res) => {
   console.log('[Route] Accessing /salesmanager/sales');
   sales_display(req, res);
+});
+router.get('/sales/data', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/sales/data');
+  getSalesData(req, res);
+});
+router.get('/sales/data/:id', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/sales/data/:id');
+  getSaleById(req, res);
 });
 router.get('/sales/:id', (req, res) => {
   console.log('[Route] Accessing /salesmanager/sales/:id');
@@ -253,10 +261,18 @@ router.get('/companies', (req, res) => {
   getCompanies(req, res);
 });
 
-const { orders_display, order_details, order_edit, order_update, addorder_post, renderAddOrderForm } = require('../controllers/salesmanager/orders');
+const { orders_display, getOrdersData, getOrderById, order_details, order_edit, order_update, addorder_post, renderAddOrderForm } = require('../controllers/salesmanager/orders');
 router.get('/orders', (req, res) => {
   console.log('[Route] Accessing /salesmanager/orders');
   orders_display(req, res);
+});
+router.get('/orders/data', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/orders/data');
+  getOrdersData(req, res);
+});
+router.get('/orders/data/:id', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/orders/data/:id');
+  getOrderById(req, res);
 });
 router.get('/orders/:id', (req, res) => {
   console.log('[Route] Accessing /salesmanager/orders/:id');
@@ -302,10 +318,22 @@ router.post("/messages/compose", compose_message);
 router.get("/messages/view", view_message);
 router.get("/messages/sent", view_sent_messages);
 
-const { employeeDisplay, employeeDetail, fireEmployee, updateSalesmanSalary, editSalesManager, updateSalesManager, renderAddEmployeeForm, addEmployee } = require("../controllers/salesmanager/salesmanager_employee");
+const { employeeDisplay, getSelfData, getEmployeesData, employeeDetail, getEmployeeById, fireEmployee, updateSalesmanSalary, editSalesManager, updateSalesManager, renderAddEmployeeForm, addEmployee } = require("../controllers/salesmanager/salesmanager_employee");
 router.get("/employees", (req, res) => {
   console.log('[Route] Accessing /salesmanager/employees');
   employeeDisplay(req, res);
+});
+router.get("/self/data", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/self/data');
+  getSelfData(req, res);
+});
+router.get("/employees/data", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/employees/data');
+  getEmployeesData(req, res);
+});
+router.get("/employees/data/:e_id", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/employees/data/:e_id');
+  getEmployeeById(req, res);
 });
 router.get("/employee-details/:e_id", (req, res) => {
   console.log('[Route] Accessing /salesmanager/employee-details/:e_id');

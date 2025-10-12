@@ -3,27 +3,29 @@ const Sale = require("../models/sale");
 
 async function salary_display(req, res) {
   try {
-    console.log('[salary_display] Request received:', req.url, req.query);
-    console.log('[salary_display] User:', res.locals.user);
+    res.render("owner/salaries_feature/display_salary", {
+      activePage: 'employee',
+      activeRoute: 'salaries'
+    });
+  } catch (error) {
+    console.error("[salary_display] Error rendering salaries:", error);
+    res.status(500).send("server error");
+  }
+}
+
+async function getSalaryData(req, res) {
+  try {
+    console.log('[getSalaryData] Request received:', req.url, req.query);
+    console.log('[getSalaryData] User:', res.locals.user);
 
     // Simplified role check for debugging
     if (!res.locals.user) {
-      console.log('[salary_display] No user found in res.locals');
-      return res.status(403).send("Access denied: No user data");
+      console.log('[getSalaryData] No user found in res.locals');
+      return res.status(403).json({ error: "Access denied: No user data" });
     }
 
     // Get current date and calculate 6-month range (X-7 to X-1)
     const currentDate = new Date();
-    const monthYearOptions = [];
-    for (let i = 7; i >= 1; i--) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const monthYear = date
-        .toLocaleString('default', { month: 'short', year: 'numeric' })
-        .replace(' ', '-');
-      monthYearOptions.push(monthYear);
-    }
-    console.log('[salary_display] Month-year options:', monthYearOptions);
-
     // Get month-year from query, default to previous month (X-1)
     const defaultMonthYear = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
       .toLocaleString('default', { month: 'short', year: 'numeric' })
@@ -37,8 +39,8 @@ async function salary_display(req, res) {
 
     // Validate month and year
     if (!monthMap.hasOwnProperty(monthStr) || isNaN(yearStr)) {
-      console.log('[salary_display] Invalid month-year format:', monthYear);
-      return res.status(400).send("Invalid month-year format");
+      console.log('[getSalaryData] Invalid month-year format:', monthYear);
+      return res.status(400).json({ error: "Invalid month-year format" });
     }
 
     const month = monthMap[monthStr];
@@ -50,8 +52,8 @@ async function salary_display(req, res) {
     const earliestDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 7, 1);
     const latestDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     if (startDate < earliestDate || startDate >= latestDate) {
-      console.log('[salary_display] Month-year out of allowed range:', monthYear);
-      return res.status(400).send("Selected month-year is outside the allowed 6-month range");
+      console.log('[getSalaryData] Month-year out of allowed range:', monthYear);
+      return res.status(400).json({ error: "Selected month-year is outside the allowed 6-month range" });
     }
 
     // Fetch all Sales Managers and Salesmen
@@ -59,7 +61,7 @@ async function salary_display(req, res) {
       role: { $in: ["Sales Manager", "Salesman"] },
       status: "active"
     }).lean();
-    console.log('[salary_display] Employees found:', employees.length);
+    console.log('[getSalaryData] Employees found:', employees.length);
 
     // Calculate salaries and commissions
     const salaryData = await Promise.all(
@@ -106,19 +108,16 @@ async function salary_display(req, res) {
         };
       })
     );
-    console.log('[salary_display] Salary data prepared:', salaryData);
+    console.log('[getSalaryData] Salary data prepared:', salaryData);
 
-    res.render("owner/salaries_feature/display_salary", {
+    res.json({
       salary: salaryData,
-      activePage: 'employee',
-      activeRoute: 'salaries',
-      selectedMonthYear: monthYear,
-      monthYearOptions: monthYearOptions
+      selectedMonthYear: monthYear
     });
   } catch (error) {
-    console.error("[salary_display] Error rendering salaries:", error);
-    res.status(500).send("server error");
+    console.error("[getSalaryData] Error fetching salaries:", error);
+    res.status(500).json({ error: "server error" });
   }
 }
 
-module.exports = { salary_display };
+module.exports = { salary_display, getSalaryData };

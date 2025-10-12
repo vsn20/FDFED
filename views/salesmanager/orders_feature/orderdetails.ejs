@@ -48,6 +48,14 @@
       display: inline-block;
       width: 150px;
     }
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+    #order-details {
+      display: none;
+    }
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -68,44 +76,77 @@
     <%- include('../../partials/salesmanager_sidebar') %>
     <div class="content-area">
       <h1>Order Details</h1>
-      <div class="detail-row">
-        <label>Order ID:</label>
-        <span><%= order.order_id %></span>
-      </div>
-      <div class="detail-row">
-        <label>Branch:</label>
-        <span><%= order.branch_name %></span>
-      </div>
-      <div class="detail-row">
-        <label>Company:</label>
-        <span><%= order.company_name %></span>
-      </div>
-      <div class="detail-row">
-        <label>Product:</label>
-        <span><%= order.product_name %></span>
-      </div>
-      <div class="detail-row">
-        <label>Quantity:</label>
-        <span><%= order.quantity %></span>
-      </div>
-      <div class="detail-row">
-        <label>Ordered Date:</label>
-        <span><%= new Date(order.ordered_date).toLocaleDateString() %></span>
-      </div>
-      <div class="detail-row">
-        <label>Delivery Date:</label>
-        <span><%= order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set' %></span>
-      </div>
-      <div class="detail-row">
-        <label>Status:</label>
-        <span><%= order.status %></span>
-      </div>
-      <div class="detail-row">
-        <label>Installation Type:</label>
-        <span><%= order.installation_type %></span>
+      <div id="loading">Loading order details...</div>
+      <div id="order-details">
+        <div class="detail-row">
+          <label>Order ID:</label>
+          <span id="order_id"></span>
+        </div>
+        <div class="detail-row">
+          <label>Branch:</label>
+          <span id="branch_name"></span>
+        </div>
+        <div class="detail-row">
+          <label>Company:</label>
+          <span id="company_name"></span>
+        </div>
+        <div class="detail-row">
+          <label>Product:</label>
+          <span id="product_name"></span>
+        </div>
+        <div class="detail-row">
+          <label>Quantity:</label>
+          <span id="quantity"></span>
+        </div>
+        <div class="detail-row">
+          <label>Ordered Date:</label>
+          <span id="ordered_date"></span>
+        </div>
+        <div class="detail-row">
+          <label>Delivery Date:</label>
+          <span id="delivery_date"></span>
+        </div>
+        <div class="detail-row">
+          <label>Status:</label>
+          <span id="status"></span>
+        </div>
+        <div class="detail-row">
+          <label>Installation Type:</label>
+          <span id="installation_type"></span>
+        </div>
       </div>
     </div>
   </div>
   <%- include('../../partials/footer') %>
+
+  <script>
+    const orderDetails = document.getElementById('order-details');
+    const loading = document.getElementById('loading');
+
+    async function loadOrderDetails() {
+      try {
+        const response = await fetch(`/salesmanager/orders/data/<%= order_id %>`);
+        if (!response.ok) throw new Error('Failed to fetch order details');
+        const order = await response.json();
+        document.getElementById('order_id').textContent = order.order_id;
+        document.getElementById('branch_name').textContent = order.branch_name;
+        document.getElementById('company_name').textContent = order.company_name;
+        document.getElementById('product_name').textContent = order.product_name;
+        document.getElementById('quantity').textContent = order.quantity;
+        document.getElementById('ordered_date').textContent = new Date(order.ordered_date).toLocaleDateString();
+        document.getElementById('delivery_date').textContent = order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set';
+        document.getElementById('status').textContent = order.status;
+        document.getElementById('installation_type').textContent = order.installation_type;
+        loading.style.display = 'none';
+        orderDetails.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading order details:', error);
+        loading.textContent = 'Error loading order details. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadOrderDetails();
+  </script>
 </body>
 </html>

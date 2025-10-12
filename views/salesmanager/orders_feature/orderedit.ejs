@@ -36,7 +36,7 @@
       flex: 1;
     }
 
-    .content-area h1 {
+    .content-area h2 {
       color: #2d3436;
       margin-bottom: 20px;
     }
@@ -52,14 +52,66 @@
       min-height: 20px;
     }
 
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .field-group > div {
+      flex: 1 1 45%;
+      min-width: 200px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #555555;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
+    #order-form {
+      display: none;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
-        padding: 0 20px;
+        padding: 0 10px;
       }
 
-      .content-area {
-        min-height: auto;
+      .field-group > div {
+        flex: 1 1 100%;
       }
     }
   </style>
@@ -73,51 +125,48 @@
     <div class="content-area" id="content">
       <div class="form-container">
         <h2>Edit Order</h2>
+        <div id="loading">Loading order...</div>
         <form id="order-form">
           <fieldset>
             <legend>Order Information</legend>
             <div class="field-group">
               <div>
                 <label for="order_id">Order ID</label>
-                <input type="text" id="order_id" value="<%= order.order_id %>" readonly>
+                <input type="text" id="order_id" name="order_id" readonly>
               </div>
               <div>
                 <label for="branch_name">Branch</label>
-                <input type="text" id="branch_name" value="<%= order.branch_name %>" readonly>
+                <input type="text" id="branch_name" name="branch_name" readonly>
               </div>
               <div>
                 <label for="company_name">Company</label>
-                <input type="text" id="company_name" value="<%= order.company_name %>" readonly>
+                <input type="text" id="company_name" name="company_name" readonly>
               </div>
               <div>
                 <label for="product_name">Product</label>
-                <input type="text" id="product_name" value="<%= order.product_name %>" readonly>
+                <input type="text" id="product_name" name="product_name" readonly>
               </div>
               <div>
                 <label for="status">Status</label>
                 <select id="status" name="status" required>
-                  <% if (order.status === 'pending') { %>
-                    <option value="pending" selected>Pending</option>
-                    <option value="cancelled">Cancelled</option>
-                  <% } else if (order.status === 'shipped') { %>
-                    <option value="shipped" selected>Shipped</option>
-                    <option value="delivered">Delivered</option>
-                  <% } else { %>
-                    <option value="<%= order.status %>" selected><%= order.status %></option>
-                  <% } %>
+                  <option value="">Select status</option>
+                  <option value="pending">Pending</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
                 </select>
               </div>
               <div>
                 <label for="quantity">Quantity</label>
-                <input type="number" id="quantity" value="<%= order.quantity %>" readonly>
+                <input type="number" id="quantity" name="quantity" readonly>
               </div>
               <div>
                 <label for="ordered_date">Ordered Date</label>
-                <input type="text" id="ordered_date" value="<%= order.ordered_date %>" readonly>
+                <input type="text" id="ordered_date" name="ordered_date" readonly>
               </div>
               <div>
                 <label for="expected_delivery_date">Expected Delivery Date</label>
-                <input type="text" id="expected_delivery_date" value="<%= ['shipped', 'accepted'].includes(order.status) ? order.expected_delivery_date : 'N/A' %>" readonly>
+                <input type="text" id="expected_delivery_date" name="expected_delivery_date" readonly>
               </div>
             </div>
           </fieldset>
@@ -133,6 +182,28 @@
   <script>
     const form = document.getElementById('order-form');
     const errorMessage = document.getElementById('error-message');
+    const loading = document.getElementById('loading');
+
+    async function loadOrder() {
+      try {
+        const response = await fetch(`/salesmanager/orders/data/<%= order_id %>`);
+        if (!response.ok) throw new Error('Failed to fetch order');
+        const order = await response.json();
+        document.getElementById('order_id').value = order.order_id;
+        document.getElementById('branch_name').value = order.branch_name;
+        document.getElementById('company_name').value = order.company_name;
+        document.getElementById('product_name').value = order.product_name;
+        document.getElementById('quantity').value = order.quantity;
+        document.getElementById('ordered_date').value = new Date(order.ordered_date).toLocaleDateString();
+        document.getElementById('expected_delivery_date').value = ['shipped', 'accepted'].includes(order.status) ? order.expected_delivery_date ? new Date(order.expected_delivery_date).toLocaleDateString() : 'N/A' : 'N/A';
+        document.getElementById('status').value = order.status.toLowerCase();
+        loading.style.display = 'none';
+        form.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading order:', error);
+        loading.textContent = 'Error loading order. Please refresh.';
+      }
+    }
 
     form.addEventListener('submit', async function(event) {
       event.preventDefault();
@@ -144,7 +215,7 @@
       console.log('Form Data:', data);
 
       try {
-        const response = await fetch(`/salesmanager/orders/update/<%= order.order_id %>`, {
+        const response = await fetch(`/salesmanager/orders/update/<%= order_id %>`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -156,6 +227,8 @@
 
         if (result.success) {
           window.location.href = result.redirect;
+          // Broadcast message to refresh orders
+          window.postMessage({ type: 'refreshOrders' }, window.location.origin);
         } else {
           errorMessage.textContent = result.message || 'An error occurred while updating the order.';
         }
@@ -163,6 +236,9 @@
         errorMessage.textContent = 'Network error: ' + error.message;
       }
     });
+
+    // Initial load
+    loadOrder();
   </script>
 </body>
 </html>

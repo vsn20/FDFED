@@ -33,7 +33,24 @@
       padding: 20px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
+      height: calc(100vh - 90px);
+      overflow-y: auto;
       overflow-x: auto;
+    }
+
+    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar in Firefox */
+    .content-area {
+      scrollbar-width: none;
+    }
+
+    /* Hide scrollbar in IE/Edge */
+    .content-area {
+      -ms-overflow-style: none;
     }
 
     .content-area h1 {
@@ -48,6 +65,42 @@
       align-items: center;
       margin-bottom: 20px;
       flex-wrap: wrap;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #fff;
+      transition: border-color 0.3s;
+    }
+
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
     }
 
     .add-button {
@@ -162,6 +215,7 @@
 
       .content-area {
         padding: 15px;
+        height: auto;
       }
 
       .content-area h1 {
@@ -172,6 +226,18 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+
+      .search-group {
+        max-width: 100%;
       }
 
       .add-button, .generate-btn {
@@ -262,17 +328,18 @@
       <div class="header-container">
         <h1>Salaries</h1>
         <div class="date-range">
-          <h1><%= selectedMonthYear %> Salaries</h1>
+          <h1 id="salaryTitle">Salaries</h1>
         </div>
         <div class="controls">
           <select class="month-year-select" id="month-year">
-            <% monthYearOptions.forEach(option => { %>
-              <option value="<%= option %>" <%= selectedMonthYear === option ? 'selected' : '' %>>
-                <%= option.replace('-', ' ') %>
-              </option>
-            <% }) %>
           </select>
           <button class="generate-btn" onclick="filterSalaries()">Generate</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchSalaries">Search by Employee ID/Employee Name</label>
+          <input type="text" id="searchSalaries" placeholder="Enter Employee ID or Name" oninput="filterSalarySearch()">
         </div>
       </div>
       <div class="table-wrapper">
@@ -288,24 +355,10 @@
               <th>Note</th>
             </tr>
           </thead>
-          <tbody>
-            <% if (salary.length === 0) { %>
-              <tr>
-                <td colspan="7">No salaries found for <%= selectedMonthYear %>.</td>
-              </tr>
-            <% } else { %>
-              <% salary.forEach(s => { %>
-                <tr>
-                  <td data-label="Employee ID"><%= s.eid %></td>
-                  <td data-label="Employee Name"><%= s.ename %></td>
-                  <td data-label="Role"><%= s.role %></td>
-                  <td data-label="Salary">$<%= s.salary %></td>
-                  <td data-label="Commission">$<%= s.commission %></td>
-                  <td data-label="Total">$<%= s.totalsalary %></td>
-                  <td data-label="Note" class="note"><%= s.note || '' %></td>
-                </tr>
-              <% }) %>
-            <% } %>
+          <tbody id="salaryTableBody">
+            <tr>
+              <td colspan="7">Loading...</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -315,10 +368,89 @@
   <%- include('../../partials/footer') %>
 
   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const currentDate = new Date();
+      const monthYearOptions = [];
+      for (let i = 7; i >= 1; i--) {
+        const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+        const monthStr = monthNames[date.getMonth()];
+        const yearStr = date.getFullYear();
+        monthYearOptions.push(`${monthStr}-${yearStr}`);
+      }
+
+      const select = document.getElementById('month-year');
+      monthYearOptions.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option;
+        opt.textContent = option.replace('-', ' ');
+        select.appendChild(opt);
+      });
+
+      const defaultMonthYear = monthYearOptions[monthYearOptions.length - 1];
+      select.value = defaultMonthYear;
+
+      loadSalaries(defaultMonthYear);
+    });
+
+    function loadSalaries(monthYear) {
+      fetch(`/admin/salaries/data?monthYear=${monthYear}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch salaries');
+          }
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById('salaryTitle').textContent = `${data.selectedMonthYear} Salaries`;
+          const tbody = document.getElementById('salaryTableBody');
+          tbody.innerHTML = '';
+          if (data.salary.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7">No salaries found for ${data.selectedMonthYear}.</td></tr>`;
+          } else {
+            data.salary.forEach(s => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td data-label="Employee ID">${s.eid}</td>
+                <td data-label="Employee Name">${s.ename}</td>
+                <td data-label="Role">${s.role}</td>
+                <td data-label="Salary">₹${s.salary}</td>
+                <td data-label="Commission">₹${s.commission}</td>
+                <td data-label="Total">₹${s.totalsalary}</td>
+                <td data-label="Note" class="note">${s.note || ''}</td>
+              `;
+              tbody.appendChild(row);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching salaries:', error);
+          const tbody = document.getElementById('salaryTableBody');
+          tbody.innerHTML = '<tr><td colspan="7">Error loading salaries.</td></tr>';
+        });
+    }
+
     function filterSalaries() {
       const monthYear = document.getElementById('month-year').value;
-      console.log('[filterSalaries] Redirecting to:', `/admin/salaries?monthYear=${monthYear}`);
-      window.location.href = `/admin/salaries?monthYear=${monthYear}`;
+      loadSalaries(monthYear);
+    }
+
+    function filterSalarySearch() {
+      const searchInput = document.getElementById('searchSalaries').value.toLowerCase();
+      const tbody = document.getElementById('salaryTableBody');
+      const rows = tbody.getElementsByTagName('tr');
+
+      for (let row of rows) {
+        if (row.cells.length > 1) { // Skip header or empty rows
+          const empId = row.cells[0].textContent.toLowerCase();
+          const empName = row.cells[1].textContent.toLowerCase();
+          if (searchInput === '' || empId.includes(searchInput) || empName.includes(searchInput)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      }
     }
   </script>
 </body>

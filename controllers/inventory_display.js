@@ -2,6 +2,18 @@ const Inventory = require("../models/inventory");
 
 async function inventory_display(req, res) {
   try {
+    res.render("owner/inventory_feature/display_inventory", {
+      activePage: 'employee',
+      activeRoute: 'stocks'
+    });
+  } catch (error) {
+    console.error("Error rendering inventory:", error);
+    res.status(500).send("Internal server error");
+  }
+}
+
+async function getInventoryData(req, res) {
+  try {
     const stocks = await Inventory.find().lean();
     // Map to match EJS template field names
     const formattedStocks = stocks.map(stock => ({
@@ -14,15 +26,11 @@ async function inventory_display(req, res) {
       quantity: stock.quantity
     }));
 
-    res.render("owner/inventory_feature/display_inventory", {
-      stocks: formattedStocks,
-      activePage: 'employee',
-      activeRoute: 'stocks'
-    });
+    res.json(formattedStocks);
   } catch (error) {
-    console.error("Error rendering inventory:", error);
-    res.status(500).send("Internal server error");
+    console.error("Error fetching inventory:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
-module.exports = { inventory_display };
+module.exports = { inventory_display, getInventoryData };

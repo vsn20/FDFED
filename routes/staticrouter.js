@@ -6,7 +6,7 @@ const {products_display}=require("../controllers/ourproducts_display")
 const { newproducts_display}=require("../controllers/newproducts_display");
 const {topproducts_display}=require("../controllers/topproducts_display");
 
-const { branches_display } = require("../controllers/branches_display");
+const { branches_display, getBranchesData } = require("../controllers/branches_display");
 const { sendOtp, resetPassword } = require("../controllers/forgotPassword");
 
 router.get("/",(req,res)=>res.render("home.ejs",{ activePage: 'home' }));
@@ -74,6 +74,7 @@ router.get("/newproducts",newproducts_display);
 
 
 router.get("/our-branches", branches_display);
+router.get("/our-branches/data", getBranchesData);
 
 
 
