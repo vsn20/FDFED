@@ -3,12 +3,23 @@ const router = express.Router();
 const User = require('../models/users');
 const Company = require('../models/company');
 const { setuser } = require("../service/auth");
+const bcrypt = require("bcrypt");
 
 async function handleCompanyLogin(req, res) {
     const { user_id, password } = req.body;
 
-    const user = await User.findOne({ user_id, password });
+    const user = await User.findOne({ user_id });
     if (!user) {
+        return res.render("companylogin", {
+            loginError: "Wrong credentials",
+            signupError: null,
+            activePage: 'company'
+        });
+    }
+
+    // Compare hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
         return res.render("companylogin", {
             loginError: "Wrong credentials",
             signupError: null,
@@ -63,11 +74,15 @@ async function handleCompanySignup(req, res) {
         });
     }
 
-    // Create new user with c_id from Company
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new user with hashed password
     const newUser = new User({
         user_id,
         c_id: company.c_id,
-        password
+        password: hashedPassword
     });
     await newUser.save();
 

@@ -1,12 +1,23 @@
 const User = require("../models/users");
 const Employee = require("../models/employees");
 const { setuser } = require("../service/auth");
+const bcrypt = require("bcrypt");
 
 async function handlelogin(req, res) {
   const { user_id, password } = req.body;
 
-  const user = await User.findOne({ user_id, password });
+  const user = await User.findOne({ user_id });
   if (!user) {
+    return res.render("employeelogin", {
+      activePage: "employee",
+      loginError: "Wrong credentials",
+      signupError: null,
+    });
+  }
+
+  // Compare hashed password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
     return res.render("employeelogin", {
       activePage: "employee",
       loginError: "Wrong credentials",
@@ -32,7 +43,7 @@ async function handlelogin(req, res) {
     });
   }
 
-  const token = setuser(user, employee); // Sets type based on employee.role
+  const token = setuser(user, employee);
   res.cookie("uid", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
 
   const userType = employee.role.toLowerCase();
