@@ -127,6 +127,10 @@
       display: none;
     }
 
+    .form-group .error.show {
+      display: block;
+    }
+
     .submit-btn {
       background-color: #28a745;
       color: white;
@@ -151,6 +155,7 @@
     .submit-btn:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
+      transform: none;
     }
 
     .error-message {
@@ -161,7 +166,7 @@
       padding: 10px;
       background-color: #fff3f3;
       border-radius: 5px;
-      display: block;
+      display: none;
     }
 
     .success-message {
@@ -238,26 +243,31 @@
             <div class="form-group">
               <label for="f_name">First Name</label>
               <input type="text" id="f_name" name="f_name" required>
+              <span class="error" id="f_name-error">First name is required</span>
             </div>
             <div class="form-group">
               <label for="last_name">Last Name</label>
               <input type="text" id="last_name" name="last_name" required>
+              <span class="error" id="last_name-error">Last name is required</span>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="email">Email</label>
               <input type="email" id="email" name="email" required>
+              <span class="error" id="email-error">Please enter a valid email address</span>
             </div>
             <div class="form-group">
               <label for="phone_no">Phone Number</label>
               <input type="tel" id="phone_no" name="phone_no" maxlength="10">
+              <span class="error" id="phone_no-error">Phone number must be 10 digits</span>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full-width">
               <label for="address">Address</label>
               <textarea id="address" name="address"></textarea>
+              <span class="error" id="address-error">Address is required</span>
             </div>
           </div>
         </div>
@@ -268,16 +278,19 @@
             <div class="form-group">
               <label for="acno">Account Number</label>
               <input type="text" id="acno" name="acno" required>
+              <span class="error" id="acno-error">Valid account number is required</span>
             </div>
             <div class="form-group">
               <label for="ifsc">IFSC Code</label>
               <input type="text" id="ifsc" name="ifsc" required>
+              <span class="error" id="ifsc-error">Valid IFSC code is required (e.g., SBIN0001234)</span>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="bankname">Bank Name</label>
               <input type="text" id="bankname" name="bankname" required>
+              <span class="error" id="bankname-error">Bank name is required</span>
             </div>
           </div>
           <div class="form-row">
@@ -288,7 +301,7 @@
           </div>
         </div>
 
-        <button type="button" class="submit-btn" onclick="updateSalesManager()">Update</button>
+        <button type="button" class="submit-btn" id="submit-btn" onclick="updateSalesManager()" disabled>Update</button>
       </form>
     </div>
   </div>
@@ -300,6 +313,43 @@
     const loading = document.getElementById('loading');
     const errorMessage = document.getElementById('error-message');
     const successMessage = document.getElementById('success-message');
+    const submitBtn = document.getElementById('submit-btn');
+
+    const fields = {
+      f_name: { errorId: 'f_name-error', validate: val => val.trim().length > 0 },
+      last_name: { errorId: 'last_name-error', validate: val => val.trim().length > 0 },
+      email: { errorId: 'email-error', validate: val => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val) },
+      phone_no: { errorId: 'phone_no-error', validate: val => !val || /^\d{10}$/.test(val) },
+      address: { errorId: 'address-error', validate: val => true }, // Address is optional
+      acno: { errorId: 'acno-error', validate: val => /^\d{9,18}$/.test(val) },
+      ifsc: { errorId: 'ifsc-error', validate: val => /^[A-Z]{4}0[A-Z0-9]{6}$/.test(val) },
+      bankname: { errorId: 'bankname-error', validate: val => val.trim().length > 0 }
+    };
+
+    function validateField(fieldId) {
+      const field = document.getElementById(fieldId);
+      const errorElement = document.getElementById(fields[fieldId].errorId);
+      const isValid = fields[fieldId].validate(field.value);
+      field.style.borderColor = isValid ? '#ced4da' : '#dc3545';
+      errorElement.classList.toggle('show', !isValid);
+      if (!isValid) console.log(`Validation failed for ${fieldId}: ${field.value}`);
+      return isValid;
+    }
+
+    function validateForm() {
+      const isValid = Object.keys(fields).every(fieldId => validateField(fieldId));
+      submitBtn.disabled = !isValid;
+      if (!isValid) console.log('Form validation failed');
+      return isValid;
+    }
+
+    Object.keys(fields).forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      field.addEventListener('input', () => {
+        validateField(fieldId);
+        validateForm();
+      });
+    });
 
     async function loadSalesManager() {
       try {
@@ -307,18 +357,19 @@
         if (!response.ok) throw new Error('Failed to fetch sales manager');
         const salesManager = await response.json();
 
-        document.getElementById('f_name').value = salesManager.f_name;
-        document.getElementById('last_name').value = salesManager.last_name;
-        document.getElementById('email').value = salesManager.email;
+        document.getElementById('f_name').value = salesManager.f_name || '';
+        document.getElementById('last_name').value = salesManager.last_name || '';
+        document.getElementById('email').value = salesManager.email || '';
         document.getElementById('phone_no').value = salesManager.phone_no || '';
         document.getElementById('address').value = salesManager.address || '';
-        document.getElementById('acno').value = salesManager.acno;
-        document.getElementById('ifsc').value = salesManager.ifsc;
-        document.getElementById('bankname').value = salesManager.bankname;
-        document.getElementById('base_salary').value = salesManager.base_salary;
+        document.getElementById('acno').value = salesManager.acno || '';
+        document.getElementById('ifsc').value = salesManager.ifsc || '';
+        document.getElementById('bankname').value = salesManager.bankname || '';
+        document.getElementById('base_salary').value = salesManager.base_salary || '';
 
         loading.style.display = 'none';
         form.style.display = 'block';
+        validateForm(); // Validate after loading data
       } catch (error) {
         console.error('Error loading sales manager:', error);
         loading.textContent = 'Error loading profile. Please refresh.';
@@ -326,43 +377,26 @@
     }
 
     async function updateSalesManager() {
-      const email = document.getElementById('email');
-      const phone = document.getElementById('phone_no');
-
-      email.style.borderColor = '#ced4da';
-      phone.style.borderColor = '#ced4da';
       errorMessage.textContent = '';
+      errorMessage.style.display = 'none';
       successMessage.style.display = 'none';
 
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailPattern.test(email.value)) {
-        email.style.borderColor = '#dc3545';
-        errorMessage.textContent = 'Please enter a valid email address';
-        return;
-      }
-
-      const phonePattern = /^\d{10}$/;
-      if (phone.value && !phonePattern.test(phone.value)) {
-        phone.style.borderColor = '#dc3545';
-        errorMessage.textContent = 'Phone number must be exactly 10 digits';
+      if (!validateForm()) {
+        errorMessage.textContent = 'Please correct the errors in the form';
+        errorMessage.style.display = 'block';
         return;
       }
 
       const data = {
         f_name: document.getElementById('f_name').value,
         last_name: document.getElementById('last_name').value,
-        email: email.value,
-        phone_no: phone.value,
+        email: document.getElementById('email').value,
+        phone_no: document.getElementById('phone_no').value,
         address: document.getElementById('address').value,
         acno: document.getElementById('acno').value,
         ifsc: document.getElementById('ifsc').value,
         bankname: document.getElementById('bankname').value,
       };
-
-      if (!data.f_name || !data.last_name || !data.email || !data.acno || !data.ifsc || !data.bankname) {
-        errorMessage.textContent = 'All required fields must be filled';
-        return;
-      }
 
       try {
         const response = await fetch('/salesmanager/update-salesmanager', {
@@ -377,6 +411,7 @@
 
         if (result.error) {
           errorMessage.textContent = result.error;
+          errorMessage.style.display = 'block';
         } else {
           successMessage.textContent = 'Profile updated successfully';
           successMessage.style.display = 'block';
@@ -386,6 +421,7 @@
         }
       } catch (error) {
         errorMessage.textContent = 'Network error: ' + error.message;
+        errorMessage.style.display = 'block';
       }
     }
 
@@ -393,6 +429,17 @@
       this.value = this.value.replace(/[^0-9]/g, '');
       if (this.value.length > 10) {
         this.value = this.value.slice(0, 10);
+      }
+    });
+
+    document.getElementById('acno').addEventListener('input', function (e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    document.getElementById('ifsc').addEventListener('input', function (e) {
+      this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (this.value.length > 11) {
+        this.value = this.value.slice(0, 11);
       }
     });
 

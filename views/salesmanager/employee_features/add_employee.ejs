@@ -65,6 +65,7 @@
     .field-group > div {
       flex: 1 1 45%;
       min-width: 200px;
+      position: relative;
     }
 
     label {
@@ -110,11 +111,28 @@
       background-color: #555555;
     }
 
+    button[type="button"]:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+    }
+
     #error-message {
       color: #e74c3c;
       font-size: 0.85rem;
       margin: 10px 0;
       text-align: center;
+      display: none;
     }
 
     #success-message {
@@ -166,22 +184,27 @@
               <div>
                 <label for="f_name">First Name</label>
                 <input type="text" id="f_name" name="f_name" required placeholder="Enter first name">
+                <span class="error" id="f_name-error">First name is required</span>
               </div>
               <div>
                 <label for="last_name">Last Name</label>
                 <input type="text" id="last_name" name="last_name" required placeholder="Enter last name">
+                <span class="error" id="last_name-error">Last name is required</span>
               </div>
               <div>
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required placeholder="Enter email">
+                <span class="error" id="email-error">Please enter a valid email address</span>
               </div>
               <div>
                 <label for="phone_no">Phone Number</label>
                 <input type="tel" id="phone_no" name="phone_no" maxlength="10" placeholder="Enter phone number">
+                <span class="error" id="phone_no-error">Phone number must be 10 digits</span>
               </div>
               <div>
                 <label for="address">Address</label>
                 <textarea id="address" name="address" placeholder="Enter address"></textarea>
+                <span class="error" id="address-error">Address is required</span>
               </div>
             </div>
           </fieldset>
@@ -192,14 +215,17 @@
               <div>
                 <label for="acno">Account Number</label>
                 <input type="text" id="acno" name="acno" required placeholder="Enter account number">
+                <span class="error" id="acno-error">Valid account number is required</span>
               </div>
               <div>
                 <label for="ifsc">IFSC Code</label>
                 <input type="text" id="ifsc" name="ifsc" required placeholder="Enter IFSC code">
+                <span class="error" id="ifsc-error">Valid IFSC code is required (e.g., SBIN0001234)</span>
               </div>
               <div>
                 <label for="bankname">Bank Name</label>
                 <input type="text" id="bankname" name="bankname" required placeholder="Enter bank name">
+                <span class="error" id="bankname-error">Bank name is required</span>
               </div>
             </div>
           </fieldset>
@@ -210,12 +236,13 @@
               <div>
                 <label for="base_salary">Monthly Salary</label>
                 <input type="number" id="base_salary" name="base_salary" required placeholder="Enter monthly salary" step="0.01">
+                <span class="error" id="base_salary-error">Salary must be a positive number</span>
               </div>
             </div>
           </fieldset>
 
           <div id="error-message"></div>
-          <button type="button" onclick="addEmployee()">Add Employee</button>
+          <button type="button" id="submit-btn" onclick="addEmployee()" disabled>Add Employee</button>
         </div>
       </div>
     </div>
@@ -224,57 +251,71 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    async function addEmployee() {
-      const form = document.getElementById('employee-login-form');
-      const email = document.getElementById('email');
-      const phone = document.getElementById('phone_no');
-      const errorMessage = document.getElementById('error-message');
-      const successMessage = document.getElementById('success-message');
+    const form = document.getElementById('employee-login-form');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+    const submitBtn = document.getElementById('submit-btn');
 
-      email.style.borderColor = '#e6e9f0';
-      email.style.backgroundColor = '#fff';
-      phone.style.borderColor = '#e6e9f0';
-      phone.style.backgroundColor = '#fff';
+    const fields = {
+      f_name: { errorId: 'f_name-error', validate: val => val.trim().length > 0 },
+      last_name: { errorId: 'last_name-error', validate: val => val.trim().length > 0 },
+      email: { errorId: 'email-error', validate: val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) },
+      phone_no: { errorId: 'phone_no-error', validate: val => !val || /^[0-9]{10}$/.test(val) },
+      address: { errorId: 'address-error', validate: val => true }, // Address is optional
+      acno: { errorId: 'acno-error', validate: val => /^\d{9,18}$/.test(val) },
+      ifsc: { errorId: 'ifsc-error', validate: val => /^[A-Z]{4}0[A-Z0-9]{6}$/.test(val) },
+      bankname: { errorId: 'bankname-error', validate: val => val.trim().length > 0 },
+      base_salary: { errorId: 'base_salary-error', validate: val => !isNaN(val) && parseFloat(val) >= 0 }
+    };
+
+    function validateField(fieldId) {
+      const field = document.getElementById(fieldId);
+      const errorElement = document.getElementById(fields[fieldId].errorId);
+      const isValid = fields[fieldId].validate(field.value);
+      field.style.borderColor = isValid ? '#e6e9f0' : '#e74c3c';
+      field.style.backgroundColor = isValid ? '#fff' : '#fff5f5';
+      errorElement.classList.toggle('show', !isValid);
+      if (!isValid) console.log(`Validation failed for ${fieldId}: ${field.value}`);
+      return isValid;
+    }
+
+    function validateForm() {
+      const isValid = Object.keys(fields).every(fieldId => validateField(fieldId));
+      submitBtn.disabled = !isValid;
+      if (!isValid) console.log('Form validation failed');
+      return isValid;
+    }
+
+    Object.keys(fields).forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      field.addEventListener('input', () => {
+        validateField(fieldId);
+        validateForm();
+      });
+    });
+
+    async function addEmployee() {
       errorMessage.textContent = '';
+      errorMessage.style.display = 'none';
       successMessage.style.display = 'none';
 
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(email.value)) {
-        email.style.borderColor = '#e74c3c';
-        email.style.backgroundColor = '#fff5f5';
-        errorMessage.textContent = 'Please enter a valid email address.';
-        return;
-      }
-
-      const phonePattern = /^[0-9]{10}$/;
-      if (phone.value && !phonePattern.test(phone.value)) {
-        phone.style.borderColor = '#e74c3c';
-        phone.style.backgroundColor = '#fff5f5';
-        errorMessage.textContent = 'Please enter a valid 10-digit phone number.';
+      if (!validateForm()) {
+        errorMessage.textContent = 'Please correct the errors in the form';
+        errorMessage.style.display = 'block';
         return;
       }
 
       const data = {
         f_name: document.getElementById('f_name').value,
         last_name: document.getElementById('last_name').value,
-        email: email.value,
-        phone_no: phone.value,
+        email: document.getElementById('email').value,
+        phone_no: document.getElementById('phone_no').value,
         acno: document.getElementById('acno').value,
         ifsc: document.getElementById('ifsc').value,
         bankname: document.getElementById('bankname').value,
         base_salary: parseFloat(document.getElementById('base_salary').value),
         address: document.getElementById('address').value,
       };
-
-      if (!data.f_name || !data.last_name || !data.email || !data.acno || !data.ifsc || !data.bankname || isNaN(data.base_salary)) {
-        errorMessage.textContent = 'All required fields must be filled';
-        return;
-      }
-
-      if (data.base_salary < 0) {
-        errorMessage.textContent = 'Monthly salary cannot be negative';
-        return;
-      }
 
       try {
         const response = await fetch('/salesmanager/add-employee', {
@@ -289,6 +330,7 @@
 
         if (result.error) {
           errorMessage.textContent = result.error;
+          errorMessage.style.display = 'block';
         } else if (result.success) {
           successMessage.textContent = 'Employee added successfully';
           successMessage.style.display = 'block';
@@ -298,8 +340,36 @@
         }
       } catch (error) {
         errorMessage.textContent = 'Network error: ' + error.message;
+        errorMessage.style.display = 'block';
       }
     }
+
+    document.getElementById('phone_no').addEventListener('input', function (e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value.length > 10) {
+        this.value = this.value.slice(0, 10);
+      }
+    });
+
+    document.getElementById('acno').addEventListener('input', function (e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    document.getElementById('ifsc').addEventListener('input', function (e) {
+      this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (this.value.length > 11) {
+        this.value = this.value.slice(0, 11);
+      }
+    });
+
+    document.getElementById('base_salary').addEventListener('input', function (e) {
+      if (this.value < 0) {
+        this.value = 0;
+      }
+    });
+
+    // Initial form validation
+    validateForm();
   </script>
 </body>
 </html>
