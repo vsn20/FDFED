@@ -9,11 +9,11 @@
 
 | Name | Roll No | Role |
 |------|----------|------|
-| Saichand Avula | S20230010031 | Team Lead / Backend Developer |
-| Vuppala Sai Naman | S20230010262 | Frontend Developer |
-| Narayana | S20230010059 | Database Manager |
-| Hemasai | S20230010046 | API Integration & Testing |
-| Jahnavi | S20230010209 | UI Designer & Documentation |
+| Saichand Avula | S20230010031 | Company & Customer & login & signup|
+| Vuppala Sai Naman | S20230010262 | Admin |
+| Narayana | S20230010059 | SalesManager |
+| Hemasai | S20230010046 | SalesMan |
+| Jahnavi | S20230010209 | Customer & Company|
 
 ---
 
