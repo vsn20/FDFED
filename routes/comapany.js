@@ -25,7 +25,7 @@ const {
   get_sales_data = null,  // Default to null if not exported
   get_sale_details = null  // Default to null if not exported
 } = saleControllers;
-const { displayComplaints, updateComplaintStatus } = require("../controllers/company/complaint");
+const { displayComplaints, getComplaintsData, updateComplaintStatus } = require("../controllers/company/complaint");
 const { company_messages_display, render_compose_message_form, compose_message, view_message, view_sent_messages } = require("../controllers/company/company_messages_display");
 const { getDashboardData } = require("../controllers/company/dashboard");
 
@@ -67,6 +67,7 @@ if (typeof get_sale_details === 'function') {
 
 router.post("/sales/update-installation/:salesid", updateInstallationStatus);
 router.get("/complaints", displayComplaints);
+router.get("/complaints/data", getComplaintsData);
 router.post("/complaints/update-status/:complaint_id", updateComplaintStatus);
 
 module.exports = router;
