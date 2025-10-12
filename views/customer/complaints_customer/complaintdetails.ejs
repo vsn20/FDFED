@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View Sale - ElectroLand</title>
+  <title>View Complaint - ElectroLand</title>
   <style>
-    /* Reset and base styles */
     * {
       margin: 0;
       padding: 0;
@@ -28,20 +27,19 @@
       padding: 0 20px;
     }
 
-    /* Content area with height and scroll */
     .content-area {
       background: #ffffff;
       border-radius: 15px;
       padding: 20px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
-      height: calc(100vh - 90px); /* Match sidebar height */
-      overflow-y: hidden; /* Hide scrollbar by default */
+      height: calc(100vh - 90px);
+      overflow-y: hidden;
       transition: overflow-y 0.1s ease;
     }
 
     .content-area:hover {
-      overflow-y: auto; /* Show scrollbar on hover */
+      overflow-y: auto;
     }
 
     .content-area::-webkit-scrollbar {
@@ -73,7 +71,6 @@
       font-size: 0.9rem;
     }
 
-    /* Form-specific styles */
     .form-section {
       margin-bottom: 20px;
       padding: 15px;
@@ -86,7 +83,6 @@
       font-size: 1.2rem;
       margin-bottom: 15px;
       font-weight: bold;
-      padding: 0 10px;
     }
 
     .field-group {
@@ -114,7 +110,6 @@
       border-radius: 5px;
       font-size: 0.9rem;
       background: #f0f0f0;
-      transition: border-color 0.3s;
     }
 
     .field-textarea {
@@ -122,33 +117,11 @@
       resize: vertical;
     }
 
-    .field-input:focus, .field-textarea:focus {
-      border-color: #333333;
-      outline: none;
-    }
-
     .disabled-field {
       background: #f0f0f0;
       cursor: not-allowed;
     }
 
-    .form-btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #333333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .form-btn:hover {
-      background-color: #555555;
-    }
-
-    /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -157,7 +130,7 @@
 
       .content-area {
         padding: 15px;
-        height: auto; /* Adjust for mobile */
+        height: auto;
         overflow-y: hidden;
       }
 
@@ -168,130 +141,97 @@
       .field-group > div {
         flex: 1 1 100%;
       }
-
-      .form-btn {
-        width: 100%;
-        padding: 8px;
-      }
     }
   </style>
 </head>
 <body>
   <%- include('../../partials/navbar') %>
-
   <div class="container">
     <%- include('../../partials/customer_sidebar') %>
-
-    <!-- Content Area -->
     <div class="content-area" id="content">
-      <h1>View Sale</h1>
-      <% if (sale) { %>
-        <form id="complaint-form">
-          <fieldset class="form-section">
-            <legend class="section-title">Sale Information</legend>
-            <div class="field-group">
-              <div>
-                <label for="sale-id" class="field-label">sale_id:</label>
-                <input type="text"sale-id" name="sale_id" value="<%= sale.sale_id %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="prod-id" class="field-label">prod_id:</label>
-                <input type="text" id="prod-id" name="prod_id" value="<%= sale.prod_id %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="prod-name" class="field-label">Prod_name:</label>
-                <input type="text" id="prod-name" name="Prod_name" value="<%= sale.Prod_name %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="com-id" class="field-label">Com_id:</label>
-                <input type="text" id="com-id" name="Com_id" value="<%= sale.Com_id %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="model-no" class="field-label">Model_no:</label>
-                <input type="text" id="model-no" name="Model_no" value="<%= sale.Model_no %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="com-name" class="field-label">com_name:</label>
-                <input type="text" id="com-name" name="com_name" value="<%= sale.com_name %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="warranty-period" class="field-label">warrantyperiod:</label>
-                <input type="text" id="warranty-period" name="warrantyperiod" value="<%= sale.warrantyperiod %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="purchase-date" class="field-label">purchasedate:</label>
-                <input type="text" id="purchase-date" name="purchasedate" value="<%= sale.purchasedate %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="prod-description" class="field-label">prod_description:</label>
-                <textarea id="prod-description" name="prod_description" class="field-textarea disabled-field" readonly><%= sale.prod_description %></textarea>
-              </div>
-              <div>
-                <label for="installation" class="field-label">installation:</label>
-                <input type="text" id="installation" name="installation" value="<%= sale.installation %>" class="field-input disabled-field" readonly>
-              </div>
-              <div>
-                <label for="price" class="field-label">price:</label>
-                <input type="text" id="price" name="price" value="<%= sale.price %>" class="field-input disabled-field" readonly>
-              </div>
-            </div>
-          </fieldset>
-
-          <!-- Complaint Section -->
-          <fieldset class="form-section">
-            <legend class="section-title">Complaint</legend>
-            <div class="field-group">
-              <div>
-                <label for="complaint" class="field-label">Complaint:</label>
-                <textarea id="complaint" name="complaint_info" class="field-textarea" placeholder="Enter your complaint here..." required></textarea>
-              </div>
-            </div>
-          </fieldset>
-
-          <!-- Submit Button -->
-          <button type="submit" class="form-btn">Submit</button>
-        </form>
-
-        <script>
-          document.getElementById('complaint-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const sale_id = document.getElementById('sale-id').value;
-            const complaint_info = document.getElementById('complaint').value;
-
-            if (!sale_id || !complaint_info) {
-              alert('Sale ID and complaint description are required');
-              return;
-            }
-
-            try {
-              const response = await fetch('/customer/complaints/submit', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ sale_id, complaint_info }),
-              });
-
-              const result = await response.json();
-
-              if (result.success) {
-                window.location.href = result.redirect;
-              } else {
-                alert(result.message || 'Failed to submit complaint');
-              }
-            } catch (error) {
-              console.error('Error submitting complaint:', error);
-              alert('An error occurred while submitting the complaint');
-            }
-          });
-        </script>
-      <% } else { %>
-        <p>Sale not found.</p>
-      <% } %>
+      <h1>View Complaint</h1>
+      <div id="complaint-details">
+        <p>Loading complaint details...</p>
+      </div>
     </div>
   </div>
-
   <%- include('../../partials/footer') %>
+
+  <script>
+    async function loadComplaintDetails() {
+      const complaintId = window.location.pathname.split('/').pop();
+      try {
+        const response = await fetch(`/customer/complaints/totaldetails/${complaintId}`);
+        const complaint = await response.json();
+
+        if (response.ok && !complaint.error) {
+          const content = document.getElementById('complaint-details');
+          content.innerHTML = `
+            <fieldset class="form-section">
+              <legend class="section-title">Complaint Information</legend>
+              <div class="field-group">
+                <div>
+                  <label class="field-label">Complaint ID:</label>
+                  <input type="text" value="${complaint.complaint_id}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Sale ID:</label>
+                  <input type="text" value="${complaint.sale_id}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Product Name:</label>
+                  <input type="text" value="${complaint.Prod_name}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Company Name:</label>
+                  <input type="text" value="${complaint.com_name}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Purchase Date:</label>
+                  <input type="text" value="${complaint.purchasedate}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Complaint Date:</label>
+                  <input type="text" value="${complaint.complaint_date}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Status:</label>
+                  <input type="text" value="${complaint.status}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Complaint Description:</label>
+                  <textarea class="field-textarea disabled-field" readonly>${complaint.complaint_info}</textarea>
+                </div>
+                <div>
+                  <label class="field-label">Product Description:</label>
+                  <textarea class="field-textarea disabled-field" readonly>${complaint.prod_description}</textarea>
+                </div>
+                <div>
+                  <label class="field-label">Warranty Period:</label>
+                  <input type="text" value="${complaint.warrantyperiod}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Installation:</label>
+                  <input type="text" value="${complaint.installation}" class="field-input disabled-field" readonly>
+                </div>
+                <div>
+                  <label class="field-label">Price:</label>
+                  <input type="text" value="${complaint.price}" class="field-input disabled-field" readonly>
+                </div>
+              </div>
+            </fieldset>
+            ${complaint.status === 'Open' ? `<a href="/customer/complaints/edit/${complaint.complaint_id}" class="form-btn">Edit Complaint</a>` : ''}
+          `;
+        } else {
+          document.getElementById('complaint-details').innerHTML = '<p>Complaint not found.</p>';
+        }
+      } catch (error) {
+        console.error('Error loading complaint:', error);
+        document.getElementById('complaint-details').innerHTML = '<p>Error loading complaint details.</p>';
+      }
+    }
+
+    window.onload = loadComplaintDetails;
+  </script>
 </body>
 </html>

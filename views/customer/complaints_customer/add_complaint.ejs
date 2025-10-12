@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Complaint - ElectroLand</title>
   <style>
-    /* Structural CSS */
+    /* Keep the existing CSS unchanged */
     * {
       margin: 0;
       padding: 0;
@@ -43,7 +43,6 @@
       font-size: 1.5rem;
     }
 
-    /* Header container styling */
     .header-container {
       display: flex;
       justify-content: space-between;
@@ -51,7 +50,6 @@
       margin-bottom: 20px;
     }
 
-    /* Table styling */
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -93,7 +91,6 @@
       background: #f8f9fd;
     }
 
-    /* Clickable button styling */
     .clickable-btn {
       background: none;
       border: none;
@@ -110,7 +107,6 @@
       text-decoration: underline;
     }
 
-    /* Form-specific styles */
     .form-section {
       margin-bottom: 20px;
       padding: 15px;
@@ -192,12 +188,10 @@
       display: none;
     }
 
-    /* Hidden class for form visibility */
     .hidden {
       display: none;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -398,7 +392,7 @@
         }
 
         try {
-          const response = await fetch('/customer/complaints/submit', {
+          const response = await fetch('/customer/complaints/add', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -407,18 +401,23 @@
             body: JSON.stringify({ sale_id, complaint_info })
           });
 
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
           const result = await response.json();
           console.log('[add_complaint] Server response:', result);
 
           if (result.success) {
-            window.location.href = result.redirect;
+            alert(result.message || 'Complaint added successfully!');
+            window.location.href = result.redirect || '/customer/complaints';
           } else {
             alert(result.message || 'Failed to submit complaint');
             console.error('[add_complaint] Submission failed:', result.message);
           }
         } catch (error) {
           console.error('[add_complaint] Error submitting complaint:', error);
-          alert('An error occurred while submitting the complaint');
+          alert(`Failed to submit complaint: ${error.message}`);
         }
       });
     });
