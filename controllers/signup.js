@@ -1,6 +1,7 @@
 const User = require("../models/users");
 const Employee = require("../models/employees");
 const { setuser } = require("../service/auth");
+const bcrypt = require("bcrypt");
 
 async function handlesignup(req, res) {
   const { user_id, email, password, confirm_password } = req.body;
@@ -8,12 +9,6 @@ async function handlesignup(req, res) {
   // Trim inputs to avoid whitespace issues
   const trimmedPassword = password ? password.trim() : "";
   const trimmedConfirmPassword = confirm_password ? confirm_password.trim() : "";
-
-  //console.log("Received user_id:", user_id);
-  //console.log("Received email:", email);
-  //console.log("Received password:", trimmedPassword);
-  //console.log("Received confirm_password:", trimmedConfirmPassword);
-  //console.log("Passwords match?", trimmedPassword === trimmedConfirmPassword);
 
   // Check if passwords match
   if (trimmedPassword !== trimmedConfirmPassword) {
@@ -55,11 +50,15 @@ async function handlesignup(req, res) {
       });
     }
 
-    // Create new user with only the password
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(trimmedPassword, saltRounds);
+
+    // Create new user with hashed password
     const newUser = new User({
       user_id,
       emp_id: employee.e_id,
-      password: trimmedPassword,
+      password: hashedPassword,
     });
     await newUser.save();
 
