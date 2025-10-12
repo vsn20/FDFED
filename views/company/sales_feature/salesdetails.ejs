@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sale Details - ElectroLand</title>
   <style>
-    /* Structural CSS */
     * {
       margin: 0;
       padding: 0;
@@ -97,12 +96,12 @@
     .form-group .star-rating {
       display: inline-block;
       font-size: 1.2rem;
-      color: #f1c40f; /* Gold color for filled stars */
+      color: #f1c40f;
       margin-left: 10px;
     }
 
     .form-group .star-rating .empty-star {
-      color: #ccc; /* Gray color for empty stars */
+      color: #ccc;
     }
 
     .form-row {
@@ -148,13 +147,18 @@
       text-decoration: underline;
     }
 
-    #error-message {
-      color: #e74c3c;
-      margin: 10px 0;
-      min-height: 20px;
+    .success-message {
+      color: green;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
     }
 
-    /* Responsive adjustments */
+    .error-message {
+      color: red;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -205,77 +209,81 @@
   <div class="container">
     <%- include('../../partials/company_sidebar') %>
 
-    <!-- Content Area -->
     <div class="content-area" id="content">
       <h2>Sale Details</h2>
 
+      <% if (successMessage) { %>
+        <div class="success-message"><%= successMessage %></div>
+      <% } %>
+      <div class="error-message" id="error-message" style="display: none;"></div>
+
       <h3>Sale Information</h3>
-      <div class="form-row">
+      <div class="form-row" id="sale-info">
         <div class="form-group">
           <label>Sale ID</label>
-          <input type="text" value="<%= sale.sales_id %>" readonly>
+          <input type="text" id="sales_id" readonly>
         </div>
         <div class="form-group">
           <label>Unique Code</label>
-          <input type="text" value="<%= sale.unique_code %>" readonly>
+          <input type="text" id="unique_code" readonly>
         </div>
         <div class="form-group">
           <label>Sale Date</label>
-          <input type="text" value="<%= sale.sales_date %>" readonly>
+          <input type="text" id="sales_date" readonly>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Branch Name</label>
-          <input type="text" value="<%= sale.branch_name %>" readonly>
+          <input type="text" id="branch_name" readonly>
         </div>
       </div>
 
       <h3>Product Information</h3>
-      <div class="form-row">
+      <div class="form-row" id="product-info">
         <div class="form-group">
           <label>Product Name</label>
-          <input type="text" value="<%= sale.product_name %>" readonly>
+          <input type="text" id="product_name" readonly>
         </div>
         <div class="form-group">
           <label>Model Number</label>
-          <input type="text" value="<%= sale.model_number %>" readonly>
+          <input type="text" id="model_number" readonly>
         </div>
         <div class="form-group">
           <label>Company Name</label>
-          <input type="text" value="<%= sale.company_name %>" readonly>
+          <input type="text" id="company_name" readonly>
         </div>
       </div>
 
       <h3>Customer Information</h3>
-      <div class="form-row">
+      <div class="form-row" id="customer-info">
         <div class="form-group">
           <label>Customer Name</label>
-          <input type="text" value="<%= sale.customer_name %>" readonly>
+          <input type="text" id="customer_name" readonly>
         </div>
         <div class="form-group">
           <label>Mobile Number</label>
-          <input type="text" value="<%= sale.phone_number %>" readonly>
+          <input type="text" id="phone_number" readonly>
         </div>
         <div class="form-group">
           <label>Address</label>
-          <input type="text" value="<%= sale.address || 'N/A' %>" readonly>
+          <input type="text" id="address" readonly>
         </div>
       </div>
 
       <h3>Installation Details</h3>
-      <div class="form-row">
+      <div class="form-row" id="installation-info">
         <div class="form-group">
           <label>Installation Required</label>
-          <input type="text" value="<%= sale.installation %>" readonly>
+          <input type="text" id="installation" readonly>
         </div>
         <div class="form-group">
           <label>Installation Type</label>
-          <input type="text" value="<%= sale.installationType || 'N/A' %>" readonly>
+          <input type="text" id="installationType" readonly>
         </div>
         <div class="form-group">
           <label>Installation Charge</label>
-          <input type="text" value="<%= sale.installationcharge || 'N/A' %>" readonly>
+          <input type="text" id="installationcharge" readonly>
         </div>
       </div>
       <div class="form-row">
@@ -283,28 +291,25 @@
           <label>Installation Status</label>
           <div id="installation-status-form">
             <select id="installation_status" name="installation_status">
-              <option value="Pending" <%= sale.installation_status === 'Pending' ? 'selected' : '' %>>Pending</option>
-              <option value="Completed" <%= sale.installation_status === 'Completed' ? 'selected' : '' %>>Completed</option>
-              <option value="" <%= !sale.installation_status ? 'selected' : '' %>>None</option>
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+              <option value="">None</option>
             </select>
-            <button class="button" onclick="updateInstallationStatus('<%= sale.sales_id %>')">Update Installation Status</button>
+            <button class="button" id="update-installation-button">Update Installation Status</button>
           </div>
-          <div id="error-message"></div>
         </div>
       </div>
 
       <h3>Customer Feedback</h3>
-      <div class="form-row">
+      <div class="form-row" id="feedback-info">
         <div class="form-group">
           <label>Review</label>
-          <textarea readonly><%= sale.review || 'N/A' %></textarea>
+          <textarea id="review" readonly></textarea>
         </div>
         <div class="form-group">
           <label>Rating</label>
-          <input type="text" value="<%= sale.rating || 'N/A' %>" readonly>
-          <span class="star-rating">
-            <%- Array(5).fill().map((_, i) => i < (sale.rating || 0) ? '<span>★</span>' : '<span class="empty-star">☆</span>').join('') %>
-          </span>
+          <input type="text" id="rating" readonly>
+          <span class="star-rating" id="star-rating"></span>
         </div>
       </div>
 
@@ -315,67 +320,95 @@
   <%- include('../../partials/footer', { activePage: 'sales' }) %>
 
   <script>
-    // Ensure the DOM is fully loaded before attaching event listeners
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM fully loaded and parsed');
+    async function loadSaleDetails() {
+      try {
+        const salesId = window.location.pathname.split('/').pop();
+        const response = await fetch(`/company/sales/details/${salesId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = await response.json();
 
-      const updateButton = document.querySelector('#installation-status-form button');
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load sale details');
+        }
+
+        const sale = data.sale;
+
+        // Populate fields
+        document.getElementById('sales_id').value = sale.sales_id;
+        document.getElementById('unique_code').value = sale.unique_code;
+        document.getElementById('sales_date').value = sale.sales_date;
+        document.getElementById('branch_name').value = sale.branch_name;
+        document.getElementById('product_name').value = sale.product_name;
+        document.getElementById('model_number').value = sale.model_number;
+        document.getElementById('company_name').value = sale.company_name;
+        document.getElementById('customer_name').value = sale.customer_name;
+        document.getElementById('phone_number').value = sale.phone_number;
+        document.getElementById('address').value = sale.address;
+        document.getElementById('installation').value = sale.installation;
+        document.getElementById('installationType').value = sale.installationType;
+        document.getElementById('installationcharge').value = sale.installationcharge;
+        document.getElementById('installation_status').value = sale.installation_status;
+        document.getElementById('review').value = sale.review;
+        document.getElementById('rating').value = sale.rating;
+
+        // Populate star rating
+        const starRating = document.getElementById('star-rating');
+        const rating = parseInt(sale.rating) || 0;
+        starRating.innerHTML = Array(5).fill().map((_, i) => i < rating ? '<span>★</span>' : '<span class="empty-star">☆</span>').join('');
+      } catch (error) {
+        console.error('[LoadSaleDetails] Error:', error);
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.textContent = error.message || 'Failed to load sale details';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSaleDetails();
+
+      const updateButton = document.getElementById('update-installation-button');
       if (updateButton) {
-        updateButton.addEventListener('click', (e) => {
+        updateButton.addEventListener('click', async (e) => {
           e.preventDefault();
-          console.log('Button clicked, calling updateInstallationStatus');
-          alert('Button clicked, attempting to update...'); // Visual feedback
-          updateInstallationStatus('<%= sale.sales_id %>');
+          const salesId = document.getElementById('sales_id').value;
+          const installationStatus = document.getElementById('installation_status').value;
+          const errorMessage = document.getElementById('error-message');
+
+          try {
+            const response = await fetch(`/company/sales/update-installation/${salesId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ installation_status: installationStatus })
+            });
+
+            if (!response.ok) {
+              const text = await response.text();
+              throw new Error(`HTTP error! Status: ${response.status}, Response: ${text.substring(0, 100)}...`);
+            }
+
+            const result = await response.json();
+            if (result.success) {
+              window.location.reload();
+            } else {
+              errorMessage.textContent = result.message || 'An error occurred while updating installation status.';
+              errorMessage.style.display = 'block';
+            }
+          } catch (error) {
+            console.error('[UpdateInstallationStatus] Error:', error);
+            errorMessage.textContent = error.message || 'Failed to update installation status';
+            errorMessage.style.display = 'block';
+          }
         });
       } else {
         console.error('Update button not found in DOM');
-        alert('Error: Update button not found. Check the page structure.');
       }
     });
-
-    async function updateInstallationStatus(salesId) {
-      const errorMessage = document.getElementById('error-message');
-      const installationStatus = document.getElementById('installation_status').value;
-
-      errorMessage.textContent = '';
-      console.log('Attempting to update installation status for salesId:', salesId, 'with status:', installationStatus);
-
-      try {
-        const response = await fetch(`/company/sales/update-installation/${salesId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            // Add any required authentication headers if needed
-            // Example: 'Authorization': 'Bearer YOUR_TOKEN'
-          },
-          body: JSON.stringify({ installation_status: installationStatus }),
-        });
-
-        console.log('Server response status:', response.status);
-
-        if (!response.ok) {
-          const text = await response.text();
-          console.log('Full raw response:', text);
-          throw new Error(`HTTP error! Status: ${response.status}, Response: ${text.substring(0, 100)}...`);
-        }
-
-        const result = await response.json();
-        console.log('Server response data:', result);
-
-        if (result.success) {
-          window.location.reload();
-        } else {
-          errorMessage.textContent = result.message || 'An error occurred while updating installation status.';
-        }
-      } catch (error) {
-        console.error('Fetch error:', error);
-        if (error.message.includes('Unexpected token')) {
-          errorMessage.textContent = `Server returned an invalid response (HTML). Status: ${response?.status || 'unknown'}, Sample: ${error.message.split(' ')[3].substring(0, 20)}... Please check server logs or contact support.`;
-        } else {
-          errorMessage.textContent = `Network error: ${error.message}`;
-        }
-      }
-    }
   </script>
 </body>
 </html>

@@ -24,7 +24,8 @@
       display: flex;
       flex: 1;
       gap: 25px;
-      padding: 0 20px;
+      padding: 0 20px !important;
+      max-width: 100%;
     }
 
     .content-area {
@@ -33,98 +34,195 @@
       padding: 20px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
-      height: calc(100vh - 90px); /* Match sidebar height */
-      overflow-y: auto; /* Enable vertical scrolling if content overflows */
+      overflow-x: auto;
+      overflow-y: auto;
+      height: calc(100vh - 90px);
     }
 
-    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
-    .content-area::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Hide scrollbar in Firefox */
-    .content-area {
-      scrollbar-width: none;
-    }
-
-    /* Hide scrollbar in IE/Edge */
-    .content-area {
-      -ms-overflow-style: none;
+    .content-area h1 {
+      color: #2d3436;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
     }
 
     .header-container {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .left-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    #searchInput {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 250px;
+      font-size: 0.9rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
       margin-bottom: 20px;
     }
 
-    h1 {
+    .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
       color: #2d3436;
-      font-size: 1.5rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input[readonly] {
+      background: #e9ecef;
+      cursor: default;
+    }
+
+    .form-group input:focus {
+      border-color: #333333;
+      outline: none;
     }
 
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .table-wrapper::-webkit-scrollbar {
+      display: none;
     }
 
     table {
       width: 100%;
       min-width: 600px;
-      border-collapse: separate;
-      border-spacing: 0;
+      border-collapse: collapse;
       background: #ffffff;
       border-radius: 10px;
-      border: 1px solid #ddd;
+      border-spacing: 0;
     }
 
-    th, td {
-      padding: 12px;
-      text-align: center;
-      font-size: 1rem;
-      border: 1px solid #eaeaea;
-      vertical-align: middle;
+    thead {
+      background: #333333;
     }
 
     th {
-      background: #333;
       color: white;
-    }
-
-    tr:nth-child(odd) {
-      background: #f8f9fd;
-    }
-
-    tr:nth-child(even) {
-      background: #eef2f7;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #ffffff;
     }
 
     td {
-      background: inherit;
-      transition: background-color 0.2s ease-in-out;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e9f0;
     }
 
-    td:hover {
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: #f8f9fd;
+    }
+
+    tr:hover td {
       background-color: #f0f4f8;
       cursor: pointer;
     }
 
+    .success-message {
+      color: green;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
+    .error-message {
+      color: red;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 768px) {
       .container {
-        margin-top: 60px;
         flex-direction: column;
-        padding: 0 10px;
-        gap: 15px;
+        padding: 0 10px !important;
       }
 
       .content-area {
         padding: 15px;
-        height: auto; /* Allow content area to expand on mobile */
+        height: auto;
       }
 
-      h1 {
+      .content-area h1 {
         font-size: 1.2rem;
+      }
+
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .left-section {
+        width: 100%;
+      }
+
+      .search-container {
+        width: 100%;
+      }
+
+      #searchInput {
+        width: 100%;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+
+      table {
+        display: block;
+        min-width: 0;
       }
 
       thead {
@@ -132,92 +230,85 @@
       }
 
       tr {
-        display: block;
-        border: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
         border-radius: 5px;
-        margin-bottom: 10px;
         padding: 10px;
         background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       }
 
       td {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        padding: 8px;
-        border: 1px solid #e0e0e0;
-        border-radius: 5px;
-        background: #f8f9fd;
-        margin: 5px 0;
-        text-align: left;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
       }
 
       td:before {
         content: attr(data-label);
         font-weight: bold;
         color: #2d3436;
+        margin-right: 10px;
         min-width: 100px;
-      }
-
-      tr:hover {
-        background-color: #f0f4f8;
       }
     }
 
     @media (min-width: 769px) and (max-width: 1024px) {
-      .container {
-        gap: 20px;
-        padding: 0 15px;
-      }
-
-      h1 {
+      .content-area h1 {
         font-size: 1.3rem;
       }
 
-      th, td {
-        padding: 10px;
-        font-size: 0.95rem;
-      }
-
-      .content-area {
-        padding: 15px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        margin-top: 50px;
-        padding: 0 5px;
+      .form-group {
+        flex: 1 1 45%;
       }
 
       th, td {
-        font-size: 0.9rem;
-      }
-
-      td {
-        padding: 6px;
-      }
-
-      td:before {
-        min-width: 80px;
-      }
-
-      .content-area {
         padding: 10px;
+        font-size: 0.85rem;
+      }
+
+      #searchInput {
+        width: 220px;
       }
     }
   </style>
 </head>
 <body>
-  <%- include('../../partials/navbar') %>
+  <%- include('../../partials/navbar', { activePage: 'sales' }) %>
 
   <div class="container">
     <%- include('../../partials/company_sidebar') %>
 
     <div class="content-area" id="content">
       <div class="header-container">
-        <h1>Sales</h1>
+        <div class="left-section">
+          <h1>Sales</h1>
+          <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search by Sale ID or Product Name...">
+          </div>
+        </div>
       </div>
+
+      <% if (successMessage) { %>
+        <div class="success-message"><%= successMessage %></div>
+      <% } %>
+      <div class="error-message" id="error-message" style="display: none;"></div>
+
+      <div class="form-row" id="company-field" style="display: none;">
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" id="companyname" readonly>
+        </div>
+      </div>
+
       <div class="table-wrapper">
         <table>
           <thead>
@@ -228,21 +319,75 @@
               <th>Model No</th>
             </tr>
           </thead>
-          <tbody>
-            <% salers.forEach(sale => { %>
-              <tr onclick="window.location='/company/sales/<%= sale.sales_id %>'">
-                <td data-label="Sale ID"><%= sale.sales_id %></td>
-                <td data-label="Branch Name"><%= sale.branch_name %></td>
-                <td data-label="Product Name"><%= sale.product_name %></td>
-                <td data-label="Model No"><%= sale.model_number || 'N/A' %></td>
-              </tr>
-            <% }) %>
+          <tbody id="sales-table-body">
+            <!-- Table rows will be populated dynamically -->
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <%- include('../../partials/footer') %>
+  <%- include('../../partials/footer', { activePage: 'sales' }) %>
+
+  <script>
+    async function loadSalesData() {
+      try {
+        const response = await fetch('/company/sales/data', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load sales data');
+        }
+
+        // Populate company field
+        const companyField = document.getElementById('company-field');
+        const companyNameInput = document.getElementById('companyname');
+        companyNameInput.value = data.company_name;
+        companyField.style.display = 'flex';
+
+        // Populate table
+        const tableBody = document.getElementById('sales-table-body');
+        tableBody.innerHTML = '';
+        data.sales.forEach(sale => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td data-label="Sale ID">${sale.sales_id}</td>
+            <td data-label="Branch Name">${sale.branch_name}</td>
+            <td data-label="Product Name">${sale.product_name}</td>
+            <td data-label="Model No">${sale.model_number || 'N/A'}</td>
+          `;
+          row.addEventListener('click', () => {
+            window.location = `/company/sales/${sale.sales_id}`;
+          });
+          tableBody.appendChild(row);
+        });
+
+        // Initialize search functionality
+        const searchInput = document.getElementById('searchInput');
+        const rows = tableBody.querySelectorAll('tr');
+
+        searchInput.addEventListener('input', () => {
+          const filter = searchInput.value.toLowerCase();
+          rows.forEach(row => {
+            const saleId = row.querySelector('td:first-child').textContent.toLowerCase();
+            const productName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            row.style.display = (saleId.includes(filter) || productName.includes(filter)) ? '' : 'none';
+          });
+        });
+      } catch (error) {
+        console.error('[LoadSalesData] Error:', error);
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.textContent = error.message || 'Failed to load sales data';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadSalesData);
+  </script>
 </body>
 </html>
