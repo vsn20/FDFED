@@ -225,18 +225,7 @@
               <th>Quantity</th>
             </tr>
           </thead>
-          <tbody>
-            <% stocks.forEach(s => { %>
-              <tr>
-                <td data-label="Branch ID"><%= s.bid %></td>
-                <td data-label="Branch Name"><%= s.bname %></td>
-                <td data-label="Product ID"><%= s.pid %></td>
-                <td data-label="Product Name"><%= s.pname %></td>
-                <td data-label="Company Name"><%= s.cname %></td>
-                <td data-label="Model No"><%= s.modelno %></td>
-                <td data-label="Quantity"><%= s.quantity %></td>
-              </tr>
-            <% }) %>
+          <tbody id="inventoryTableBody">
           </tbody>
         </table>
       </div>
@@ -246,7 +235,27 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    // Add any necessary script logic here if needed
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/admin/stocks/data')
+        .then(response => response.json())
+        .then(stocks => {
+          const tbody = document.getElementById('inventoryTableBody');
+          stocks.forEach(s => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td data-label="Branch ID">${s.bid}</td>
+              <td data-label="Branch Name">${s.bname}</td>
+              <td data-label="Product ID">${s.pid}</td>
+              <td data-label="Product Name">${s.pname}</td>
+              <td data-label="Company Name">${s.cname}</td>
+              <td data-label="Model No">${s.modelno}</td>
+              <td data-label="Quantity">${s.quantity}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(error => console.error('Error fetching inventory:', error));
+    });
   </script>
 </body>
 </html>

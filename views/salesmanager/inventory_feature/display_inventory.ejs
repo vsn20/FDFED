@@ -110,6 +110,11 @@
       outline: none;
     }
 
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -214,6 +219,10 @@
         flex: 1 1 100%;
       }
 
+      .search-group {
+        max-width: 100%;
+      }
+
       table {
         display: block;
         min-width: 0;
@@ -264,6 +273,10 @@
         flex: 1 1 45%;
       }
 
+      .search-group {
+        max-width: 250px;
+      }
+
       th, td {
         padding: 10px;
         font-size: 0.85rem;
@@ -290,6 +303,10 @@
 
       <!-- Branch Fields -->
       <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchInventory">Search by Product ID or Product Name</label>
+          <input type="text" id="searchInventory" placeholder="Enter Product ID or Product Name" oninput="filterInventory()">
+        </div>
         <div class="form-group">
           <label>Branch ID</label>
           <input type="text" value="<%= branchid %>" readonly>
@@ -352,9 +369,27 @@
         }
         loading.style.display = 'none';
         tableContainer.style.display = 'block';
+        filterInventory(); // Apply filter after loading data
       } catch (error) {
         console.error('Error loading inventory:', error);
         loading.textContent = 'Error loading inventory. Please refresh.';
+      }
+    }
+
+    function filterInventory() {
+      const searchInput = document.getElementById('searchInventory').value.toLowerCase();
+      const rows = tbody.getElementsByTagName('tr');
+
+      for (let row of rows) {
+        const productId = row.cells[0].textContent.toLowerCase();
+        const productName = row.cells[1].textContent.toLowerCase();
+        if (row.cells[0].classList.contains('no-data')) {
+          row.style.display = searchInput === '' ? '' : 'none';
+        } else if (searchInput === '' || productId.includes(searchInput) || productName.includes(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
       }
     }
 
