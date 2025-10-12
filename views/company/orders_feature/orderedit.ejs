@@ -68,6 +68,14 @@
     .submit-button:hover {
       background-color: #555555;
     }
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+    .form-container {
+      display: none;
+    }
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -85,39 +93,64 @@
     <%- include('../../partials/company_sidebar') %>
     <div class="content-area">
       <h1>Edit Order</h1>
-      <form action="/company/orders/update-delivery" method="POST">
-        <input type="hidden" name="order_id" value="<%= order.order_id %>">
-        <div class="form-group">
-          <label for="order_id">Order ID</label>
-          <input type="text" id="order_id" value="<%= order.order_id %>" readonly>
-        </div>
-        <div class="form-group">
-          <label for="status">Status</label>
-          <select id="status" name="status">
-            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-            <option value="Accepted" <%= order.status === 'Accepted' ? 'selected' : '' %>>Accepted</option>
-            <option value="Rejected" <%= order.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
-            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-            <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="delivery_date">Delivery Date</label>
-          <input type="text" id="delivery_date" name="delivery_date" class="delivery-date-input" 
-                 value="<%= order.delivery_date ? new Date(order.delivery_date).toISOString().split('T')[0] : '' %>" 
-                 placeholder="Select Date">
-        </div>
-        <button type="submit" class="submit-button">Update Order</button>
-      </form>
+      <div id="loading">Loading order details...</div>
+      <div id="form-container" class="form-container">
+        <form action="/company/orders/update/<%= oid %>" method="POST">
+          <input type="hidden" name="order_id" id="order_id_hidden" value="<%= oid %>">
+          <div class="form-group">
+            <label for="order_id">Order ID</label>
+            <input type="text" id="order_id" value="" readonly>
+          </div>
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+              <option value="Pending">Pending</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="delivery_date">Delivery Date</label>
+            <input type="text" id="delivery_date" name="delivery_date" class="delivery-date-input" 
+                   value="" placeholder="Select Date">
+          </div>
+          <button type="submit" class="submit-button">Update Order</button>
+        </form>
+      </div>
     </div>
   </div>
   <%- include('../../partials/footer') %>
   <script>
-    flatpickr(".delivery-date-input", {
-      dateFormat: "Y-m-d",
-      minDate: "today"
-    });
+    const oid = '<%= oid %>';
+    const loading = document.getElementById('loading');
+    const formContainer = document.getElementById('form-container');
+
+    async function loadOrder() {
+      try {
+        const response = await fetch(`/company/orders/data/${oid}`);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const order = await response.json();
+        document.getElementById('order_id').value = order.order_id;
+        document.getElementById('order_id_hidden').value = order.order_id;
+        document.getElementById('status').value = order.status;
+        const deliveryDateValue = order.delivery_date ? new Date(order.delivery_date).toISOString().split('T')[0] : '';
+        document.getElementById('delivery_date').value = deliveryDateValue;
+        loading.style.display = 'none';
+        formContainer.style.display = 'block';
+        flatpickr(".delivery-date-input", {
+          dateFormat: "Y-m-d",
+          minDate: "today"
+        });
+      } catch (error) {
+        console.error('Error loading order:', error);
+        loading.textContent = 'Error loading order. Please refresh.';
+      }
+    }
+
+    loadOrder();
   </script>
 </body>
 </html>
