@@ -174,6 +174,16 @@
       display: none;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
+    #editForm {
+      display: none;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -187,13 +197,8 @@
         overflow-y: auto;
       }
 
-      .content-area::-webkit-scrollbar {
-        display: none;
-      }
-
-      .content-area {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+      .content-area h1 {
+        font-size: 1.5em;
       }
 
       .form-row {
@@ -203,6 +208,11 @@
 
       .form-group {
         min-width: 100%;
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 10px;
       }
     }
   </style>
@@ -214,95 +224,110 @@
     <%- include('../../partials/salesmanager_sidebar') %>
 
     <div class="content-area" id="content">
-      <h1>Edit Profile</h1>
-      <% if (error) { %>
-        <p class="error-message"><%= error %></p>
-      <% } %>
-      <div id="success-message" class="success-message"></div>
-      <% if (salesManager) { %>
-        <div id="editForm">
-          <div class="section">
-            <h2>Personal Details</h2>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="f_name">First Name</label>
-                <input type="text" id="f_name" name="f_name" value="<%= salesManager.f_name %>" required>
-              </div>
-              <div class="form-group">
-                <label for="last_name">Last Name</label>
-                <input type="text" id="last_name" name="last_name" value="<%= salesManager.last_name %>" required>
-              </div>
-              <div class="form-group">
-                <label for="role">Role</label>
-                <input type="text" id="role" name="role" value="<%= salesManager.role %>" readonly>
-              </div>
+      <h1>Edit Sales Manager Profile</h1>
+
+      <div id="loading">Loading profile...</div>
+
+      <form id="editForm" style="display: none;">
+        <p class="error-message" id="error-message"></p>
+        <p id="success-message" class="success-message"></p>
+
+        <div class="section">
+          <h2>Personal Details</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f_name">First Name</label>
+              <input type="text" id="f_name" name="f_name" required>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="bid">Branch</label>
-                <input type="text" id="bid" name="bid" value="<%= salesManager.bid || 'Not Assigned' %>" readonly>
-              </div>
-              <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="<%= salesManager.email %>" required>
-                <span id="emailError" class="error">Please enter a valid email address</span>
-              </div>
-              <div class="form-group">
-                <label for="phone_no">Phone Number</label>
-                <input type="text" id="phone_no" name="phone_no" value="<%= salesManager.phone_no || '' %>" pattern="[0-9]{10}" maxlength="10">
-                <span id="phoneError" class="error">Phone number must be exactly 10 digits</span>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="address">Address</label>
-                <textarea id="address" name="address"><%= salesManager.address || '' %></textarea>
-              </div>
+            <div class="form-group">
+              <label for="last_name">Last Name</label>
+              <input type="text" id="last_name" name="last_name" required>
             </div>
           </div>
-
-          <div class="section">
-            <h2>Account and Salaries</h2>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="acno">Account Number</label>
-                <input type="text" id="acno" name="acno" value="<%= salesManager.acno %>" required>
-              </div>
-              <div class="form-group">
-                <label for="ifsc">IFSC Code</label>
-                <input type="text" id="ifsc" name="ifsc" value="<%= salesManager.ifsc %>" required>
-              </div>
-              <div class="form-group">
-                <label for="bankname">Bank Name</label>
-                <input type="text" id="bankname" name="bankname" value="<%= salesManager.bankname %>" required>
-              </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="base_salary">Monthly Salary</label>
-                <input type="number" id="base_salary" name="base_salary" value="<%= salesManager.base_salary %>" readonly>
-              </div>
+            <div class="form-group">
+              <label for="phone_no">Phone Number</label>
+              <input type="tel" id="phone_no" name="phone_no" maxlength="10">
             </div>
           </div>
-
-          <button type="button" class="submit-btn" onclick="updateSalesManager()">Update</button>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="address">Address</label>
+              <textarea id="address" name="address"></textarea>
+            </div>
+          </div>
         </div>
-      <% } else { %>
-        <p>Sales Manager data not available</p>
-      <% } %>
+
+        <div class="section">
+          <h2>Bank Details</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="acno">Account Number</label>
+              <input type="text" id="acno" name="acno" required>
+            </div>
+            <div class="form-group">
+              <label for="ifsc">IFSC Code</label>
+              <input type="text" id="ifsc" name="ifsc" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bankname">Bank Name</label>
+              <input type="text" id="bankname" name="bankname" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="base_salary">Monthly Salary</label>
+              <input type="number" id="base_salary" name="base_salary" readonly>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="submit-btn" onclick="updateSalesManager()">Update</button>
+      </form>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
 
   <script>
+    const form = document.getElementById('editForm');
+    const loading = document.getElementById('loading');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    async function loadSalesManager() {
+      try {
+        const response = await fetch('/salesmanager/self/data');
+        if (!response.ok) throw new Error('Failed to fetch sales manager');
+        const salesManager = await response.json();
+
+        document.getElementById('f_name').value = salesManager.f_name;
+        document.getElementById('last_name').value = salesManager.last_name;
+        document.getElementById('email').value = salesManager.email;
+        document.getElementById('phone_no').value = salesManager.phone_no || '';
+        document.getElementById('address').value = salesManager.address || '';
+        document.getElementById('acno').value = salesManager.acno;
+        document.getElementById('ifsc').value = salesManager.ifsc;
+        document.getElementById('bankname').value = salesManager.bankname;
+        document.getElementById('base_salary').value = salesManager.base_salary;
+
+        loading.style.display = 'none';
+        form.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading sales manager:', error);
+        loading.textContent = 'Error loading profile. Please refresh.';
+      }
+    }
+
     async function updateSalesManager() {
       const email = document.getElementById('email');
       const phone = document.getElementById('phone_no');
-      const errorMessage = document.querySelector('.error-message') || document.createElement('p');
-      errorMessage.className = 'error-message';
-      const successMessage = document.getElementById('success-message');
-      const form = document.getElementById('editForm');
 
       email.style.borderColor = '#ced4da';
       phone.style.borderColor = '#ced4da';
@@ -313,7 +338,6 @@
       if (!emailPattern.test(email.value)) {
         email.style.borderColor = '#dc3545';
         errorMessage.textContent = 'Please enter a valid email address';
-        form.insertBefore(errorMessage, form.firstChild);
         return;
       }
 
@@ -321,7 +345,6 @@
       if (phone.value && !phonePattern.test(phone.value)) {
         phone.style.borderColor = '#dc3545';
         errorMessage.textContent = 'Phone number must be exactly 10 digits';
-        form.insertBefore(errorMessage, form.firstChild);
         return;
       }
 
@@ -338,7 +361,6 @@
 
       if (!data.f_name || !data.last_name || !data.email || !data.acno || !data.ifsc || !data.bankname) {
         errorMessage.textContent = 'All required fields must be filled';
-        form.insertBefore(errorMessage, form.firstChild);
         return;
       }
 
@@ -355,7 +377,6 @@
 
         if (result.error) {
           errorMessage.textContent = result.error;
-          form.insertBefore(errorMessage, form.firstChild);
         } else {
           successMessage.textContent = 'Profile updated successfully';
           successMessage.style.display = 'block';
@@ -365,7 +386,6 @@
         }
       } catch (error) {
         errorMessage.textContent = 'Network error: ' + error.message;
-        form.insertBefore(errorMessage, form.firstChild);
       }
     }
 
@@ -375,6 +395,9 @@
         this.value = this.value.slice(0, 10);
       }
     });
+
+    // Initial load
+    loadSalesManager();
   </script>
 </body>
 </html>
