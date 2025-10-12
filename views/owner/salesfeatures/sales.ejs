@@ -403,16 +403,7 @@
               <th>Sale Date</th>
             </tr>
           </thead>
-          <tbody>
-            <% salers.forEach(sale => { %>
-              <tr onclick="window.location='/admin/sales/<%= sale.sales_id %>'">
-                <td data-label="Sale ID"><%= sale.sales_id %></td>
-                <td data-label="Branch Name"><%= sale.branch_name %></td>
-                <td data-label="Price">$<%= typeof sale.amount === 'number' ? sale.amount.toFixed(2) : '0.00' %></td>
-                <td data-label="Profit">$<%= typeof sale.profit_or_loss === 'number' ? sale.profit_or_loss.toFixed(2) : '0.00' %></td>
-                <td data-label="Sale Date"><%= new Date(sale.sales_date).toISOString().split('T')[0] %></td>
-              </tr>
-            <% }) %>
+          <tbody id="salesTableBody">
           </tbody>
         </table>
       </div>
@@ -420,5 +411,29 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/admin/sales/data')
+        .then(response => response.json())
+        .then(sales => {
+          const tbody = document.getElementById('salesTableBody');
+          sales.forEach(sale => {
+            const row = document.createElement('tr');
+            row.onclick = function() { window.location.href = `/admin/sales/${sale.sales_id}`; };
+            row.style.cursor = 'pointer';
+            row.innerHTML = `
+              <td data-label="Sale ID">${sale.sales_id}</td>
+              <td data-label="Branch Name">${sale.branch_name}</td>
+              <td data-label="Price">$${typeof sale.amount === 'number' ? sale.amount.toFixed(2) : '0.00'}</td>
+              <td data-label="Profit">$${typeof sale.profit_or_loss === 'number' ? sale.profit_or_loss.toFixed(2) : '0.00'}</td>
+              <td data-label="Sale Date">${new Date(sale.sales_date).toISOString().split('T')[0]}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(error => console.error('Error fetching sales:', error));
+    });
+  </script>
 </body>
 </html>

@@ -331,7 +331,7 @@
       </div>
 
       <!-- Complaint Form (Hidden by Default) -->
-      <form id="complaint-form" class="hidden" action="/customer/complaints/submit" method="POST">
+      <form id="complaint-form" class="hidden">
         <input type="hidden" name="sale_id" id="sale-id">
         <fieldset class="form-section" id="complaint-section">
           <legend class="section-title">File Complaint</legend>
@@ -351,66 +351,76 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    const complaintForm = document.getElementById('complaint-form');
-    const complaintSection = document.getElementById('complaint-section');
-    const saleIdInput = document.getElementById('sale-id');
+    document.addEventListener('DOMContentLoaded', () => {
+      const complaintForm = document.getElementById('complaint-form');
+      const complaintSection = document.getElementById('complaint-section');
+      const saleIdInput = document.getElementById('sale-id');
+      const complaintInput = document.getElementById('complaint');
+      const complaintError = document.getElementById('complaint-error');
 
-    document.querySelectorAll('.clickable-btn').forEach(button => {
-      button.addEventListener('click', () => {
-        const saleId = button.getAttribute('data-saleid');
-        console.log('[add_complaint] File Complaint button clicked, saleId:', saleId);
-
-        if (saleId) {
-          saleIdInput.value = saleId;
-          complaintForm.classList.remove('hidden');
-          complaintSection.scrollIntoView({ behavior: 'smooth' });
-        } else {
-          console.error('[add_complaint] Sale ID not found on button');
-        }
-      });
-    });
-
-    complaintForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      console.log('[add_complaint] Form submission triggered');
-
-      // Client-side validation
-      const complaint = document.querySelector('#complaint').value.trim();
-      const complaintError = document.querySelector('#complaint-error');
+      // Reset form to hidden state initially
+      complaintForm.classList.add('hidden');
+      complaintInput.value = ''; // Clear textarea
       complaintError.style.display = 'none';
 
-      if (!complaint) {
-        complaintError.style.display = 'block';
-        console.log('[add_complaint] Validation failed: Complaint description is empty');
-        return;
-      }
+      document.querySelectorAll('.clickable-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          const saleId = button.getAttribute('data-saleid');
+          console.log('[add_complaint] File Complaint button clicked, saleId:', saleId);
 
-      const form = event.target;
-      const formData = new FormData(form);
-      console.log('[add_complaint] Form data:', Object.fromEntries(formData));
-
-      try {
-        const response = await fetch(form.action, {
-          method: form.method,
-          body: formData,
-          headers: {
-            'Accept': 'application/json'
+          if (saleId) {
+            saleIdInput.value = saleId;
+            complaintForm.classList.remove('hidden');
+            complaintInput.value = ''; // Reset textarea on new selection
+            complaintError.style.display = 'none';
+            complaintSection.scrollIntoView({ behavior: 'smooth' });
+            complaintInput.focus();
+            console.log('[add_complaint] Form displayed, sale_id set to:', saleId);
+          } else {
+            console.error('[add_complaint] Sale ID not found on button');
           }
         });
+      });
 
-        const result = await response.json();
-        console.log('[add_complaint] Server response:', result);
+      complaintForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        console.log('[add_complaint] Form submission triggered');
 
-        if (result.success) {
-          window.location.href = result.redirect;
-        } else {
-          alert(result.message || 'Error submitting complaint');
-          console.error('[add_complaint] Submission failed:', result.message);
+        // Client-side validation
+        const sale_id = saleIdInput.value.trim();
+        const complaint_info = complaintInput.value.trim();
+        complaintError.style.display = 'none';
+
+        if (!sale_id || !complaint_info) {
+          complaintError.style.display = 'block';
+          console.log('[add_complaint] Validation failed: Missing sale_id or complaint_info');
+          return;
         }
-      } catch (error) {
-        console.error('[add_complaint] Error submitting complaint:', error);
-        alert('An error occurred while submitting the complaint');
-      }
+
+        try {
+          const response = await fetch('/customer/complaints/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ sale_id, complaint_info })
+          });
+
+          const result = await response.json();
+          console.log('[add_complaint] Server response:', result);
+
+          if (result.success) {
+            window.location.href = result.redirect;
+          } else {
+            alert(result.message || 'Failed to submit complaint');
+            console.error('[add_complaint] Submission failed:', result.message);
+          }
+        } catch (error) {
+          console.error('[add_complaint] Error submitting complaint:', error);
+          alert('An error occurred while submitting the complaint');
+        }
+      });
     });
   </script>
 </body>
