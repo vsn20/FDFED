@@ -35,8 +35,6 @@
 - ✅ Form Validation using DOM completed
 - ✅ Dynamic HTML Implementation completed
 - ✅ Data Handling with AJAX / Fetch / Axios / async completed
-- ✅ Team Cohesion demonstrated
-- ✅ Individual Contribution & QA documented
 
 ---
 
