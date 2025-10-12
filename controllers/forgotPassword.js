@@ -204,7 +204,7 @@ async function resetPassword(req, res) {
   
       console.log(`Password reset successfully for ${userEmail} (${user.user_id}).`);
   
-      // Return success with redirect URL for client handling
+      // Return success wiedirect URL for client handling
       res.json({ 
         success: true, 
         message: "Password reset successfully! Redirecting to home page...",
