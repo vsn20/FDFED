@@ -12,7 +12,19 @@ const {
 } = require("../controllers/owner/load_employee_data");
 const Branch = require("../models/branches");
 const Employee = require("../models/employees");
-const { products_display, rejected_products_display, new_products_display, render_product_details, render_add_product_form, render_edit_product_form, update_product } = require("../controllers/admin_products_display");
+const { 
+  products_display, 
+  rejected_products_display, 
+  new_products_display, 
+  render_product_details, 
+  render_add_product_form, 
+  render_edit_product_form, 
+  update_product,
+  getProductsData,
+  getRejectedProductsData,
+  getNewProductsData,
+  getProductData
+} = require("../controllers/admin_products_display");
 const { getAdminDashboardData } = require("../controllers/owner/dashboard");
 
 router.get("/employees", loademployeedata);
@@ -32,9 +44,13 @@ router.get("/addemployee", (req, res) => {
 router.post("/addemployee", addemployee);
 
 router.get("/products", products_display);
+router.get("/products/data", getProductsData);
 router.get("/products/rejected", rejected_products_display);
+router.get("/products/rejected/data", getRejectedProductsData);
 router.get("/products/new", new_products_display);
+router.get("/products/new/data", getNewProductsData);
 router.get("/products/details/:prod_id", render_product_details);
+router.get("/products/data/:prod_id", getProductData);
 router.get("/products/add", render_add_product_form);
 router.get("/products/edit/:prod_id", render_edit_product_form);
 router.post("/products/edit/:prod_id", update_product);
