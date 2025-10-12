@@ -10,8 +10,9 @@ router.get("/", getSalesmanDashboardData);
 router.get("/home", getSalesmanDashboardData);
 
 // Salesman inventory
-const { inventory_display } = require("../controllers/salesman/inventory_display");
+const { inventory_display, get_inventory_data } = require("../controllers/salesman/inventory_display");
 router.get("/stocks", inventory_display);
+router.get("/stocks/data", get_inventory_data);
 
 // Salesman salary
 const { salary_display, get_salary_data } = require("../controllers/salesman/salary");
