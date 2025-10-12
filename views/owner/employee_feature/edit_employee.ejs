@@ -81,7 +81,7 @@
       border-radius: 5px;
       font-size: 0.9rem;
       background: #fff;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s, background-color 0.3s;
     }
 
     input:disabled, select:disabled, textarea:disabled {
@@ -125,6 +125,7 @@
       font-size: 0.85rem;
       margin: 10px 0;
       text-align: center;
+      display: none;
     }
 
     .branch-option {
@@ -280,6 +281,62 @@
     let allBranches = [];
     let employeeData = null;
 
+    // Real-time Validation Functions
+    function validateEmail(el) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(el.value)) {
+        el.style.borderColor = '#e74c3c';
+        el.style.backgroundColor = '#fff5f5';
+        showFieldError('Please enter a valid email address.');
+        return false;
+      } else {
+        el.style.borderColor = '#27ae60';
+        el.style.backgroundColor = '#f0fff4';
+        clearFieldError();
+        return true;
+      }
+    }
+
+    function validatePhone(el) {
+      const phonePattern = /^[0-9]{10}$/;
+      if (el.value && !phonePattern.test(el.value)) {
+        el.style.borderColor = '#e74c3c';
+        el.style.backgroundColor = '#fff5f5';
+        showFieldError('Please enter a valid 10-digit phone number.');
+        return false;
+      } else {
+        el.style.borderColor = '#e6e9f0';
+        el.style.backgroundColor = '#fff';
+        clearFieldError();
+        return true;
+      }
+    }
+
+    function showFieldError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.style.display = 'block';
+    }
+
+    function clearFieldError() {
+      errorMessage.textContent = '';
+      errorMessage.style.display = 'none';
+    }
+
+    // Event Listeners for Real-Time Validation
+    email.addEventListener('input', () => validateEmail(email));
+    email.addEventListener('blur', () => validateEmail(email));
+
+    phone.addEventListener('blur', () => validatePhone(phone));
+
+    // Reset styles on focus
+    [email, phone].forEach(el => {
+      el.addEventListener('focus', () => {
+        el.style.borderColor = '#333333';
+        el.style.backgroundColor = '#fff';
+        clearFieldError();
+      });
+    });
+
     async function loadBranches() {
       try {
         const response = await fetch('/admin/branches/data');
@@ -366,6 +423,9 @@
         statusSelect.value = employeeData.status;
         populateBranchSelect(employeeData.bid);
         toggleFormInputs();
+        // Trigger initial validation after population
+        validateEmail(email);
+        validatePhone(phone);
         loading.style.display = 'none';
         formContainer.style.display = 'block';
       } catch (error) {
@@ -393,26 +453,12 @@
       event.preventDefault();
       if (!employeeData || submitBtn.disabled) return;
 
-      email.style.borderColor = '#e6e9f0';
-      email.style.backgroundColor = '#fff';
-      phone.style.borderColor = '#e6e9f0';
-      phone.style.backgroundColor = '#fff';
-      errorMessage.textContent = '';
+      // Run real-time validations before submit
+      const isEmailValid = validateEmail(email);
+      const isPhoneValid = validatePhone(phone);
 
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(email.value)) {
-        email.style.borderColor = '#e74c3c';
-        email.style.backgroundColor = '#fff5f5';
-        errorMessage.textContent = 'Please enter a valid email address.';
-        return;
-      }
-
-      const phonePattern = /^[0-9]{10}$/;
-      if (phone.value && !phonePattern.test(phone.value)) {
-        phone.style.borderColor = '#e74c3c';
-        phone.style.backgroundColor = '#fff5f5';
-        errorMessage.textContent = 'Please enter a valid 10-digit phone number.';
-        return;
+      if (!isEmailValid || !isPhoneValid) {
+        return; // Stop submit if invalid
       }
 
       const formData = new FormData(form);
@@ -432,10 +478,10 @@
         if (response.ok && result.success) {
           window.location.href = `/admin/employee/${e_id}`;
         } else {
-          errorMessage.textContent = result.message || 'An error occurred while updating the employee.';
+          showFieldError(result.message || 'An error occurred while updating the employee.');
         }
       } catch (error) {
-        errorMessage.textContent = 'Network error: ' + error.message;
+        showFieldError('Network error: ' + error.message);
       }
     });
 

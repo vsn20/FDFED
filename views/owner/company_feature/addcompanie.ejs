@@ -123,6 +123,12 @@
             border-color: #e74c3c !important;
             background-color: #ffe6e6 !important;
         }
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -168,18 +174,22 @@
                         <div>
                             <label for="company-name">Company Name</label>
                             <input type="text" id="company-name" name="cname" required placeholder="Enter company name">
+                            <div class="error-message" id="company-name-error"></div>
                         </div>
                         <div>
                             <label for="email">Email</label>
                             <input type="email" id="email" name="email" required placeholder="Enter company email">
+                            <div class="error-message" id="email-error"></div>
                         </div>
                         <div>
                             <label for="phone">Phone</label>
                             <input type="tel" id="phone" name="phone" required placeholder="Enter company phone">
+                            <div class="error-message" id="phone-error"></div>
                         </div>
                         <div>
                             <label for="address">Address</label>
                             <textarea id="address" name="address" required placeholder="Enter company address"></textarea>
+                            <div class="error-message" id="address-error"></div>
                         </div>
                     </div>
                 </fieldset>
@@ -198,8 +208,119 @@
         const successMessage = document.getElementById('success-message');
         const submitBtn = form.querySelector('button[type="submit"]');
 
+        // DOM elements for validation
+        const companyNameInput = document.getElementById('company-name');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const addressInput = document.getElementById('address');
+
+        const companyNameError = document.getElementById('company-name-error');
+        const emailError = document.getElementById('email-error');
+        const phoneError = document.getElementById('phone-error');
+        const addressError = document.getElementById('address-error');
+
+        // Validation functions
+        function validateCompanyName(name) {
+            if (!name) {
+                return 'Company name is required.';
+            }
+            if (name.length < 2) {
+                return 'Company name must be at least 2 characters long.';
+            }
+            return '';
+        }
+
+        function validateEmail(email) {
+            if (!email) {
+                return 'Email is required.';
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return 'Please enter a valid email address.';
+            }
+            return '';
+        }
+
+        function validatePhone(phone) {
+            if (!phone) {
+                return 'Phone is required.';
+            }
+            const phoneRegex = /^\d{10}$/; // Assuming 10-digit phone
+            if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
+                return 'Please enter a valid 10-digit phone number.';
+            }
+            return '';
+        }
+
+        function validateAddress(address) {
+            if (!address) {
+                return 'Address is required.';
+            }
+            if (address.length < 10) {
+                return 'Address must be at least 10 characters long.';
+            }
+            return '';
+        }
+
+        // Real-time validation on input
+        companyNameInput.addEventListener('input', function() {
+            const error = validateCompanyName(this.value);
+            companyNameError.textContent = error;
+            companyNameError.style.display = error ? 'block' : 'none';
+            this.classList.toggle('error', !!error);
+        });
+
+        emailInput.addEventListener('input', function() {
+            const error = validateEmail(this.value);
+            emailError.textContent = error;
+            emailError.style.display = error ? 'block' : 'none';
+            this.classList.toggle('error', !!error);
+        });
+
+        phoneInput.addEventListener('input', function() {
+            const error = validatePhone(this.value);
+            phoneError.textContent = error;
+            phoneError.style.display = error ? 'block' : 'none';
+            this.classList.toggle('error', !!error);
+        });
+
+        addressInput.addEventListener('input', function() {
+            const error = validateAddress(this.value);
+            addressError.textContent = error;
+            addressError.style.display = error ? 'block' : 'none';
+            this.classList.toggle('error', !!error);
+        });
+
+        // Form submit validation
         form.addEventListener('submit', async function(event) {
             event.preventDefault();
+
+            // Validate all fields
+            const companyNameErrorMsg = validateCompanyName(companyNameInput.value);
+            const emailErrorMsg = validateEmail(emailInput.value);
+            const phoneErrorMsg = validatePhone(phoneInput.value);
+            const addressErrorMsg = validateAddress(addressInput.value);
+
+            companyNameError.textContent = companyNameErrorMsg;
+            companyNameError.style.display = companyNameErrorMsg ? 'block' : 'none';
+            emailError.textContent = emailErrorMsg;
+            emailError.style.display = emailErrorMsg ? 'block' : 'none';
+            phoneError.textContent = phoneErrorMsg;
+            phoneError.style.display = phoneErrorMsg ? 'block' : 'none';
+            addressError.textContent = addressErrorMsg;
+            addressError.style.display = addressErrorMsg ? 'block' : 'none';
+
+            // Highlight errors
+            companyNameInput.classList.toggle('error', !!companyNameErrorMsg);
+            emailInput.classList.toggle('error', !!emailErrorMsg);
+            phoneInput.classList.toggle('error', !!phoneErrorMsg);
+            addressInput.classList.toggle('error', !!addressErrorMsg);
+
+            if (companyNameErrorMsg || emailErrorMsg || phoneErrorMsg || addressErrorMsg) {
+                errorMessage.textContent = 'Please fix the errors above.';
+                return;
+            }
+
             errorMessage.textContent = '';
             successMessage.textContent = '';
             submitBtn.disabled = true;

@@ -67,6 +67,42 @@
       flex-wrap: wrap;
     }
 
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #fff;
+      transition: border-color 0.3s;
+    }
+
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .add-button {
       display: inline-block;
       padding: 10px 20px;
@@ -192,6 +228,18 @@
         gap: 10px;
       }
 
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+
+      .search-group {
+        max-width: 100%;
+      }
+
       .add-button, .generate-btn {
         margin-top: 5px;
         width: 100%;
@@ -288,6 +336,12 @@
           <button class="generate-btn" onclick="filterSalaries()">Generate</button>
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchSalaries">Search by Employee ID/Employee Name</label>
+          <input type="text" id="searchSalaries" placeholder="Enter Employee ID or Name" oninput="filterSalarySearch()">
+        </div>
+      </div>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -379,6 +433,24 @@
     function filterSalaries() {
       const monthYear = document.getElementById('month-year').value;
       loadSalaries(monthYear);
+    }
+
+    function filterSalarySearch() {
+      const searchInput = document.getElementById('searchSalaries').value.toLowerCase();
+      const tbody = document.getElementById('salaryTableBody');
+      const rows = tbody.getElementsByTagName('tr');
+
+      for (let row of rows) {
+        if (row.cells.length > 1) { // Skip header or empty rows
+          const empId = row.cells[0].textContent.toLowerCase();
+          const empName = row.cells[1].textContent.toLowerCase();
+          if (searchInput === '' || empId.includes(searchInput) || empName.includes(searchInput)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      }
     }
   </script>
 </body>
