@@ -7,11 +7,9 @@ const Product = require("../../models/products");
 
 async function orders_display(req, res) {
   try {
-    const orders = await Order.find({ company_id: req.user.c_id }).lean();
     res.render("company/orders_feature/orderdata", {
       activePage: "company",
       activeRoute: "orders",
-      orders
     });
   } catch (error) {
     console.error("Error rendering orders:", error);
@@ -19,16 +17,22 @@ async function orders_display(req, res) {
   }
 }
 
+async function getOrdersData(req, res) {
+  try {
+    const orders = await Order.find({ company_id: req.user.c_id }).lean();
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
 async function ordersedit_display(req, res) {
   try {
-    const order = await Order.findOne({ order_id: req.params.oid, company_id: req.user.c_id }).lean();
-    if (!order) {
-      return res.status(404).send("Order not found");
-    }
     res.render("company/orders_feature/orderedit", {
+      oid: req.params.oid,
       activePage: "company",
       activeRoute: "orders",
-      order
     });
   } catch (error) {
     console.error("Error rendering edit order form:", error);
@@ -36,16 +40,25 @@ async function ordersedit_display(req, res) {
   }
 }
 
+async function getOrderById(req, res) {
+  try {
+    const { oid } = req.params;
+    const order = await Order.findOne({ order_id: oid, company_id: req.user.c_id }).lean();
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    res.json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
 async function pendingorders_display(req, res) {
   try {
-    const orders = await Order.find({ 
-      company_id: req.user.c_id, 
-      status: "Pending" 
-    }).lean();
     res.render("company/orders_feature/pendingorderdata", {
       activePage: "company",
       activeRoute: "orders",
-      orders
     });
   } catch (error) {
     console.error("Error rendering pending orders:", error);
@@ -53,20 +66,25 @@ async function pendingorders_display(req, res) {
   }
 }
 
-async function pendingedit_display(req, res) {
+async function getPendingOrdersData(req, res) {
   try {
-    const order = await Order.findOne({ 
-      order_id: req.params.oid, 
+    const orders = await Order.find({ 
       company_id: req.user.c_id, 
       status: "Pending" 
     }).lean();
-    if (!order) {
-      return res.status(404).send("Order not found or not pending");
-    }
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching pending orders:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function pendingedit_display(req, res) {
+  try {
     res.render("company/orders_feature/pendingedit", {
+      oid: req.params.oid,
       activePage: "company",
       activeRoute: "orders",
-      order
     });
   } catch (error) {
     console.error("Error rendering pending edit form:", error);
@@ -184,8 +202,11 @@ async function updateDeliveryDate(req, res) {
 
 module.exports = {
   orders_display,
+  getOrdersData,
   ordersedit_display,
+  getOrderById,
   pendingorders_display,
+  getPendingOrdersData,
   pendingedit_display,
   updateOrderStatus,
   updateDeliveryDate
