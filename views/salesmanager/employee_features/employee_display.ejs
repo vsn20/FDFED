@@ -59,6 +59,48 @@
       font-weight: bold;
     }
 
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: #333333;
+      outline: none;
+    }
+
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -136,6 +178,77 @@
       .content-area {
         height: auto;
       }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+
+      .search-group {
+        max-width: 100%;
+      }
+
+      table {
+        display: block;
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        border: 1px solid #e6e9f0;
+        border-radius: 5px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e6e9f0;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 10px;
+        min-width: 100px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .content-area h1 {
+        font-size: 1.3rem;
+      }
+
+      .form-group {
+        flex: 1 1 45%;
+      }
+
+      .search-group {
+        max-width: 250px;
+      }
+
+      th, td {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
     }
   </style>
 </head>
@@ -154,6 +267,12 @@
         <p style="color: red;"><%= error %></p>
       <% } %>
       <a href="/salesmanager/add-employee" class="add-employee-btn">Add Employees</a>
+      <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchEmployee">Search by Employee ID or Name</label>
+          <input type="text" id="searchEmployee" placeholder="Enter Employee ID or Name" oninput="filterEmployees()">
+        </div>
+      </div>
       <table id="employeeTable">
         <thead>
           <tr>
@@ -167,26 +286,26 @@
         <tbody>
           <% if (salesManager) { %>
             <tr>
-              <td><%= salesManager.e_id %></td>
-              <td><%= salesManager.f_name %></td>
-              <td><%= salesManager.last_name %></td>
-              <td><%= salesManager.status %></td>
-              <td>
+              <td data-label="Employee ID"><%= salesManager.e_id %></td>
+              <td data-label="First Name"><%= salesManager.f_name %></td>
+              <td data-label="Last Name"><%= salesManager.last_name %></td>
+              <td data-label="Status"><%= salesManager.status %></td>
+              <td data-label="Action">
                 <a href="/salesmanager/edit-salesmanager" class="edit-btn">Edit</a>
               </td>
             </tr>
           <% } else { %>
-            <tr><td colspan="5">Sales Manager data not available</td></tr>
+            <tr><td colspan="5" class="no-data">Sales Manager data not available</td></tr>
           <% } %>
 
           <% if (employeeData && Array.isArray(employeeData) && employeeData.length > 0) { %>
             <% employeeData.forEach(employee => { %>
               <tr>
-                <td><%= employee.e_id %></td>
-                <td><%= employee.f_name %></td>
-                <td><%= employee.last_name %></td>
-                <td><%= employee.status %></td>
-                <td>
+                <td data-label="Employee ID"><%= employee.e_id %></td>
+                <td data-label="First Name"><%= employee.f_name %></td>
+                <td data-label="Last Name"><%= employee.last_name %></td>
+                <td data-label="Status"><%= employee.status %></td>
+                <td data-label="Action">
                   <a href="/salesmanager/employee-details/<%= employee.e_id %>" class="edit-btn">Details</a>
                   <% if (employee.status === 'active') { %>
                     <a href="#" class="fire-btn" onclick="showFireForm('<%= employee.e_id %>'); return false;">Fire</a>
@@ -201,7 +320,7 @@
               </tr>
             <% }) %>
           <% } else { %>
-            <tr><td colspan="5">No salesmen available</td></tr>
+            <tr><td colspan="5" class="no-data">No salesmen available</td></tr>
           <% } %>
         </tbody>
       </table>
@@ -252,6 +371,25 @@
       } catch (error) {
         errorMessage.textContent = 'Network error: ' + error.message;
         parentDiv.insertBefore(errorMessage, reasonInput.nextSibling);
+      }
+    }
+
+    function filterEmployees() {
+      const searchInput = document.getElementById('searchEmployee').value.toLowerCase();
+      const rows = document.getElementById('employeeTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+      for (let row of rows) {
+        const employeeId = row.cells[0].textContent.toLowerCase();
+        const firstName = row.cells[1].textContent.toLowerCase();
+        const lastName = row.cells[2].textContent.toLowerCase();
+        const fullName = `${firstName} ${lastName}`;
+        if (row.cells[0].classList.contains('no-data')) {
+          row.style.display = searchInput === '' ? '' : 'none';
+        } else if (searchInput === '' || employeeId.includes(searchInput) || fullName.includes(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
       }
     }
   </script>
