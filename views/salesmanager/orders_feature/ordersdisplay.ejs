@@ -396,7 +396,7 @@
       for (let row of rows) {
         const orderId = row.cells[0].textContent.toLowerCase();
         const productName = row.cells[3].textContent.toLowerCase();
-        if (searchInput === '' || orderId.includes(searchInput) || productName.includes(searchInput)) {
+        if (searchInput === '' || orderId.startsWith(searchInput) || productName.startsWith(searchInput)) {
           row.style.display = '';
         } else {
           row.style.display = 'none';

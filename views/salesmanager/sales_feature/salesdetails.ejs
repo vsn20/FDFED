@@ -121,6 +121,12 @@
       background: #555555;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -203,75 +209,79 @@
     <div class="content-area" id="content">
       <h2>Sale Details</h2>
 
-      <h3>Sale Information</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Sale ID</label>
-          <input type="text" value="<%= sale.sales_id %>" readonly>
-        </div>
-        <div class="form-group">
-          <label>Unique Code</label>
-          <input type="text" value="<%= sale.unique_code %>" readonly>
-        </div>
-        <div class="form-group">
-          <label>Sale Date</label>
-          <input type="text" value="<%= new Date(sale.saledate).toISOString().split('T')[0] %>" readonly>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Salesman Name</label>
-          <input type="text" value="<%= sale.salesman_name %>" readonly>
-        </div>
-        <div class="form-group">
-          <label>Customer Name</label>
-          <input type="text" value="<%= sale.customer_name %>" readonly>
-        </div>
-        <div class="form-group">
-          <label>Branch Name</label>
-          <input type="text" value="<%= sale.branch_name %>" readonly>
-        </div>
-      </div>
+      <div id="loading">Loading sale details...</div>
 
-      <h3>Product Information</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Product Name</label>
-          <input type="text" value="<%= sale.product_name %>" readonly>
+      <div id="sale-details-container" style="display: none;">
+        <h3>Sale Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sale ID</label>
+            <input type="text" id="saleId" readonly>
+          </div>
+          <div class="form-group">
+            <label>Unique Code</label>
+            <input type="text" id="uniqueCode" readonly>
+          </div>
+          <div class="form-group">
+            <label>Sale Date</label>
+            <input type="text" id="saleDate" readonly>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Model Number</label>
-          <input type="text" value="<%= sale.model_number %>" readonly>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Salesman Name</label>
+            <input type="text" id="salesmanName" readonly>
+          </div>
+          <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" id="customerName" readonly>
+          </div>
+          <div class="form-group">
+            <label>Branch Name</label>
+            <input type="text" id="branchName" readonly>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Company Name</label>
-          <input type="text" value="<%= sale.company_name %>" readonly>
-        </div>
-      </div>
 
-      <h3>Transaction Details</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Purchased Price</label>
-          <input type="text" value="$<%= sale.purchased_price.toFixed(2) %>" readonly>
+        <h3>Product Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="productName" readonly>
+          </div>
+          <div class="form-group">
+            <label>Model Number</label>
+            <input type="text" id="modelNumber" readonly>
+          </div>
+          <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" id="companyName" readonly>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Sold Price</label>
-          <input type="text" value="$<%= sale.price.toFixed(2) %>" readonly>
+
+        <h3>Transaction Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Purchased Price</label>
+            <input type="text" id="purchasedPrice" readonly>
+          </div>
+          <div class="form-group">
+            <label>Sold Price</label>
+            <input type="text" id="soldPrice" readonly>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="text" id="quantity" readonly>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Quantity</label>
-          <input type="text" value="<%= sale.quantity %>" readonly>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Profit/Loss</label>
-          <input type="text" value="$<%= sale.profit_or_loss.toFixed(2) %>" readonly>
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" value="<%= sale.phone_number || 'N/A' %>" readonly>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Profit/Loss</label>
+            <input type="text" id="profitLoss" readonly>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="phoneNumber" readonly>
+          </div>
         </div>
       </div>
 
@@ -280,5 +290,43 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    const salesId = '<%= sales_id %>';
+    const loading = document.getElementById('loading');
+    const detailsContainer = document.getElementById('sale-details-container');
+
+    async function loadSaleDetails() {
+      try {
+        const response = await fetch(`/salesmanager/sales/data/${salesId}`);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const sale = await response.json();
+
+        document.getElementById('saleId').value = sale.sales_id;
+        document.getElementById('uniqueCode').value = sale.unique_code;
+        document.getElementById('saleDate').value = new Date(sale.saledate).toISOString().split('T')[0];
+        document.getElementById('salesmanName').value = sale.salesman_name;
+        document.getElementById('customerName').value = sale.customer_name;
+        document.getElementById('branchName').value = sale.branch_name;
+        document.getElementById('productName').value = sale.product_name;
+        document.getElementById('modelNumber').value = sale.model_number;
+        document.getElementById('companyName').value = sale.company_name;
+        document.getElementById('purchasedPrice').value = `$${sale.purchased_price.toFixed(2)}`;
+        document.getElementById('soldPrice').value = `$${sale.price.toFixed(2)}`;
+        document.getElementById('quantity').value = sale.quantity;
+        document.getElementById('profitLoss').value = `$${sale.profit_or_loss.toFixed(2)}`;
+        document.getElementById('phoneNumber').value = sale.phone_number || 'N/A';
+
+        loading.style.display = 'none';
+        detailsContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading sale details:', error);
+        loading.textContent = 'Error loading sale details. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadSaleDetails();
+  </script>
 </body>
 </html>

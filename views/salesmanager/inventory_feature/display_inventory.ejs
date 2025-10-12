@@ -294,7 +294,6 @@
     <div class="content-area" id="content">
       <div class="header-container">
         <h1>Inventory</h1>
-        <a href="/salesmanager/add-order" class="add-button">Add Order</a>
       </div>
 
       <% if (typeof successMessage !== 'undefined') { %>
@@ -385,7 +384,7 @@
         const productName = row.cells[1].textContent.toLowerCase();
         if (row.cells[0].classList.contains('no-data')) {
           row.style.display = searchInput === '' ? '' : 'none';
-        } else if (searchInput === '' || productId.includes(searchInput) || productName.includes(searchInput)) {
+        } else if (searchInput === '' || productId.startsWith(searchInput) || productName.startsWith(searchInput)) {
           row.style.display = '';
         } else {
           row.style.display = 'none';

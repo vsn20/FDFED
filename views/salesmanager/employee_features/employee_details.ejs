@@ -86,6 +86,12 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       background-color: #ffffff;
+      transition: border-color 0.3s;
+    }
+
+    input:focus:not([readonly]) {
+      border-color: #333;
+      outline: none;
     }
 
     .fire-button, .edit-button, .submit-button, .cancel-button {
@@ -168,6 +174,17 @@
       display: none;
     }
 
+    .field-error {
+      color: #d63031;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    input.invalid {
+      border-color: #d63031;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -213,7 +230,7 @@
             <div><label for="role">Role</label><input type="text" id="role" readonly></div>
             <div><label for="status">Status</label><input type="text" id="status" readonly></div>
             <div><label for="bid">Branch ID</label><input type="text" id="bid" readonly></div>
-            <div><label for="base_salary">Monthly Salary</label><input type="number" id="base_salary" readonly></div>
+            <div><label for="base_salary">Monthly Salary</label><input type="number" id="base_salary" readonly step="0.01"><div class="field-error" id="salary-error">Monthly salary must be a postive number.</div></div>
             <div id="editSalaryButtonContainer"><button id="editSalaryButton" class="edit-button">Edit Salary</button></div>
             <div><label for="hiredAt">Hired At</label><input type="text" id="hiredAt" readonly></div>
             <div><label for="resignation_date">Resignation Date</label><input type="text" id="resignation_date" readonly></div>
@@ -256,6 +273,20 @@
     let salaryInput;
     let editButton;
     let fireButton = document.getElementById('fireButton');
+
+    // Validation Function for Salary
+    function validateSalary(field, errorElement) {
+      const value = parseFloat(field.value);
+      if (isNaN(value) || value <=0) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
 
     async function loadEmployee() {
       try {
@@ -311,6 +342,19 @@
       salaryInput.readOnly = false;
       salaryInput.focus();
 
+      const salaryError = document.getElementById('salary-error');
+
+      // Add event listeners for real-time validation
+      const validateOnInput = () => validateSalary(salaryInput, salaryError);
+      const validateOnBlur = () => validateSalary(salaryInput, salaryError);
+
+      salaryInput.addEventListener('input', validateOnInput);
+      salaryInput.addEventListener('blur', validateOnBlur);
+
+      // Store references to remove later
+      salaryInput._validateOnInput = validateOnInput;
+      salaryInput._validateOnBlur = validateOnBlur;
+
       const existingButtonContainer = document.getElementById('salaryButtons');
       if (existingButtonContainer) {
         existingButtonContainer.remove();
@@ -320,7 +364,11 @@
       submitButton.type = 'button';
       submitButton.className = 'submit-button';
       submitButton.textContent = 'Submit';
-      submitButton.onclick = () => updateSalary();
+      submitButton.onclick = () => {
+        if (validateSalary(salaryInput, salaryError)) {
+          updateSalary();
+        }
+      };
 
       const cancelButton = document.createElement('button');
       cancelButton.type = 'button';
@@ -333,10 +381,23 @@
       buttonContainer.appendChild(submitButton);
       buttonContainer.appendChild(cancelButton);
       document.getElementById('employeeForm').appendChild(buttonContainer);
+
+      // Initial validation
+      validateOnInput();
     }
 
     function cancelEdit() {
+      // Remove event listeners
+      if (salaryInput._validateOnInput) {
+        salaryInput.removeEventListener('input', salaryInput._validateOnInput);
+      }
+      if (salaryInput._validateOnBlur) {
+        salaryInput.removeEventListener('blur', salaryInput._validateOnBlur);
+      }
+
       salaryInput.readOnly = true;
+      salaryInput.classList.remove('invalid');
+      document.getElementById('salary-error').style.display = 'none';
       editButton.style.display = 'inline-block';
       const buttonContainer = document.getElementById('salaryButtons');
       if (buttonContainer) {
@@ -347,14 +408,15 @@
     }
 
     async function updateSalary() {
-      const salaryValue = parseFloat(salaryInput.value);
+      const salaryError = document.getElementById('salary-error');
       errorMessage.textContent = '';
       successMessage.style.display = 'none';
 
-      if (isNaN(salaryValue) || salaryValue < 0) {
-        errorMessage.textContent = 'Monthly salary must be a non-negative number.';
+      if (!validateSalary(salaryInput, salaryError)) {
         return;
       }
+
+      const salaryValue = parseFloat(salaryInput.value);
 
       try {
         const response = await fetch(`/salesmanager/employee/update-salary/<%= e_id %>`, {

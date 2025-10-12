@@ -8,17 +8,7 @@ const Inventory = require("../../models/inventory");
 
 const renderAddSaleForm = async (req, res) => {
   try {
-    const user = res.locals.user;
-    const employee = await Employee.findOne({ e_id: user.emp_id, role: "Sales Manager", status: "active" });
-    if (!employee) {
-      return res.status(404).send("Sales Manager not found");
-    }
-
-    const branch = await Branch.findOne({ bid: employee.bid, active: "active" }).lean();
-    const branchName = branch ? branch.b_name : "Unknown Branch";
-
     res.render("salesmanager/sales_feature/addsale", {
-      branchName: branchName,
       activePage: 'employee',
       activeRoute: 'sales'
     });
@@ -30,10 +20,22 @@ const renderAddSaleForm = async (req, res) => {
 
 const sales_display = async (req, res) => {
   try {
+    res.render('salesmanager/sales_feature/salesdisplay', {
+      activePage: 'employee',
+      activeRoute: 'sales'
+    });
+  } catch (error) {
+    console.error("error rendering sales", error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const getSalesData = async (req, res) => {
+  try {
     const user = res.locals.user;
     const employee = await Employee.findOne({ e_id: user.emp_id });
     if (!employee) {
-      return res.status(404).send("Sales Manager not found");
+      return res.status(404).json({ error: "Sales Manager not found" });
     }
 
     const branch = await Branch.findOne({ bid: employee.bid }).lean();
@@ -66,35 +68,44 @@ const sales_display = async (req, res) => {
       })
     );
 
-    res.render('salesmanager/sales_feature/salesdisplay', {
-      activePage: 'employee',
-      activeRoute: 'sales',
+    res.json({
       sales: mappedSales,
       branchid: employee.bid,
       branchname: branchName
     });
   } catch (error) {
-    console.error("error rendering sales", error);
-    res.status(500).send('Internal Server Error');
+    console.error("error fetching sales data", error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 const sales_details = async (req, res) => {
   try {
+    const salesId = req.params.id;
+    res.render('salesmanager/sales_feature/salesdetails', {
+      activePage: 'employee',
+      activeRoute: 'sales',
+      sales_id: salesId
+    });
+  } catch (error) {
+    console.error("error rendering sale details", error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const getSaleById = async (req, res) => {
+  try {
     const user = res.locals.user;
     const employee = await Employee.findOne({ e_id: user.emp_id });
     if (!employee) {
-      return res.status(404).send("Sales Manager not found");
+      return res.status(404).json({ error: "Sales Manager not found" });
     }
-
-    const branch = await Branch.findOne({ bid: employee.bid }).lean();
-    const branchName = branch ? branch.b_name : "Unknown Branch";
 
     const salesId = req.params.id;
     const sale = await Sale.findOne({ sales_id: salesId, branch_id: employee.bid }).lean();
 
     if (!sale) {
-      return res.status(404).send('Sale not found');
+      return res.status(404).json({ error: 'Sale not found' });
     }
 
     let salesmanName = "Unknown Salesman";
@@ -123,23 +134,22 @@ const sales_details = async (req, res) => {
       }
     }
 
-    res.render('salesmanager/sales_feature/salesdetails', {
-      activePage: 'employee',
-      activeRoute: 'sales',
-      sale: {
-        ...sale,
-        salesman_name: salesmanName,
-        company_name: companyName,
-        product_name: productName,
-        model_number: modelNumber,
-        branch_name: branchName,
-        saledate: sale.sales_date,
-        price: sale.sold_price
-      }
+    const branch = await Branch.findOne({ bid: employee.bid }).lean();
+    const branchName = branch ? branch.b_name : "Unknown Branch";
+
+    res.json({
+      ...sale,
+      salesman_name: salesmanName,
+      company_name: companyName,
+      product_name: productName,
+      model_number: modelNumber,
+      branch_name: branchName,
+      saledate: sale.sales_date,
+      price: sale.sold_price
     });
   } catch (error) {
-    console.error("error rendering sale details", error);
-    res.status(500).send('Internal Server Error');
+    console.error("error fetching sale details", error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -301,7 +311,9 @@ const getCompanies = async (req, res) => {
 module.exports = {
   renderAddSaleForm,
   sales_display,
+  getSalesData,
   sales_details,
+  getSaleById,
   addsale_post,
   getSalesmen,
   getCompanies

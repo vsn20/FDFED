@@ -542,7 +542,7 @@
         const fullName = `${firstName} ${lastName}`;
         if (row.cells[0].classList.contains('no-data')) {
           row.style.display = searchInput === '' ? '' : 'none';
-        } else if (searchInput === '' || employeeId.includes(searchInput) || fullName.includes(searchInput)) {
+        } else if (searchInput === '' || employeeId.startsWith(searchInput) || fullName.startsWith(searchInput)) {
           row.style.display = '';
         } else {
           row.style.display = 'none';

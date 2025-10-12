@@ -59,6 +59,11 @@
       font-size: 0.9rem;
       background: #f8f9fa;
       color: #2d3436;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus {
+      border-color: #333;
+      outline: none;
     }
     input[readonly] {
       background: #e9ecef;
@@ -80,6 +85,15 @@
       color: #e74c3c;
       margin: 10px 0;
       min-height: 20px;
+    }
+    .field-error {
+      color: #d63031;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      display: none;
+    }
+    input.invalid, select.invalid {
+      border-color: #d63031;
     }
     @media (max-width: 768px) {
       .container {
@@ -117,20 +131,24 @@
                     <option value="<%= company.c_id %>"><%= company.cname %></option>
                   <% }) %>
                 </select>
+                <div class="field-error" id="company-error">Please select a company.</div>
               </div>
               <div>
                 <label for="product_id">Product Name</label>
                 <select id="product_id" name="product_id" required>
                   <option value="">Select a product</option>
                 </select>
+                <div class="field-error" id="product-error">Please select a product.</div>
               </div>
               <div>
                 <label for="quantity">Quantity</label>
                 <input type="number" id="quantity" name="quantity" required placeholder="Enter quantity" min="1">
+                <div class="field-error" id="quantity-error">Please enter a quantity greater than 0.</div>
               </div>
               <div>
                 <label for="ordered_date">Ordered Date</label>
                 <input type="date" id="ordered_date" name="ordered_date" required>
+                <div class="field-error" id="ordered-date-error">Please select an ordered date.</div>
               </div>
             </div>
           </fieldset>
@@ -148,7 +166,57 @@
     const companySelect = document.getElementById('company_id');
     const productSelect = document.getElementById('product_id');
     const quantity = document.getElementById('quantity');
+    const orderedDate = document.getElementById('ordered_date');
     const errorMessage = document.getElementById('error-message');
+
+    // Validation Functions
+    function validateRequired(field, errorElement) {
+      if (!field.value.trim()) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    function validateQuantity(field, errorElement) {
+      const value = parseInt(field.value);
+      if (isNaN(value) || value < 1) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    // Add Event Listeners for Real-time Validation
+    function addValidationListeners() {
+      // Company Select
+      const companyError = document.getElementById('company-error');
+      companySelect.addEventListener('blur', () => validateRequired(companySelect, companyError));
+      companySelect.addEventListener('change', () => validateRequired(companySelect, companyError));
+
+      // Product Select
+      const productError = document.getElementById('product-error');
+      productSelect.addEventListener('blur', () => validateRequired(productSelect, productError));
+      productSelect.addEventListener('change', () => validateRequired(productSelect, productError));
+
+      // Quantity
+      const quantityError = document.getElementById('quantity-error');
+      quantity.addEventListener('blur', () => validateQuantity(quantity, quantityError));
+      quantity.addEventListener('input', () => validateQuantity(quantity, quantityError));
+
+      // Ordered Date
+      const orderedDateError = document.getElementById('ordered-date-error');
+      orderedDate.addEventListener('blur', () => validateRequired(orderedDate, orderedDateError));
+      orderedDate.addEventListener('change', () => validateRequired(orderedDate, orderedDateError));
+    }
 
     companySelect.addEventListener('change', async function() {
       const companyId = this.value;
@@ -180,14 +248,19 @@
     form.addEventListener('submit', async function(event) {
       event.preventDefault();
 
-      quantity.style.borderColor = '#ddd';
-      quantity.style.backgroundColor = '#f8f9fa';
-      errorMessage.textContent = '';
+      const fieldErrors = document.querySelectorAll('.field-error');
+      fieldErrors.forEach(error => error.style.display = 'none');
 
-      if (quantity.value <= 0) {
-        quantity.style.borderColor = '#e74c3c';
-        quantity.style.backgroundColor = '#fff5f5';
-        errorMessage.textContent = 'Quantity must be greater than 0.';
+      let valid = true;
+
+      // Validate required fields
+      if (!validateRequired(companySelect, document.getElementById('company-error'))) valid = false;
+      if (!validateRequired(productSelect, document.getElementById('product-error'))) valid = false;
+      if (!validateRequired(orderedDate, document.getElementById('ordered-date-error'))) valid = false;
+      if (!validateQuantity(quantity, document.getElementById('quantity-error'))) valid = false;
+
+      if (!valid) {
+        errorMessage.textContent = 'Please fix the errors in the form.';
         return;
       }
 
@@ -213,6 +286,10 @@
       } catch (error) {
         errorMessage.textContent = 'Network error: ' + error.message;
       }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      addValidationListeners();
     });
   </script>
 </body>
