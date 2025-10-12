@@ -5,8 +5,8 @@ A comprehensive, multi-level management system designed to streamline the operat
 ---
 
 ## Authors
-- Saichand  avula
-- Naman  
+- Saichand Avula
+- Vuppala Sai Naman  
 - Narayana  
 - Hemasai  
 - Jahnavi  
