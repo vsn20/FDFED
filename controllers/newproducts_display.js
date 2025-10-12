@@ -1,6 +1,13 @@
 const Product = require("../models/products");
 
 async function newproducts_display(req, res) {
+    res.render("newproducts", {
+        activePage: 'new-products',
+        activeRoute: '',
+    });
+}
+
+async function getNewProductsData(req, res) {
     try {
         // Get the current date dynamically
         const currentDate = new Date();
@@ -15,22 +22,18 @@ async function newproducts_display(req, res) {
             approvedAt: { $gte: fifteenDaysAgo, $lte: currentDate }
         }).lean();
 
-        // Render the page with the fetched products
-        res.render("newproducts", {
+        // Send JSON response
+        res.json({
             newproductData: acceptedProducts,
-            activePage: 'new-products',
-            activeRoute: '',
             error: acceptedProducts.length === 0 ? "No new products available" : null
         });
     } catch (error) {
         console.error("Error fetching new products:", error);
-        res.status(500).render("newproducts", {
+        res.status(500).json({
             newproductData: [],
-            activePage: 'new-products',
-            activeRoute: '',
             error: "Internal Server Error"
         });
     }
 }
 
-module.exports = { newproducts_display };
+module.exports = { newproducts_display, getNewProductsData };
