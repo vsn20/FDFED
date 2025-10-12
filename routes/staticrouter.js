@@ -2,9 +2,9 @@ const express = require("express");
 
 const router = express.Router();
 
-const {products_display}=require("../controllers/ourproducts_display")
-const { newproducts_display}=require("../controllers/newproducts_display");
-const {topproducts_display}=require("../controllers/topproducts_display");
+const {products_display, getProductsData}=require("../controllers/ourproducts_display")
+const { newproducts_display, getNewProductsData}=require("../controllers/newproducts_display");
+const {topproducts_display, getTopProductsData}=require("../controllers/topproducts_display");
 
 const { branches_display, getBranchesData } = require("../controllers/branches_display");
 const { sendOtp, resetPassword } = require("../controllers/forgotPassword");
@@ -53,9 +53,6 @@ router.get('/companylogin', (req, res) => {
     res.render('companylogin', { activePage: 'company', loginError: null, signupError: null });
 });
 
-
-
-
 router.get("/about-us",(req,res)=>res.render("aboutus.ejs",{ activePage: 'about-us' }));
 router.get("/signup",(req,res)=>res.render("signup.ejs",{ activePage: 'employee' }));
 
@@ -66,20 +63,17 @@ router.post("/forgot-password/reset", resetPassword);
 router.get("/contact-us", (req, res) => res.render("contactus.ejs", { activePage: 'contact-us' }));
 
 
+// Main routes - render empty views
 router.get("/topproducts",topproducts_display);
 router.get("/ourproducts",products_display);
 router.get("/newproducts",newproducts_display);
 
-
-
+// Data API routes
+router.get("/topproducts/data", getTopProductsData);
+router.get("/ourproducts/data", getProductsData);
+router.get("/newproducts/data", getNewProductsData);
 
 router.get("/our-branches", branches_display);
 router.get("/our-branches/data", getBranchesData);
-
-
-
-
-
-
 
 module.exports= router;

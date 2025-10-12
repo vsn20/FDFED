@@ -79,7 +79,8 @@
 
     .products-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, 300px);
+      justify-content: center;
       gap: 25px;
       padding: 10px;
     }
@@ -173,6 +174,12 @@
       content: '🏢';
     }
 
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -211,7 +218,8 @@
       }
 
       .products-container {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, 250px);
+        justify-content: center;
       }
 
       .slides {
@@ -230,30 +238,10 @@
   <div class="container">
     <div class="content-area" id="content">
       <h1>Our Products</h1>
-
-      <% if (error) { %>
-        <p class="error-message"><%= error %></p>
-      <% } %>
-
-      <div class="products-container">
-        <% if (productData && productData.length > 0) { %>
-          <% productData.forEach(product => { %>
-            <div class="product-item">
-              <div class="slideshow-container">
-                <% product.prod_photos.forEach((photo, index) => { %>
-                  <img src="<%= photo %>" alt="Product Photo" class="slides <%= index === 0 ? 'active' : '' %>">
-                <% }) %>
-              </div>
-              <div class="product-details">
-                <p><span>Product ID:</span> <%= product.prod_id %></p>
-                <p><span>Model Number:</span> <%= product.Model_no %></p>
-                <p><span>Company Name:</span> <%= product.com_name %></p>
-              </div>
-            </div>
-          <% }) %>
-        <% } else { %>
-          <p class="error-message">No products available</p>
-        <% } %>
+      
+      <div class="loading" id="loading">Loading products...</div>
+      
+      <div class="products-container" id="products-container">
       </div>
     </div>
   </div>
@@ -261,17 +249,87 @@
   <%- include('./partials/footer') %>
 
   <script>
-    document.querySelectorAll('.slideshow-container').forEach(container => {
-      const slides = container.querySelectorAll('.slides');
-      let currentSlide = 0;
-      function showNextSlide() {
-        slides[currentSlide].classList.remove('active');
-        currentSlide = (currentSlide + 1) % slides.length;
-        slides[currentSlide].classList.add('active');
+    async function loadProducts() {
+      try {
+        const response = await fetch('/ourproducts/data');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const { productData, error } = await response.json();
+        const container = document.getElementById('products-container');
+        const loading = document.getElementById('loading');
+        
+        // Hide loading
+        loading.style.display = 'none';
+
+        if (error) {
+          const p = document.createElement('p');
+          p.className = 'error-message';
+          p.textContent = error;
+          container.parentNode.insertBefore(p, container);
+          return;
+        }
+
+        productData.forEach(product => {
+          const div = document.createElement('div');
+          div.className = 'product-item';
+
+          let slidesHTML = '';
+          product.prod_photos.forEach((photo, index) => {
+            slidesHTML += `<img src="${photo}" alt="Product Photo" class="slides ${index === 0 ? 'active' : ''}">`;
+          });
+
+          div.innerHTML = `
+            <div class="slideshow-container">
+              ${slidesHTML}
+            </div>
+            <div class="product-details">
+              <p><span>Product ID:</span> ${product.prod_id}</p>
+              <p><span>Model Number:</span> ${product.Model_no}</p>
+              <p><span>Company Name:</span> ${product.com_name}</p>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+
+        // Initialize slideshows
+        initializeSlideshows();
+      } catch (err) {
+        console.error('Error loading products:', err);
+        const container = document.getElementById('products-container');
+        const loading = document.getElementById('loading');
+        loading.style.display = 'none';
+        
+        const p = document.createElement('p');
+        p.className = 'error-message';
+        p.textContent = 'Failed to load products';
+        container.parentNode.insertBefore(p, container);
       }
-      slides[0].classList.add('active');
-      setInterval(showNextSlide, 2000);
-    });
+    }
+
+    function initializeSlideshows() {
+      document.querySelectorAll('.slideshow-container').forEach(container => {
+        const slides = container.querySelectorAll('.slides');
+        let currentSlide = 0;
+        
+        function showNextSlide() {
+          if (slides.length <= 1) return; // Don't animate if only one slide
+          
+          slides[currentSlide].classList.remove('active');
+          currentSlide = (currentSlide + 1) % slides.length;
+          slides[currentSlide].classList.add('active');
+        }
+        
+        if (slides.length > 0) {
+          slides[0].classList.add('active');
+          if (slides.length > 1) {
+            setInterval(showNextSlide, 2000);
+          }
+        }
+      });
+    }
+
+    window.addEventListener('load', loadProducts);
   </script>
 </body>
 </html>
