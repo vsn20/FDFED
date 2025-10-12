@@ -95,8 +95,9 @@ router.post("/branches/edit/:bid", update_branch);
 const { customers_display } = require("../controllers/admin_customers_display");
 router.get("/customers", customers_display);
 
-const { inventory_display } = require("../controllers/inventory_display");
+const { inventory_display, getInventoryData } = require("../controllers/inventory_display");
 router.get("/stocks", inventory_display);
+router.get("/stocks/data", getInventoryData);
 
 const { 
   sales_display, 
@@ -113,8 +114,9 @@ const { profits_display, profitByMonth } = require("../controllers/profits_displ
 router.get("/profits", profits_display);
 router.get("/profit-by-month", profitByMonth);
 
-const { salary_display } = require("../controllers/salaries_display");
+const { salary_display, getSalaryData } = require("../controllers/salaries_display");
 router.get("/salaries", salary_display);
+router.get("/salaries/data", getSalaryData);
 
 const { orders_display, getOrdersData } = require("../controllers/admin_orders_display");
 router.get("/orders", orders_display);
