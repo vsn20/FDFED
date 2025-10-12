@@ -23,34 +23,28 @@
       margin-top: 90px;
       display: flex;
       flex: 1;
-      gap: 25px; /* Standardized gap */
-      padding: 0 20px !important; /* Standardized padding with !important to prevent override */
-      max-width: 100%; /* Ensure it doesn’t exceed viewport */
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
     }
 
     .content-area {
       background: #ffffff;
       border-radius: 15px;
-      padding: 20px; /* Standardized padding */
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Standardized shadow */
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
-      overflow-x: auto; /* Horizontal scroll if needed */
-      height: calc(100vh - 90px); /* Match sidebar height */
-      overflow-y: auto; /* Enable vertical scrolling if content overflows */
+      overflow-x: auto;
+      height: calc(100vh - 90px);
+      overflow-y: auto;
     }
 
-    /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
     .content-area::-webkit-scrollbar {
       display: none;
     }
 
-    /* Hide scrollbar in Firefox */
     .content-area {
       scrollbar-width: none;
-    }
-
-    /* Hide scrollbar in IE/Edge */
-    .content-area {
       -ms-overflow-style: none;
     }
 
@@ -58,8 +52,8 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px; /* Standardized margin */
-      flex-wrap: wrap; /* Allow wrapping on small screens */
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .left-section {
@@ -71,7 +65,7 @@
 
     .header-container h1 {
       color: #2d3436;
-      font-size: 1.5rem; /* Standardized font size */
+      font-size: 1.5rem;
     }
 
     .add-button {
@@ -98,6 +92,17 @@
       font-size: 0.9rem;
     }
 
+    .error-message {
+      color: #d63031;
+      background: #ffeeee;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: none;
+    }
+
     .search-container {
       display: flex;
       justify-content: flex-start;
@@ -114,17 +119,17 @@
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
-      scrollbar-width: none; /* Hide scrollbar in Firefox */
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
     .table-wrapper::-webkit-scrollbar {
-      display: none; /* Hide scrollbar in Webkit browsers */
+      display: none;
     }
 
     table {
       width: 100%;
-      min-width: 600px; /* Standardized min-width */
+      min-width: 600px;
       border-collapse: separate;
       border-spacing: 0;
       background: #ffffff;
@@ -163,16 +168,15 @@
       cursor: pointer;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
-        padding: 0 10px !important; /* Consistent responsive padding */
+        padding: 0 10px !important;
       }
 
       .content-area {
         padding: 15px;
-        height: auto; /* Allow content area to expand on mobile */
+        height: auto;
       }
 
       .header-container {
@@ -201,7 +205,8 @@
         font-size: 0.85rem;
       }
 
-      .success-message {
+      .success-message,
+      .error-message {
         font-size: 0.85rem;
       }
 
@@ -287,6 +292,7 @@
         <a href="/salesman/add-sale" class="add-button">Add Sale</a>
       </div>
       <div id="successMessage" class="success-message">Sale added successfully!</div>
+      <div id="errorMessage" class="error-message"></div>
       <div id="tableWrapper" class="table-wrapper">
         <table>
           <thead>
@@ -297,15 +303,8 @@
               <th>Sale Date</th>
             </tr>
           </thead>
-          <tbody>
-            <% salers.forEach(sale => { %>
-              <tr onclick="window.location='/salesman/sales/<%= sale.sales_id %>'">
-                <td data-label="Sale ID"><%= sale.sales_id %></td>
-                <td data-label="Price">$<%= sale.total_amount.toFixed(2) %></td>
-                <td data-label="Profit">$<%= sale.profit_or_loss.toFixed(2) %></td>
-                <td data-label="Sale Date"><%= new Date(sale.saledate).toISOString().split('T')[0] %></td>
-              </tr>
-            <% }) %>
+          <tbody id="salesTableBody">
+            <!-- Sales data will be populated dynamically -->
           </tbody>
         </table>
       </div>
@@ -314,27 +313,64 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    // Show success message if redirected with success query
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success') === 'true') {
-      const successMessage = document.getElementById('successMessage');
-      successMessage.style.display = 'block';
-      setTimeout(() => {
-        successMessage.style.display = 'none';
-      }, 3000);
+    async function fetchSalesData() {
+      const errorMessage = document.getElementById('errorMessage');
+      const tableBody = document.getElementById('salesTableBody');
+      errorMessage.style.display = 'none';
+      tableBody.innerHTML = '';
+
+      try {
+        const response = await fetch('/salesman/sales/data', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to load sales data');
+        }
+        const sales = await response.json();
+
+        sales.forEach(sale => {
+          const row = document.createElement('tr');
+          row.setAttribute('onclick', `window.location='/salesman/sales/${sale.sales_id}'`);
+          row.innerHTML = `
+            <td data-label="Sale ID">${sale.sales_id}</td>
+            <td data-label="Price">$${parseFloat(sale.total_amount).toFixed(2)}</td>
+            <td data-label="Profit">$${parseFloat(sale.profit_or_loss).toFixed(2)}</td>
+            <td data-label="Sale Date">${new Date(sale.saledate).toISOString().split('T')[0]}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+        // Re-apply search functionality
+        const searchInput = document.getElementById('searchInput');
+        const rows = tableBody.querySelectorAll('tr');
+        searchInput.addEventListener('input', () => {
+          const filter = searchInput.value.toLowerCase();
+          rows.forEach(row => {
+            const saleId = row.querySelector('td:first-child').textContent.toLowerCase();
+            row.style.display = saleId.includes(filter) ? '' : 'none';
+          });
+        });
+      } catch (error) {
+        console.error('Error fetching sales:', error);
+        errorMessage.textContent = 'Failed to load sales data. Please try again.';
+        errorMessage.style.display = 'block';
+      }
     }
 
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    const table = document.querySelector('table');
-    const rows = table.querySelectorAll('tbody tr');
+    document.addEventListener('DOMContentLoaded', () => {
+      // Show success message if redirected with success query
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('success') === 'true') {
+        const successMessage = document.getElementById('successMessage');
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+      }
 
-    searchInput.addEventListener('input', () => {
-      const filter = searchInput.value.toLowerCase();
-      rows.forEach(row => {
-        const saleId = row.querySelector('td:first-child').textContent.toLowerCase();
-        row.style.display = saleId.includes(filter) ? '' : 'none';
-      });
+      // Fetch sales data
+      fetchSalesData();
     });
   </script>
 </body>

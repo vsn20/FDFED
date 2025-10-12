@@ -16,7 +16,15 @@ const {
   updateOrderStatus,
   updateDeliveryDate
 } = require("../controllers/company/orders_display");
-const { sales_display, salesdetaildisplay, updateInstallationStatus } = require("../controllers/company/sale");
+const saleControllers = require("../controllers/company/sale");
+console.log('Imported sale controllers:', saleControllers);
+const { 
+  sales_display, 
+  get_sales_data, 
+  salesdetaildisplay, 
+  get_sale_details, 
+  updateInstallationStatus 
+} = saleControllers;
 const { displayComplaints, updateComplaintStatus } = require("../controllers/company/complaint");
 const { company_messages_display, render_compose_message_form, compose_message, view_message, view_sent_messages } = require("../controllers/company/company_messages_display");
 const { getDashboardData } = require("../controllers/company/dashboard");
@@ -41,7 +49,9 @@ router.post("/messages/compose", compose_message);
 router.get("/messages/view", view_message);
 router.get("/messages/sent", view_sent_messages);
 router.get("/sales", sales_display);
+router.get("/sales/data", get_sales_data);
 router.get("/sales/:salesid", salesdetaildisplay);
+router.get("/sales/details/:salesid", get_sale_details);
 router.post("/sales/update-installation/:salesid", updateInstallationStatus);
 router.get("/complaints", displayComplaints);
 router.post("/complaints/update-status/:complaint_id", updateComplaintStatus);

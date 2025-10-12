@@ -13,6 +13,7 @@ const {
   complaints_display,
   getComplaintsData,
   getComplaintById,
+  getEligibleSales,
   render_add_complaint_form,
   add_complaint,
   render_edit_complaint_form,
@@ -21,6 +22,7 @@ const {
 router.get("/complaints", complaints_display);
 router.get("/complaints/data", getComplaintsData);
 router.get("/complaints/totaldetails/:complaint_id", getComplaintById);
+router.get("/complaints/eligible-sales", getEligibleSales);
 router.get("/complaints/add", render_add_complaint_form);
 router.post("/complaints/add", add_complaint);
 router.get("/complaints/edit/:complaint_id", render_edit_complaint_form);

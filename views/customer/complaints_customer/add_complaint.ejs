@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Complaint - ElectroLand</title>
   <style>
-    /* Keep the existing CSS unchanged */
     * {
       margin: 0;
       padding: 0;
@@ -114,6 +113,11 @@
       border-radius: 5px;
     }
 
+    .form-section.active {
+      border-color: #008CBA;
+      box-shadow: 0 0 5px rgba(0, 140, 186, 0.3);
+    }
+
     .section-title {
       color: #2d3436;
       font-size: 1.2rem;
@@ -140,52 +144,67 @@
       font-weight: 500;
     }
 
-    .field-input, .field-textarea {
+    input, textarea {
       width: 100%;
       padding: 8px;
       border: 1px solid #e6e9f0;
       border-radius: 5px;
       font-size: 0.9rem;
-      background: #f0f0f0;
-      transition: border-color 0.3s;
+      background: #f8f9fa;
     }
 
-    .field-textarea {
-      height: 100px;
-      resize: vertical;
-    }
-
-    .field-input:focus, .field-textarea:focus {
-      border-color: #333333;
-      outline: none;
-    }
-
-    .disabled-field {
-      background: #f0f0f0;
+    input[readonly] {
+      background: #ebedf0;
       cursor: not-allowed;
     }
 
-    .form-btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #333333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
+    textarea {
+      resize: vertical;
+      min-height: 100px;
     }
 
-    .form-btn:hover {
-      background-color: #555555;
+    .submit-button {
+      background-color: #008CBA;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .submit-button:hover {
+      background-color: #007bb5;
+    }
+
+    .success-message {
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
     }
 
     .error-message {
-      color: #d32f2f;
+      background-color: #f2dede;
+      color: #a94442;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .field-error {
+      color: #a94442;
       font-size: 0.9rem;
       margin-top: 5px;
       display: none;
+    }
+
+    .form-group.invalid input,
+    .form-group.invalid textarea {
+      border-color: #a94442;
     }
 
     .hidden {
@@ -202,78 +221,12 @@
         padding: 15px;
       }
 
-      .header-container {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
       .content-area h1 {
-        font-size: 1.2rem;
-      }
-
-      table {
-        display: block;
-        min-width: 0;
-      }
-
-      thead {
-        display: none;
-      }
-
-      tr {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 15px;
-        border: 1px solid #e6e9f0;
-        border-radius: 5px;
-        padding: 10px;
-        background: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
-
-      td {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        font-size: 0.85rem;
-        border-bottom: 1px dashed #e6e9f0;
-      }
-
-      td:last-child {
-        border-bottom: none;
-      }
-
-      td:before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #2d3436;
-        margin-right: 10px;
-        min-width: 100px;
-      }
-
-      .clickable-btn {
-        flex: 1;
-        text-align: right;
+        font-size: 1.3rem;
       }
 
       .field-group > div {
         flex: 1 1 100%;
-      }
-
-      .form-btn {
-        width: 100%;
-        padding: 8px;
-      }
-    }
-
-    @media (min-width: 769px) and (max-width: 1024px) {
-      th, td {
-        padding: 10px;
-        font-size: 0.85rem;
-      }
-
-      .content-area h1 {
-        font-size: 1.3rem;
       }
     }
   </style>
@@ -284,8 +237,9 @@
   <div class="container">
     <%- include('../../partials/customer_sidebar') %>
 
-    <!-- Content Area -->
-    <div class="content-area" id="content">
+    <div class="content-area">
+      <div id="successMessage" class="success-message" style="display: none;"></div>
+      <div id="errorMessage" class="error-message" style="display: none;"></div>
       <div class="header-container">
         <h1>Add Complaint</h1>
       </div>
@@ -295,101 +249,277 @@
           <thead>
             <tr>
               <th>Sale ID</th>
-              <th>Product ID</th>
               <th>Product Name</th>
               <th>Company Name</th>
               <th>Purchase Date</th>
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
-            <% sales.forEach(sale => { %>
-              <tr>
-                <td data-label="Sale ID"><%= sale.sale_id %></td>
-                <td data-label="Product ID"><%= sale.prod_id %></td>
-                <td data-label="Product Name"><%= sale.Prod_name %></td>
-                <td data-label="Company Name"><%= sale.com_name %></td>
-                <td data-label="Purchase Date"><%= sale.purchasedate %></td>
-                <td data-label="Action">
-                  <button class="clickable-btn" data-saleid="<%= sale.sale_id %>">File Complaint</button>
-                </td>
-              </tr>
-            <% }) %>
-            <% if (sales.length === 0) { %>
-              <tr>
-                <td colspan="6" style="text-align: center;">No purchases found.</td>
-              </tr>
-            <% } %>
+          <tbody id="salesTableBody">
+            <tr><td colspan="5">Loading eligible sales...</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Complaint Form (Hidden by Default) -->
-      <form id="complaint-form" class="hidden">
-        <input type="hidden" name="sale_id" id="sale-id">
-        <fieldset class="form-section" id="complaint-section">
-          <legend class="section-title">File Complaint</legend>
+      <div id="complaintSection" class="form-section hidden">
+        <h2 class="section-title">File a Complaint</h2>
+        <form id="complaintForm">
           <div class="field-group">
-            <div>
-              <label for="complaint" class="field-label">Complaint Description:</label>
-              <textarea id="complaint" name="complaint_info" class="field-textarea" placeholder="Enter your complaint here..." required></textarea>
-              <p id="complaint-error" class="error-message">Please enter a complaint description.</p>
+            <div class="form-group">
+              <label class="field-label" for="saleId">Sale ID</label>
+              <input type="text" id="saleId" name="saleId" readonly>
+              <div id="saleIdError" class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="complaintInput">Complaint Description <span style="color: red;">*</span></label>
+              <textarea id="complaintInput" name="complaintInfo"></textarea>
+              <div id="complaintError" class="field-error"></div>
             </div>
           </div>
-        </fieldset>
-        <button type="submit" class="form-btn">Submit Complaint</button>
-      </form>
+          <button type="submit" class="submit-button" disabled>Submit</button>
+        </form>
+      </div>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const complaintForm = document.getElementById('complaint-form');
-      const complaintSection = document.getElementById('complaint-section');
-      const saleIdInput = document.getElementById('sale-id');
-      const complaintInput = document.getElementById('complaint');
-      const complaintError = document.getElementById('complaint-error');
+    const validations = {
+      saleId: false,
+      complaintInfo: false
+    };
 
-      // Reset form to hidden state initially
-      complaintForm.classList.add('hidden');
-      complaintInput.value = ''; // Clear textarea
-      complaintError.style.display = 'none';
+    function updateSubmitButton() {
+      const submitButton = document.querySelector('.submit-button');
+      if (submitButton) {
+        const allValid = Object.values(validations).every(valid => valid);
+        submitButton.disabled = !allValid;
+      } else {
+        console.error('[add_complaint] Submit button not found');
+      }
+    }
 
-      document.querySelectorAll('.clickable-btn').forEach(button => {
-        button.addEventListener('click', () => {
-          const saleId = button.getAttribute('data-saleid');
-          console.log('[add_complaint] File Complaint button clicked, saleId:', saleId);
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      if (errorElement) {
+        const formGroup = errorElement.parentElement;
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        formGroup.classList.add('invalid');
+      } else {
+        console.error('[add_complaint] Error element not found:', elementId);
+      }
+    }
 
-          if (saleId) {
+    function clearError(elementId) {
+      const errorElement = document.getElementById(elementId);
+      if (errorElement) {
+        const formGroup = errorElement.parentElement;
+        errorElement.textContent = '';
+        errorElement.style.display = 'none';
+        formGroup.classList.remove('invalid');
+      } else {
+        console.error('[add_complaint] Error element not found:', elementId);
+      }
+    }
+
+    function validateSaleId() {
+      const saleIdInput = document.getElementById('saleId');
+      if (!saleIdInput) {
+        console.error('[add_complaint] saleId input not found');
+        return;
+      }
+      const saleId = saleIdInput.value.trim();
+      if (!saleId) {
+        showError('saleIdError', 'Please select a sale');
+        validations.saleId = false;
+      } else {
+        clearError('saleIdError');
+        validations.saleId = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateComplaintInfo() {
+      const complaintInput = document.getElementById('complaintInput');
+      if (!complaintInput) {
+        console.error('[add_complaint] complaintInput not found');
+        return;
+      }
+      const complaintInfo = complaintInput.value.trim();
+      if (!complaintInfo) {
+        showError('complaintError', 'Complaint description is required');
+        validations.complaintInfo = false;
+      } else {
+        clearError('complaintError');
+        validations.complaintInfo = true;
+      }
+      updateSubmitButton();
+    }
+
+    async function fetchEligibleSales() {
+      const errorMessage = document.getElementById('errorMessage');
+      const salesTableBody = document.getElementById('salesTableBody');
+      if (!errorMessage || !salesTableBody) {
+        console.error('[add_complaint] errorMessage or salesTableBody not found');
+        return;
+      }
+      errorMessage.style.display = 'none';
+      salesTableBody.innerHTML = '<tr><td colspan="5">Loading eligible sales...</td></tr>';
+
+      try {
+        const response = await fetch('/customer/complaints/eligible-sales', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const sales = await response.json();
+        console.log('[fetchEligibleSales] Sales received:', sales);
+
+        salesTableBody.innerHTML = '';
+        if (sales.length === 0) {
+          salesTableBody.innerHTML = '<tr><td colspan="5">No eligible sales found. Ensure you have completed purchases without existing complaints.</td></tr>';
+          return;
+        }
+
+        sales.forEach(sale => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${sale.sales_id}</td>
+            <td>${sale.Prod_name || 'Unknown Product'}</td>
+            <td>${sale.com_name || 'Unknown Company'}</td>
+            <td>${sale.sales_date || 'N/A'}</td>
+            <td><button class="clickable-btn" data-saleid="${sale.sales_id}">File Complaint</button></td>
+          `;
+          salesTableBody.appendChild(row);
+        });
+
+        document.querySelectorAll('.clickable-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const saleId = button.getAttribute('data-saleid');
+            console.log('[add_complaint] File Complaint button clicked, saleId:', saleId);
+
+            if (!saleId) {
+              console.error('[add_complaint] Sale ID not found on button');
+              showErrorMessage('Failed to load complaint form: Sale ID missing.');
+              return;
+            }
+
+            const complaintSection = document.getElementById('complaintSection');
+            const complaintForm = document.getElementById('complaintForm');
+            const saleIdInput = document.getElementById('saleId');
+            const complaintInput = document.getElementById('complaintInput');
+
+            if (!complaintSection || !complaintForm || !saleIdInput || !complaintInput) {
+              console.error('[add_complaint] Form elements not found', {
+                complaintSection: !!complaintSection,
+                complaintForm: !!complaintForm,
+                saleIdInput: !!saleIdInput,
+                complaintInput: !!complaintInput
+              });
+              showErrorMessage('Failed to load complaint form: Form elements missing.');
+              return;
+            }
+
             saleIdInput.value = saleId;
             complaintForm.classList.remove('hidden');
-            complaintInput.value = ''; // Reset textarea on new selection
-            complaintError.style.display = 'none';
+            complaintSection.classList.remove('hidden');
+            complaintSection.classList.add('active'); // Highlight form
+            complaintInput.value = '';
+            clearError('saleIdError');
+            clearError('complaintError');
+            validations.saleId = true;
+            validations.complaintInfo = false;
+            updateSubmitButton();
             complaintSection.scrollIntoView({ behavior: 'smooth' });
             complaintInput.focus();
             console.log('[add_complaint] Form displayed, sale_id set to:', saleId);
-          } else {
-            console.error('[add_complaint] Sale ID not found on button');
-          }
+          });
         });
-      });
+      } catch (error) {
+        console.error('[add_complaint] Error fetching eligible sales:', error);
+        showErrorMessage('Failed to load eligible sales. Please try again.');
+        salesTableBody.innerHTML = '<tr><td colspan="5">Error loading eligible sales.</td></tr>';
+      }
+    }
+
+    function showErrorMessage(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        setTimeout(() => {
+          errorMessage.style.display = 'none';
+        }, 5000);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const successMessage = document.getElementById('successMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      if (!successMessage || !errorMessage) {
+        console.error('[add_complaint] Message elements not found', {
+          successMessage: !!successMessage,
+          errorMessage: !!errorMessage
+        });
+        return;
+      }
+
+      if (urlParams.get('success')) {
+        successMessage.textContent = urlParams.get('success');
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+      }
+
+      if (urlParams.get('error')) {
+        errorMessage.textContent = urlParams.get('error');
+        errorMessage.style.display = 'block';
+        setTimeout(() => {
+          errorMessage.style.display = 'none';
+        }, 3000);
+      }
+
+      fetchEligibleSales();
+
+      const complaintForm = document.getElementById('complaintForm');
+      const saleIdInput = document.getElementById('saleId');
+      const complaintInput = document.getElementById('complaintInput');
+
+      if (!complaintForm || !saleIdInput || !complaintInput) {
+        console.error('[add_complaint] Form elements not found on load', {
+          complaintForm: !!complaintForm,
+          saleIdInput: !!saleIdInput,
+          complaintInput: !!complaintInput
+        });
+        return;
+      }
+
+      saleIdInput.addEventListener('input', validateSaleId);
+      complaintInput.addEventListener('input', validateComplaintInfo);
 
       complaintForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         console.log('[add_complaint] Form submission triggered');
 
-        // Client-side validation
-        const sale_id = saleIdInput.value.trim();
-        const complaint_info = complaintInput.value.trim();
-        complaintError.style.display = 'none';
+        validateSaleId();
+        validateComplaintInfo();
 
-        if (!sale_id || !complaint_info) {
-          complaintError.style.display = 'block';
-          console.log('[add_complaint] Validation failed: Missing sale_id or complaint_info');
+        if (!Object.values(validations).every(valid => valid)) {
+          showErrorMessage('Please correct all errors before submitting');
+          console.log('[add_complaint] Validation failed');
           return;
         }
+
+        const sale_id = saleIdInput.value.trim();
+        const complaint_info = complaintInput.value.trim();
 
         try {
           const response = await fetch('/customer/complaints/add', {
@@ -409,15 +539,14 @@
           console.log('[add_complaint] Server response:', result);
 
           if (result.success) {
-            alert(result.message || 'Complaint added successfully!');
-            window.location.href = result.redirect || '/customer/complaints';
+            window.location.href = `/customer/complaints?success=${encodeURIComponent(result.message || 'Complaint added successfully!')}`;
           } else {
-            alert(result.message || 'Failed to submit complaint');
+            showErrorMessage(result.message || 'Failed to submit complaint');
             console.error('[add_complaint] Submission failed:', result.message);
           }
         } catch (error) {
           console.error('[add_complaint] Error submitting complaint:', error);
-          alert(`Failed to submit complaint: ${error.message}`);
+          showErrorMessage(`Failed to submit complaint: ${error.message}`);
         }
       });
     });

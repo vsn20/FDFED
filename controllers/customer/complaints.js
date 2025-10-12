@@ -4,7 +4,6 @@ const Product = require("../../models/products");
 
 async function complaints_display(req, res) {
   try {
-    // Render empty page; data loaded via API
     res.render("customer/complaints_customer/complaints", {
       activePage: "customer",
       activeRoute: "complaints",
@@ -20,10 +19,8 @@ async function getComplaintsData(req, res) {
     const user = req.user;
     const phone_number = user.user_id;
 
-    // Fetch all complaints for the customer
     const complaints = await Complaint.find({ phone_number }).lean();
 
-    // Fetch sale and product details for each complaint
     const mappedComplaints = await Promise.all(
       complaints.map(async (complaint) => {
         const sale = await Sale.findOne({ sales_id: complaint.sale_id }).lean();
@@ -74,10 +71,6 @@ async function getComplaintById(req, res) {
       complaint_info: complaint.complaint_info,
       complaint_date: complaint.complaint_date.toISOString().split("T")[0],
       status: complaint.status,
-      prod_description: product ? product.prod_description : "N/A",
-      warrantyperiod: product ? product.warrantyperiod : "N/A",
-      installation: sale ? sale.installation : "N/A",
-      price: sale ? sale.sold_price : "N/A",
     };
 
     res.json(complaintData);
@@ -87,31 +80,64 @@ async function getComplaintById(req, res) {
   }
 }
 
-async function render_add_complaint_form(req, res) {
+async function getEligibleSales(req, res) {
   try {
     const user = req.user;
-    const phone_number = user.user_id;
+    console.log("[getEligibleSales] req.user:", JSON.stringify(user, null, 2));
+    const phone_number = String(user.user_id).replace(/^\+91/, '').trim();
+    console.log("[getEligibleSales] Normalized phone_number:", phone_number);
 
-    // Fetch all sales for the customer
-    const sales = await Sale.find({ phone_number })
-      .select("-purchased_price -profit_or_loss")
-      .lean();
+    // Support multiple phone number formats
+    const phoneVariations = [phone_number, `+91${phone_number}`, `+91 ${phone_number}`];
+    console.log("[getEligibleSales] Phone variations:", phoneVariations);
 
-    const mappedSales = await Promise.all(
+    // Log all sales for debugging
+    const allSales = await Sale.find({ phone_number: { $in: phoneVariations } }).lean();
+    console.log("[getEligibleSales] All sales for user:", JSON.stringify(allSales, null, 2));
+
+    // Log unique installation_status values
+    const statuses = await Sale.distinct("installation_status", { phone_number: { $in: phoneVariations } });
+    console.log("[getEligibleSales] Unique installation_status values:", statuses);
+
+    // Find eligible sales
+    const sales = await Sale.find({
+      phone_number: { $in: phoneVariations },
+      installation_status: { $regex: "^Completed$", $options: "i" },
+    }).lean();
+    console.log("[getEligibleSales] Sales with installation_status 'Completed':", JSON.stringify(sales, null, 2));
+
+    const eligibleSales = await Promise.all(
       sales.map(async (sale) => {
+        const existingComplaint = await Complaint.findOne({ sale_id: sale.sales_id }).lean();
+        console.log(`[getEligibleSales] Sale ${sale.sales_id}, has complaint:`, !!existingComplaint);
+        if (existingComplaint) return null;
+
         const product = await Product.findOne({ prod_id: sale.product_id }).lean();
+        console.log(`[getEligibleSales] Product for prod_id ${sale.product_id}:`, JSON.stringify(product, null, 2));
         return {
-          sale_id: sale.sales_id,
-          prod_id: sale.product_id,
+          sales_id: sale.sales_id,
           Prod_name: product ? product.Prod_name : "Unknown Product",
           com_name: product ? product.com_name : "Unknown Company",
-          purchasedate: sale.sales_date.toISOString().split("T")[0],
+          sales_date: sale.sales_date ? sale.sales_date.toISOString().split("T")[0] : "N/A",
         };
       })
     );
 
+    const filteredSales = eligibleSales.filter(sale => sale !== null);
+    console.log("[getEligibleSales] Eligible sales:", JSON.stringify(filteredSales, null, 2));
+    if (filteredSales.length === 0) {
+      console.log("[getEligibleSales] No eligible sales found. Possible reasons: No sales with installation_status 'Completed' or all have complaints.");
+    }
+    res.json(filteredSales);
+  } catch (error) {
+    console.error("[getEligibleSales] Error fetching eligible sales:", error);
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+}
+
+async function render_add_complaint_form(req, res) {
+  try {
     res.render("customer/complaints_customer/add_complaint", {
-      sales: mappedSales,
       activePage: "customer",
       activeRoute: "complaints",
     });
@@ -131,13 +157,16 @@ async function add_complaint(req, res) {
       return res.status(400).json({ success: false, message: "Sale ID and complaint description are required" });
     }
 
-    // Verify the sale belongs to the customer
     const sale = await Sale.findOne({ sales_id: sale_id, phone_number }).lean();
     if (!sale) {
       return res.status(404).json({ success: false, message: "Sale not found or you are not authorized to file a complaint for this sale" });
     }
 
-    // Generate unique complaint ID
+    const existingComplaint = await Complaint.findOne({ sale_id }).lean();
+    if (existingComplaint) {
+      return res.status(400).json({ success: false, message: "A complaint already exists for this sale" });
+    }
+
     const count = await Complaint.countDocuments() + 1;
     const complaint_id = `C${String(count).padStart(3, "0")}`;
 
@@ -162,7 +191,6 @@ async function add_complaint(req, res) {
 async function render_edit_complaint_form(req, res) {
   try {
     const { complaint_id } = req.params;
-    // Render empty page; data loaded via API
     res.render("customer/complaints_customer/edit_complaint", {
       complaint_id,
       activePage: "customer",
@@ -182,7 +210,7 @@ async function update_complaint(req, res) {
     const { complaint_info } = req.body;
 
     const complaint = await Complaint.findOneAndUpdate(
-      { complaint_id, phone_number, status: "Open" }, // Only allow updates for open complaints
+      { complaint_id, phone_number, status: "Open" },
       { complaint_info },
       { new: true }
     );
@@ -201,6 +229,7 @@ module.exports = {
   complaints_display,
   getComplaintsData,
   getComplaintById,
+  getEligibleSales,
   render_add_complaint_form,
   add_complaint,
   render_edit_complaint_form,

@@ -11,12 +11,34 @@ async function getSalesmanDetails(req, res) {
       return res.status(403).send("Access denied: Not a salesman");
     }
 
+    res.render("salesman/Employee_details/employee_details", {
+      activePage: 'employee',
+      activeRoute: 'employees',
+      successMessage: req.query.success,
+      errorMessage: req.query.error
+    });
+  } catch (error) {
+    console.log("Error rendering employee details:", error);
+    res.status(500).send("Internal Server Error");
+  }
+}
+
+async function get_salesman_data(req, res) {
+  try {
+    if (!req.user || !req.user.emp_id) {
+      return res.status(401).json({ error: "Unauthorized: Not logged in" });
+    }
+
+    if (req.user.type !== "salesman") {
+      return res.status(403).json({ error: "Access denied: Not a salesman" });
+    }
+
     console.log("Querying for e_id:", req.user.emp_id);
     const salesman = await Employee.findOne({ e_id: req.user.emp_id }).lean();
 
     if (!salesman) {
       console.log("No salesman found for e_id:", req.user.emp_id);
-      return res.status(404).send("Salesman not found");
+      return res.status(404).json({ error: "Salesman not found" });
     }
 
     let branchName = "Unknown Branch";
@@ -28,46 +50,40 @@ async function getSalesmanDetails(req, res) {
     }
 
     const hireDate = salesman.hiredAt || new Date();
-    res.render("salesman/Employee_details/employee_details", {
-      salesman: {
-        salesmanId: salesman.e_id || "N/A",
-        firstName: salesman.f_name || "Unknown",
-        lastName: salesman.last_name || "Unknown",
-        role: salesman.role || "Salesman",
-        status: salesman.status.charAt(0).toUpperCase() + salesman.status.slice(1) || "Active",
-        branch: branchName,
-        email: salesman.email || "N/A",
-        phoneNumber: salesman.phone_no || "N/A",
-        registrationDate: hireDate,
-        formattedRegistrationDate: hireDate
-          ? new Date(hireDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            })
-          : "N/A",
-        accountNumber: salesman.acno || "N/A",
-        ifscCode: salesman.ifsc || "N/A",
-        bank: salesman.bankname || "N/A",
-        hireDate: hireDate,
-        formattedHireDate: hireDate
-          ? new Date(hireDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            })
-          : "N/A",
-        monthlySalary: salesman.base_salary || 0,
-        address: salesman.address || "N/A",
-      },
-      activePage: 'employee',
-      activeRoute: 'employees',
-      successMessage: req.query.success,
-      errorMessage: req.query.error
+    res.json({
+      salesmanId: salesman.e_id || "N/A",
+      firstName: salesman.f_name || "Unknown",
+      lastName: salesman.last_name || "Unknown",
+      role: salesman.role || "Salesman",
+      status: salesman.status.charAt(0).toUpperCase() + salesman.status.slice(1) || "Active",
+      branch: branchName,
+      email: salesman.email || "N/A",
+      phoneNumber: salesman.phone_no || "",
+      registrationDate: hireDate,
+      formattedRegistrationDate: hireDate
+        ? new Date(hireDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+        : "N/A",
+      accountNumber: salesman.acno || "N/A",
+      ifscCode: salesman.ifsc || "N/A",
+      bank: salesman.bankname || "N/A",
+      hireDate: hireDate,
+      formattedHireDate: hireDate
+        ? new Date(hireDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+        : "N/A",
+      monthlySalary: salesman.base_salary || 0,
+      address: salesman.address || ""
     });
   } catch (error) {
-    console.log("Error rendering employee details:", error);
-    res.status(500).send("Internal Server Error");
+    console.log("Error fetching employee data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
@@ -154,10 +170,9 @@ async function updateSalesmanDetails(req, res) {
     res.redirect("/salesman/employees?success=Employee%20details%20updated%20successfully!");
   } catch (error) {
     console.log("Error updating employee details:", error);
-    // Redirect with an error message
     const errorMessage = encodeURIComponent(error.message || "Failed to update employee details");
     res.redirect(`/salesman/employees?error=${errorMessage}`);
   }
 }
 
-module.exports = { getSalesmanDetails, updateSalesmanDetails };
+module.exports = { getSalesmanDetails, get_salesman_data, updateSalesmanDetails };

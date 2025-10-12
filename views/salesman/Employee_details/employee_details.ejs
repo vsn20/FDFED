@@ -102,6 +102,55 @@
       display: none;
     }
 
+    .form-container .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-container .field-group > div {
+      flex: 1 1 45%;
+      min-width: 200px;
+    }
+
+    .form-container label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .form-container input,
+    .form-container select,
+    .form-container textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ebedf0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2c3e50;
+    }
+
+    .form-container input[readonly],
+    .form-container select:disabled,
+    .form-container textarea[readonly] {
+      background: #ebedf0;
+      cursor: not-allowed;
+    }
+
+    .form-container textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group.invalid input,
+    .form-group.invalid select,
+    .form-group.invalid textarea {
+      border-color: #a94442;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -145,12 +194,8 @@
     <%- include('../../partials/salesman_sidebar') %>
 
     <div class="content-area">
-      <% if (successMessage) { %>
-        <div class="success-message"><%= successMessage %></div>
-      <% } %>
-      <% if (errorMessage) { %>
-        <div class="error-message"><%= errorMessage %></div>
-      <% } %>
+      <div id="successMessage" class="success-message" style="display: none;"></div>
+      <div id="errorMessage" class="error-message" style="display: none;"></div>
       <div class="header-container">
         <h1>Employee Details</h1>
         <button id="editButton" class="edit-button">Edit</button>
@@ -162,178 +207,417 @@
           <fieldset>
             <legend>Personal Details</legend>
             <div class="field-group">
-              <div>
+              <div class="form-group">
                 <label for="salesmanId">Salesman ID</label>
-                <input type="text" id="salesmanId" name="salesmanId" value="<%= salesman.salesmanId %>" readonly>
+                <input type="text" id="salesmanId" name="salesmanId" readonly>
+                <div id="salesmanIdError" class="field-error"></div>
               </div>
-              <div>
-                <label for="firstName">First Name</label>
-                <input type="text" id="firstName" name="firstName" value="<%= salesman.firstName %>" readonly required>
-                <div class="field-error" id="firstNameError">First Name is required</div>
+              <div class="form-group">
+                <label for="firstName">First Name <span style="color: red;">*</span></label>
+                <input type="text" id="firstName" name="firstName" readonly>
+                <div id="firstNameError" class="field-error"></div>
               </div>
-              <div>
-                <label for="lastName">Last Name</label>
-                <input type="text" id="lastName" name="lastName" value="<%= salesman.lastName %>" readonly required>
-                <div class="field-error" id="lastNameError">Last Name is required</div>
+              <div class="form-group">
+                <label for="lastName">Last Name <span style="color: red;">*</span></label>
+                <input type="text" id="lastName" name="lastName" readonly>
+                <div id="lastNameError" class="field-error"></div>
               </div>
-              <div>
+              <div class="form-group">
                 <label for="role">Role</label>
-                <select id="role" name="role" disabled>
-                  <option><%= salesman.role %></option>
-                </select>
+                <input type="text" id="role" name="role" readonly>
+                <div id="roleError" class="field-error"></div>
               </div>
-              <div>
+              <div class="form-group">
                 <label for="status">Status</label>
                 <select id="status" name="status" disabled>
-                  <option value="active" <%= salesman.status === 'Active' ? 'selected' : '' %>>Active</option>
-                  <option value="resigned" <%= salesman.status === 'Resigned' ? 'selected' : '' %>>Resigned</option>
+                  <option value="active">Active</option>
+                  <option value="resigned">Resigned</option>
+                  <option value="fired">Fired</option>
                 </select>
-              </div>
-              <div>
-                <label for="branch">Branch Name</label>
-                <input type="text" id="branch" name="branch" value="<%= salesman.branch %>" readonly>
-              </div>
-              <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="<%= salesman.email %>" readonly required>
-                <div class="field-error" id="emailError">Email is required</div>
-              </div>
-              <div>
-                <label for="phoneNumber">Phone Number</label>
-                <input type="text" id="phoneNumber" name="phoneNumber" value="<%= salesman.phoneNumber %>" readonly>
+                <div id="statusError" class="field-error"></div>
               </div>
             </div>
           </fieldset>
 
-          <!-- Account and Salaries Section -->
+          <!-- Contact Details Section -->
           <fieldset>
-            <legend>Account and Salaries</legend>
+            <legend>Contact Details</legend>
             <div class="field-group">
-              <div>
-                <label for="registrationDate">Registration Date</label>
-                <input type="text" id="registrationDate" name="registrationDate" value="<%= salesman.formattedRegistrationDate %>" readonly>
+              <div class="form-group">
+                <label for="email">Email <span style="color: red;">*</span></label>
+                <input type="email" id="email" name="email" readonly>
+                <div id="emailError" class="field-error"></div>
               </div>
-              <div>
-                <label for="accountNumber">Account Number</label>
-                <input type="text" id="accountNumber" name="accountNumber" value="<%= salesman.accountNumber %>" readonly required>
-                <div class="field-error" id="accountNumberError">Account Number is required</div>
+              <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" readonly>
+                <div id="phoneNumberError" class="field-error"></div>
               </div>
-              <div>
-                <label for="ifscCode">IFSC Code</label>
-                <input type="text" id="ifscCode" name="ifscCode" value="<%= salesman.ifscCode %>" readonly required>
-                <div class="field-error" id="ifscCodeError">IFSC Code is required</div>
-              </div>
-              <div>
-                <label for="bank">Bank</label>
-                <input type="text" id="bank" name="bank" value="<%= salesman.bank %>" readonly required>
-                <div class="field-error" id="bankError">Bank is required</div>
-              </div>
-              <div>
-                <label for="hireDate">Hire Date</label>
-                <input type="text" id="hireDate" name="hireDate" value="<%= salesman.formattedHireDate %>" readonly>
-              </div>
-              <div>
-                <label for="monthlySalary">Monthly Salary</label>
-                <input type="text" id="monthlySalary" name="monthlySalary" value="$<%= salesman.monthlySalary %>" readonly>
-              </div>
-              <div style="flex: 1 1 100%;">
+              <div class="form-group">
                 <label for="address">Address</label>
-                <textarea id="address" name="address" readonly><%= salesman.address %></textarea>
+                <textarea id="address" name="address" readonly></textarea>
+                <div id="addressError" class="field-error"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Employment Details Section -->
+          <fieldset>
+            <legend>Employment Details</legend>
+            <div class="field-group">
+              <div class="form-group">
+                <label for="registrationDate">Registration Date</label>
+                <input type="text" id="registrationDate" name="registrationDate" readonly>
+                <div id="registrationDateError" class="field-error"></div>
+              </div>
+              <div class="form-group">
+                <label for="hireDate">Hire Date</label>
+                <input type="text" id="hireDate" name="hireDate" readonly>
+                <div id="hireDateError" class="field-error"></div>
+              </div>
+              <div class="form-group">
+                <label for="monthlySalary">Monthly Salary</label>
+                <input type="text" id="monthlySalary" name="monthlySalary" readonly>
+                <div id="monthlySalaryError" class="field-error"></div>
+              </div>
+              <div class="form-group">
+                <label for="branch">Branch</label>
+                <input type="text" id="branch" name="branch" readonly>
+                <div id="branchError" class="field-error"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Bank Details Section -->
+          <fieldset>
+            <legend>Bank Details</legend>
+            <div class="field-group">
+              <div class="form-group">
+                <label for="accountNumber">Account Number <span style="color: red;">*</span></label>
+                <input type="text" id="accountNumber" name="accountNumber" readonly>
+                <div id="accountNumberError" class="field-error"></div>
+              </div>
+              <div class="form-group">
+                <label for="ifscCode">IFSC Code <span style="color: red;">*</span></label>
+                <input type="text" id="ifscCode" name="ifscCode" readonly>
+                <div id="ifscCodeError" class="field-error"></div>
+              </div>
+              <div class="form-group">
+                <label for="bank">Bank Name <span style="color: red;">*</span></label>
+                <input type="text" id="bank" name="bank" readonly>
+                <div id="bankError" class="field-error"></div>
               </div>
             </div>
           </fieldset>
         </div>
       </form>
-
-      <script>
-        const editButton = document.getElementById('editButton');
-        const employeeForm = document.getElementById('employeeForm');
-        const inputs = employeeForm.querySelectorAll('input:not([id="salesmanId"]):not([id="registrationDate"]):not([id="hireDate"]):not([id="monthlySalary"]):not([id="branch"]), select, textarea');
-
-        editButton.addEventListener('click', () => {
-          inputs.forEach(input => {
-            if (input.tagName === 'SELECT') {
-              input.disabled = false;
-            } else {
-              input.readOnly = false;
-            }
-          });
-
-          editButton.style.display = 'none';
-          const submitButton = document.createElement('button');
-          submitButton.type = 'button';
-          submitButton.className = 'submit-button';
-          submitButton.textContent = 'Submit';
-          employeeForm.appendChild(submitButton);
-
-          submitButton.addEventListener('click', async () => {
-            let isValid = true;
-            const requiredFields = [
-              { id: 'firstName', errorId: 'firstNameError' },
-              { id: 'lastName', errorId: 'lastNameError' },
-              { id: 'email', errorId: 'emailError' },
-              { id: 'accountNumber', errorId: 'accountNumberError' },
-              { id: 'ifscCode', errorId: 'ifscCodeError' },
-              { id: 'bank', errorId: 'bankError' }
-            ];
-
-            requiredFields.forEach(field => {
-              const input = document.getElementById(field.id);
-              const error = document.getElementById(field.errorId);
-              if (input.value.trim() === '') {
-                error.style.display = 'block';
-                isValid = false;
-              } else {
-                error.style.display = 'none';
-              }
-            });
-
-            if (!isValid) {
-              alert('Please fill in all required fields.');
-              return;
-            }
-
-            // Collect form data
-            const formData = new FormData(employeeForm);
-            const data = {
-              firstName: formData.get('firstName'),
-              lastName: formData.get('lastName'),
-              status: formData.get('status'),
-              email: formData.get('email'),
-              phoneNumber: formData.get('phoneNumber'),
-              accountNumber: formData.get('accountNumber'),
-              ifscCode: formData.get('ifscCode'),
-              bank: formData.get('bank'),
-              address: formData.get('address')
-            };
-
-            try {
-              const response = await fetch('/salesman/employees/update', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-              });
-
-              if (response.ok) {
-                // Redirect with success message
-                window.location.href = '/salesman/employees?success=Employee%20details%20updated%20successfully!';
-              } else {
-                const errorData = await response.json();
-                const errorMessage = encodeURIComponent(errorData.message || 'Failed to update employee details');
-                window.location.href = `/salesman/employees?error=${errorMessage}`;
-              }
-            } catch (error) {
-              const errorMessage = encodeURIComponent(error.message || 'Failed to update employee details');
-              window.location.href = `/salesman/employees?error=${errorMessage}`;
-            }
-          });
-        });
-      </script>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    const validations = {
+      firstName: false,
+      lastName: false,
+      email: false,
+      accountNumber: false,
+      bank: false,
+      phoneNumber: true, // Optional
+      address: true, // Optional
+      status: true // Optional
+    };
+
+    function updateSubmitButton() {
+      const submitButton = document.querySelector('.submit-button');
+      if (submitButton) {
+        const allValid = Object.values(validations).every(valid => valid);
+        submitButton.disabled = !allValid;
+      }
+    }
+
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      const formGroup = errorElement.parentElement;
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      formGroup.classList.add('invalid');
+    }
+
+    function clearError(elementId) {
+      const errorElement = document.getElementById(elementId);
+      const formGroup = errorElement.parentElement;
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+      formGroup.classList.remove('invalid');
+    }
+
+    function validateFirstName() {
+      const firstName = document.getElementById('firstName').value.trim();
+      const regex = /^[a-zA-Z\s]+$/;
+      if (!firstName) {
+        showError('firstNameError', 'First Name is required');
+        validations.firstName = false;
+      } else if (!regex.test(firstName)) {
+        showError('firstNameError', 'First Name must contain only letters and spaces');
+        validations.firstName = false;
+      } else {
+        clearError('firstNameError');
+        validations.firstName = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateLastName() {
+      const lastName = document.getElementById('lastName').value.trim();
+      const regex = /^[a-zA-Z\s]+$/;
+      if (!lastName) {
+        showError('lastNameError', 'Last Name is required');
+        validations.lastName = false;
+      } else if (!regex.test(lastName)) {
+        showError('lastNameError', 'Last Name must contain only letters and spaces');
+        validations.lastName = false;
+      } else {
+        clearError('lastNameError');
+        validations.lastName = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateEmail() {
+      const email = document.getElementById('email').value.trim();
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) {
+        showError('emailError', 'Email is required');
+        validations.email = false;
+      } else if (!regex.test(email)) {
+        showError('emailError', 'Invalid email format');
+        validations.email = false;
+      } else {
+        clearError('emailError');
+        validations.email = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validatePhoneNumber() {
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const regex = /^\d{10}$/;
+      if (phoneNumber && !regex.test(phoneNumber)) {
+        showError('phoneNumberError', 'Phone number must be 10 digits');
+        validations.phoneNumber = false;
+      } else {
+        clearError('phoneNumberError');
+        validations.phoneNumber = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateAccountNumber() {
+      const accountNumber = document.getElementById('accountNumber').value.trim();
+      if (!accountNumber) {
+        showError('accountNumberError', 'Account Number is required');
+        validations.accountNumber = false;
+      } else {
+        clearError('accountNumberError');
+        validations.accountNumber = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateBank() {
+      const bank = document.getElementById('bank').value.trim();
+      if (!bank) {
+        showError('bankError', 'Bank Name is required');
+        validations.bank = false;
+      } else {
+        clearError('bankError');
+        validations.bank = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateAddress() {
+      const address = document.getElementById('address').value.trim();
+      validations.address = true; // Optional field, always valid
+      clearError('addressError');
+      updateSubmitButton();
+    }
+
+    function validateStatus() {
+      const status = document.getElementById('status').value;
+      validations.status = true; // Optional field, always valid
+      clearError('statusError');
+      updateSubmitButton();
+    }
+
+    async function fetchEmployeeData() {
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.style.display = 'none';
+
+      try {
+        const response = await fetch('/salesman/employees/data', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to load employee data');
+        }
+        const salesman = await response.json();
+
+        // Populate form fields
+        document.getElementById('salesmanId').value = salesman.salesmanId || 'N/A';
+        document.getElementById('firstName').value = salesman.firstName || 'Unknown';
+        document.getElementById('lastName').value = salesman.lastName || 'Unknown';
+        document.getElementById('role').value = salesman.role || 'Salesman';
+        document.getElementById('status').value = salesman.status.toLowerCase() || 'active';
+        document.getElementById('email').value = salesman.email || 'N/A';
+        document.getElementById('phoneNumber').value = salesman.phoneNumber || '';
+        document.getElementById('address').value = salesman.address || '';
+        document.getElementById('registrationDate').value = salesman.formattedRegistrationDate || 'N/A';
+        document.getElementById('hireDate').value = salesman.formattedHireDate || 'N/A';
+        document.getElementById('monthlySalary').value = salesman.monthlySalary ? `$${salesman.monthlySalary.toFixed(2)}` : '0.00';
+        document.getElementById('branch').value = salesman.branch || 'Unknown Branch';
+        document.getElementById('accountNumber').value = salesman.accountNumber || 'N/A';
+        document.getElementById('ifscCode').value = salesman.ifscCode || 'N/A';
+        document.getElementById('bank').value = salesman.bank || 'N/A';
+
+        // Validate fields after population
+        validateFirstName();
+        validateLastName();
+        validateEmail();
+        validatePhoneNumber();
+        validateAccountNumber();
+        validateBank();
+        validateAddress();
+        validateStatus();
+      } catch (error) {
+        console.error('Error fetching employee data:', error);
+        errorMessage.textContent = 'Failed to load employee data. Please try again.';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Show success/error messages from query parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const successMessage = document.getElementById('successMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      if (urlParams.get('success')) {
+        successMessage.textContent = urlParams.get('success');
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+      }
+
+      if (urlParams.get('error')) {
+        errorMessage.textContent = urlParams.get('error');
+        errorMessage.style.display = 'block';
+        setTimeout(() => {
+          errorMessage.style.display = 'none';
+        }, 3000);
+      }
+
+      // Fetch employee data
+      fetchEmployeeData();
+
+      const editButton = document.getElementById('editButton');
+      const employeeForm = document.getElementById('employeeForm');
+      const inputs = employeeForm.querySelectorAll('input:not([id="salesmanId"]):not([id="registrationDate"]):not([id="hireDate"]):not([id="monthlySalary"]):not([id="branch"]), select, textarea');
+
+      editButton.addEventListener('click', () => {
+        inputs.forEach(input => {
+          if (input.tagName === 'SELECT') {
+            input.disabled = false;
+          } else {
+            input.readOnly = false;
+          }
+        });
+
+        editButton.style.display = 'none';
+        const submitButton = document.createElement('button');
+        submitButton.type = 'button';
+        submitButton.className = 'submit-button';
+        submitButton.textContent = 'Submit';
+        submitButton.disabled = true; // Initially disabled until validations pass
+        employeeForm.appendChild(submitButton);
+
+        // Add validation event listeners
+        document.getElementById('firstName').addEventListener('input', validateFirstName);
+        document.getElementById('lastName').addEventListener('input', validateLastName);
+        document.getElementById('email').addEventListener('input', validateEmail);
+        document.getElementById('phoneNumber').addEventListener('input', validatePhoneNumber);
+        document.getElementById('accountNumber').addEventListener('input', validateAccountNumber);
+        document.getElementById('bank').addEventListener('input', validateBank);
+        document.getElementById('address').addEventListener('input', validateAddress);
+        document.getElementById('status').addEventListener('change', validateStatus);
+
+        submitButton.addEventListener('click', async () => {
+          // Re-validate all fields before submission
+          validateFirstName();
+          validateLastName();
+          validateEmail();
+          validatePhoneNumber();
+          validateAccountNumber();
+          validateBank();
+          validateAddress();
+          validateStatus();
+
+          // Check ifscCode for non-empty (since it's required in the form)
+          const ifscCode = document.getElementById('ifscCode').value.trim();
+          if (!ifscCode) {
+            showError('ifscCodeError', 'IFSC Code is required');
+            return;
+          } else {
+            clearError('ifscCodeError');
+          }
+
+          if (!Object.values(validations).every(valid => valid)) {
+            errorMessage.textContent = 'Please correct all errors before submitting';
+            errorMessage.style.display = 'block';
+            return;
+          }
+
+          // Collect form data
+          const formData = new FormData(employeeForm);
+          const data = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            status: formData.get('status'),
+            email: formData.get('email'),
+            phoneNumber: formData.get('phoneNumber'),
+            accountNumber: formData.get('accountNumber'),
+            ifscCode: formData.get('ifscCode'),
+            bank: formData.get('bank'),
+            address: formData.get('address')
+          };
+
+          try {
+            const response = await fetch('/salesman/employees/update', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+              window.location.href = '/salesman/employees?success=Employee%20details%20updated%20successfully!';
+            } else {
+              const errorData = await response.json();
+              errorMessage.textContent = errorData.message || 'Failed to update employee details';
+              errorMessage.style.display = 'block';
+            }
+          } catch (error) {
+            console.error('Error updating employee details:', error);
+            errorMessage.textContent = error.message || 'Failed to update employee details';
+            errorMessage.style.display = 'block';
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
