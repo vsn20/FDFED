@@ -2,20 +2,7 @@ const Sale = require("../../models/sale");
 const Product = require("../../models/products");
 const Branch = require("../../models/branches");
 
-async function previous_data_display(req, res) {
-  try {
-    // Render empty page; data loaded via API
-    res.render("customer/previousdata_feature/previousdata", {
-      activePage: "customer",
-      activeRoute: "previouspurchases",
-    });
-  } catch (error) {
-    console.error("[previous_data_display] Error rendering previous purchases page:", error);
-    res.status(500).send("Internal Server Error");
-  }
-}
-
-async function getPreviousPurchasesData(req, res) {
+const previous_data_display = async (req, res) => {
   try {
     const user = req.user; // From JWT middleware
     const phone_number = user.user_id; // e.g., "8125345317"
@@ -28,7 +15,7 @@ async function getPreviousPurchasesData(req, res) {
 
     // Fetch all sales for the customer, excluding sensitive fields
     const sales = await Sale.find({ phone_number })
-      .select("-purchased_price -profit_or_loss")
+      .select("-purchased_price -profit_or_loss") // Exclude sensitive fields
       .lean();
 
     // Map sales to include product and branch details
@@ -60,14 +47,18 @@ async function getPreviousPurchasesData(req, res) {
       })
     );
 
-    res.json(mappedSales);
+    res.render("customer/previousdata_feature/previousdata", {
+      data: mappedSales,
+      activePage: "customer",
+      activeRoute: "previouspurchases"
+    });
   } catch (error) {
-    console.error("[getPreviousPurchasesData] Error fetching previous purchases:", error);
+    console.error("[previous_data_display] Error fetching previous purchases:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
-}
+};
 
-async function getSaleById(req, res) {
+const total_previous_data_display = async (req, res) => {
   try {
     const user = req.user;
     const phone_number = user.user_id;
@@ -79,7 +70,11 @@ async function getSaleById(req, res) {
       .lean();
 
     if (!sale) {
-      return res.status(404).json({ success: false, message: "Sale not found" });
+      return res.status(404).render("customer/total_previous_data_display", {
+        sale: null,
+        activePage: "customer",
+        activeRoute: "previouspurchases"
+      });
     }
 
     // Fetch product details
@@ -95,7 +90,7 @@ async function getSaleById(req, res) {
     const branch = await Branch.findOne({ bid: sale.branch_id }).lean();
     const branchName = branch ? branch.b_name : "Unknown Branch";
 
-    // Prepare sale data
+    // Prepare sale data for rendering
     const saleData = {
       sale_id: sale.sales_id,
       prod_id: sale.product_id,
@@ -122,31 +117,18 @@ async function getSaleById(req, res) {
       company_id: sale.company_id
     };
 
-    res.json(saleData);
-  } catch (error) {
-    console.error("[getSaleById] Error fetching sale details:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-}
-
-async function total_previous_data_display(req, res) {
-  try {
-    const { saleid } = req.params;
-    // Render empty page; data loaded via API
     res.render("customer/previousdata_feature/total_previous_data_display", {
-      saleId: saleid,
+      sale: saleData,
       activePage: "customer",
-      activeRoute: "previouspurchases",
+      activeRoute: "previouspurchases"
     });
   } catch (error) {
-    console.error("[total_previous_data_display] Error rendering sale details page:", error);
-    res.status(500).send("Internal Server Error");
+    console.error("[total_previous_data_display] Error fetching sale details:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
-}
+};
 
 module.exports = {
   previous_data_display,
-  getPreviousPurchasesData,
-  getSaleById,
   total_previous_data_display
 };

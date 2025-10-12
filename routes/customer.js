@@ -4,10 +4,8 @@ const router = express.Router();
 router.get("/home", (req, res) => res.redirect("/customer/previouspurchases"));
 
 // Previous purchases
-const { previous_data_display, getPreviousPurchasesData, getSaleById, total_previous_data_display } = require("../controllers/customer/previous_data");
+const { previous_data_display, total_previous_data_display } = require("../controllers/customer/previous_data");
 router.get("/previouspurchases", previous_data_display);
-router.get("/previouspurchases/data", getPreviousPurchasesData);
-router.get("/previouspurchases/totaldetails/data/:saleid", getSaleById);
 router.get("/previouspurchases/totaldetails/:saleid", total_previous_data_display);
 
 // Complaints

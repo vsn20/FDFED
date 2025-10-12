@@ -132,18 +132,6 @@
       cursor: not-allowed;
     }
 
-    #loading {
-      text-align: center;
-      padding: 20px;
-      color: #636e72;
-    }
-
-    #error {
-      color: #e74c3c;
-      text-align: center;
-      padding: 20px;
-    }
-
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
@@ -176,138 +164,102 @@
     <!-- Content Area -->
     <div class="content-area" id="content">
       <h1>View Sale</h1>
-      <div id="loading">Loading sale details...</div>
-      <div id="error" style="display: none;"></div>
-      <div id="sale-details" style="display: none;">
-        <fieldset class="form-section">
-          <legend class="section-title">Sale Information</legend>
-          <div class="field-group" id="field-group">
-            <!-- Fields populated via JS -->
-          </div>
-        </fieldset>
-      </div>
+      <% if (sale) { %>
+          <fieldset class="form-section">
+            <legend class="section-title">Sale Information</legend>
+            <div class="field-group">
+              <div>
+                <label for="sale-id" class="field-label">Sale ID:</label>
+                <input type="text" id="sale-id" name="sale_id" value="<%= sale.sale_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-id" class="field-label">Product ID:</label>
+                <input type="text" id="prod-id" name="prod_id" value="<%= sale.prod_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-name" class="field-label">Product Name:</label>
+                <input type="text" id="prod-name" name="Prod_name" value="<%= sale.Prod_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="com-id" class="field-label">Company ID:</label>
+                <input type="text" id="com-id" name="Com_id" value="<%= sale.Com_id %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="com-name" class="field-label">Company Name:</label>
+                <input type="text" id="com-name" name="com_name" value="<%= sale.com_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="model-no" class="field-label">Model No:</label>
+                <input type="text" id="model-no" name="Model_no" value="<%= sale.Model_no %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="branch-name" class="field-label">Branch Name:</label>
+                <input type="text" id="branch-name" name="branch_name" value="<%= sale.branch_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="warranty-period" class="field-label">Warranty Period:</label>
+                <input type="text" id="warranty-period" name="warrantyperiod" value="<%= sale.warrantyperiod %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="purchase-date" class="field-label">Purchase Date:</label>
+                <input type="text" id="purchase-date" name="purchasedate" value="<%= sale.purchasedate %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="customer-name" class="field-label">Customer Name:</label>
+                <input type="text" id="customer-name" name="customer_name" value="<%= sale.customer_name %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="phone-number" class="field-label">Phone Number:</label>
+                <input type="text" id="phone-number" name="phone_number" value="<%= sale.phone_number %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="address" class="field-label">Address:</label>
+                <input type="text" id="address" name="address" value="<%= sale.address %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="unique-code" class="field-label">Unique Code:</label>
+                <input type="text" id="unique-code" name="unique_code" value="<%= sale.unique_code %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="sold-price" class="field-label">Sold Price:</label>
+                <input type="text" id="sold-price" name="price" value="<%= sale.price %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="quantity" class="field-label">Quantity:</label>
+                <input type="text" id="quantity" name="quantity" value="<%= sale.quantity %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="amount" class="field-label">Total Amount:</label>
+                <input type="text" id="amount" name="amount" value="<%= sale.amount %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="installation" class="field-label">Installation:</label>
+                <input type="text" id="installation" name="installation" value="<%= sale.installation %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="installation-type" class="field-label">Installation Type:</label>
+                <input type="text" id="installation-type" name="installationType" value="<%= sale.installationType %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="installation-charge" class="field-label">Installation Charge:</label>
+                <input type="text" id="installation-charge" name="installationcharge" value="<%= sale.installationcharge %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="installation-status" class="field-label">Installation Status:</label>
+                <input type="text" id="installation-status" name="installation_status" value="<%= sale.installation_status %>" class="field-input disabled-field" readonly>
+              </div>
+              <div>
+                <label for="prod-description" class="field-label">Product Description:</label>
+                <textarea id="prod-description" name="prod_description" class="field-textarea disabled-field" readonly><%= sale.prod_description %></textarea>
+              </div>
+            </div>
+          </fieldset>
+      <% } else { %>
+        <p>Sale not found.</p>
+      <% } %>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
-
-  <script>
-    const saleId = '<%= saleId %>'; // Passed from controller
-    const loading = document.getElementById('loading');
-    const errorDiv = document.getElementById('error');
-    const saleDetails = document.getElementById('sale-details');
-    const fieldGroup = document.getElementById('field-group');
-
-    async function loadSaleDetails() {
-      try {
-        const response = await fetch(`/customer/previouspurchases/totaldetails/data/${saleId}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to fetch');
-        }
-        const sale = await response.json();
-        fieldGroup.innerHTML = '';
-        // Populate fields
-        fieldGroup.innerHTML = `
-          <div>
-            <label class="field-label">Sale ID:</label>
-            <input type="text" value="${sale.sale_id}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Product ID:</label>
-            <input type="text" value="${sale.prod_id}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Product Name:</label>
-            <input type="text" value="${sale.Prod_name}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Company ID:</label>
-            <input type="text" value="${sale.Com_id}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Company Name:</label>
-            <input type="text" value="${sale.com_name}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Model No:</label>
-            <input type="text" value="${sale.Model_no}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Branch Name:</label>
-            <input type="text" value="${sale.branch_name}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Warranty Period:</label>
-            <input type="text" value="${sale.warrantyperiod}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Purchase Date:</label>
-            <input type="text" value="${sale.purchasedate}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Customer Name:</label>
-            <input type="text" value="${sale.customer_name}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Phone Number:</label>
-            <input type="text" value="${sale.phone_number}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Address:</label>
-            <input type="text" value="${sale.address || 'N/A'}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Unique Code:</label>
-            <input type="text" value="${sale.unique_code}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Sold Price:</label>
-            <input type="text" value="${sale.price}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Quantity:</label>
-            <input type="text" value="${sale.quantity}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Total Amount:</label>
-            <input type="text" value="${sale.amount}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Installation:</label>
-            <input type="text" value="${sale.installation}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Installation Type:</label>
-            <input type="text" value="${sale.installationType || 'N/A'}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Installation Charge:</label>
-            <input type="text" value="${sale.installationcharge || 'N/A'}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Installation Status:</label>
-            <input type="text" value="${sale.installation_status}" class="field-input disabled-field" readonly>
-          </div>
-          <div>
-            <label class="field-label">Product Description:</label>
-            <textarea class="field-textarea disabled-field" readonly>${sale.prod_description}</textarea>
-          </div>
-        `;
-        loading.style.display = 'none';
-        saleDetails.style.display = 'block';
-      } catch (error) {
-        console.error('Error loading sale details:', error);
-        loading.style.display = 'none';
-        errorDiv.textContent = error.message === 'Sale not found' 
-          ? 'Sale not found.' 
-          : 'Error loading sale details. Please refresh.';
-        errorDiv.style.display = 'block';
-      }
-    }
-
-    // Initial load
-    loadSaleDetails();
-  </script>
 </body>
 </html>
