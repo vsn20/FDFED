@@ -6,7 +6,7 @@ const Branch = require("../../models/branches"); // Already added for branches
 async function salesmanager_messages_display(req, res) {
   try {
     const user = res.locals.user; // Get logged-in user from JWT
-    const emp_id = user.emp_id || "unknown"; // Logged-in sales manager's emp_id
+    const emp_id = user.emp_id || "unknown"; // Logged-in sales manager's emp
     const messages = await Message.find({
       $or: [
         { to: emp_id }, // Messages addressed to the logged-in sales manager
