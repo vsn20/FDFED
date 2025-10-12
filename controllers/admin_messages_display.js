@@ -17,7 +17,7 @@ async function admin_messages_display(req, res) {
       messages,
       activePage: "employee",
       activeRoute: "messages",
-      isSentMessages: false // Explicitly define isSentMessages
+      isSentMessages: false // Explicitly define isSentMessag
     });
   } catch (error) {
     console.error("Error rendering messages:", error);
@@ -27,7 +27,7 @@ async function admin_messages_display(req, res) {
 
 async function admin_sent_messages(req, res) {
   try {
-    const user = res.locals.user; // Get logged-in user from JWT
+    const user = res.locals.user; // Get logged-in user 
     const emp_id = user.emp_id || "unknown"; // Logged-in employee's emp_id
     const messages = await Message.find({
       from: emp_id // Messages sent by the logged-in employee
