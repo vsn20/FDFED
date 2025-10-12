@@ -110,6 +110,12 @@
       text-decoration: underline;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
@@ -200,7 +206,9 @@
         <h1>Previous Purchases</h1>
       </div>
 
-      <div class="table-wrapper">
+      <div id="loading">Loading previous purchases...</div>
+
+      <div class="table-wrapper" id="table-container" style="display: none;">
         <table>
           <thead>
             <tr>
@@ -215,20 +223,8 @@
               <th>Installation Status</th>
             </tr>
           </thead>
-          <tbody>
-            <% data.forEach(sale => { %>
-              <tr>
-                <td data-label="Sale ID"><button class="clickable-btn" data-bid="<%= sale.sale_id %>"><%= sale.sale_id %></button></td>
-                <td data-label="Product ID"><%= sale.prod_id %></td>
-                <td data-label="Product Name"><%= sale.Prod_name %></td>
-                <td data-label="Company Name"><%= sale.com_name %></td>
-                <td data-label="Branch Name"><%= sale.branch_name %></td>
-                <td data-label="Purchase Date"><%= sale.purchasedate %></td>
-                <td data-label="Warranty Period"><%= sale.warrantyperiod %></td>
-                <td data-label="Installation"><%= sale.installation %></td>
-                <td data-label="Installation Status"><%= sale.installation_status %></td>
-              </tr>
-            <% }) %>
+          <tbody id="purchases-tbody">
+            <!-- Data populated via JS -->
           </tbody>
         </table>
       </div>
@@ -238,12 +234,56 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    document.querySelectorAll('.clickable-btn').forEach(button => {
-      button.addEventListener('click', () => {
-        const bid = button.getAttribute('data-bid');
-        window.location.href = `/customer/previouspurchases/totaldetails/${bid}`;
+    const tbody = document.getElementById('purchases-tbody');
+    const loading = document.getElementById('loading');
+    const tableContainer = document.getElementById('table-container');
+
+    async function loadPreviousPurchases() {
+      try {
+        const response = await fetch('/customer/previouspurchases/data');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch');
+        }
+        const sales = await response.json();
+        tbody.innerHTML = ''; // Clear existing rows
+        sales.forEach(sale => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td data-label="Sale ID"><button class="clickable-btn" data-bid="${sale.sale_id}">${sale.sale_id}</button></td>
+            <td data-label="Product ID">${sale.prod_id}</td>
+            <td data-label="Product Name">${sale.Prod_name}</td>
+            <td data-label="Company Name">${sale.com_name}</td>
+            <td data-label="Branch Name">${sale.branch_name}</td>
+            <td data-label="Purchase Date">${sale.purchasedate}</td>
+            <td data-label="Warranty Period">${sale.warrantyperiod}</td>
+            <td data-label="Installation">${sale.installation}</td>
+            <td data-label="Installation Status">${sale.installation_status}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        attachEventListeners();
+        loading.style.display = 'none';
+        tableContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading previous purchases:', error);
+        loading.textContent = error.message === 'No purchase records found for this customer' 
+          ? 'No purchase records found.' 
+          : 'Error loading previous purchases. Please refresh.';
+      }
+    }
+
+    function attachEventListeners() {
+      document.querySelectorAll('.clickable-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          const bid = button.getAttribute('data-bid');
+          window.location.href = `/customer/previouspurchases/totaldetails/${bid}`;
+        });
       });
-    });
+    }
+
+    // Initial load
+    loadPreviousPurchases();
   </script>
 </body>
 </html>
