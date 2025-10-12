@@ -62,9 +62,8 @@ async function getProductsByCompany(req, res) {
   }
 }
 
-const orders_display = async (req, res) => {
+async function orders_display(req, res) {
   try {
-    const allEmployees = await Employee.find().lean();
     const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
 
     if (!employee) {
@@ -88,21 +87,53 @@ const orders_display = async (req, res) => {
       return res.status(403).send(`No active branch found for bid: ${employee.bid} (e_id: ${employee.e_id}). Contact the administrator to verify branch assignment.`);
     }
 
-    const orders = await Order.find({ branch_name: branch.b_name }).lean();
+    // Render empty page; data loaded via API
     res.render('salesmanager/orders_feature/ordersdisplay', {
       activePage: 'employee',
       activeRoute: 'orders',
-      orders,
       branchid: branch.bid,
       branchname: branch.b_name
     });
   } catch (error) {
-    console.error("Error displaying orders:", error);
+    console.error("Error rendering orders page:", error);
     res.status(500).send('Internal Server Error');
   }
-};
+}
 
-const order_details = async (req, res) => {
+async function getOrdersData(req, res) {
+  try {
+    const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
+
+    if (!employee) {
+      return res.status(403).json({ error: `No employee found for emp_id: ${req.user.emp_id}.` });
+    }
+
+    if (employee.status !== "active") {
+      return res.status(403).json({ error: `Employee (e_id: ${employee.e_id}) is not active (status: ${employee.status}).` });
+    }
+
+    if (!employee.bid) {
+      return res.status(403).json({ error: `No branch assigned to this employee (e_id: ${employee.e_id}).` });
+    }
+
+    const branch = await Branch.findOne({ 
+      bid: employee.bid, 
+      active: "active" 
+    }).lean();
+
+    if (!branch) {
+      return res.status(403).json({ error: `No active branch found for bid: ${employee.bid} (e_id: ${employee.e_id}).` });
+    }
+
+    const orders = await Order.find({ branch_name: branch.b_name }).lean();
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function order_details(req, res) {
   try {
     const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
 
@@ -127,26 +158,59 @@ const order_details = async (req, res) => {
       return res.status(403).send(`No active branch found for bid: ${employee.bid} (e_id: ${employee.e_id}).`);
     }
 
-    const order = await Order.findOne({ 
-      order_id: req.params.id, 
-      branch_name: branch.b_name 
-    }).lean();
-
-    if (!order) {
-      return res.status(404).send('Order not found or not accessible');
-    }
+    // Render empty page; data loaded via API
     res.render('salesmanager/orders_feature/orderdetails', {
       activePage: 'employee',
       activeRoute: 'orders',
-      order
+      order_id: req.params.id
     });
   } catch (error) {
-    console.error("Error displaying order details:", error);
+    console.error("Error rendering order details page:", error);
     res.status(500).send('Internal Server Error');
   }
-};
+}
 
-const order_edit = async (req, res) => {
+async function getOrderById(req, res) {
+  try {
+    const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
+
+    if (!employee) {
+      return res.status(403).json({ error: `No employee found for emp_id: ${req.user.emp_id}.` });
+    }
+
+    if (employee.status !== "active") {
+      return res.status(403).json({ error: `Employee (e_id: ${employee.e_id}) is not active (status: ${employee.status}).` });
+    }
+
+    if (!employee.bid) {
+      return res.status(403).json({ error: `No branch assigned to this employee (e_id: ${employee.e_id}).` });
+    }
+
+    const branch = await Branch.findOne({ 
+      bid: employee.bid, 
+      active: "active" 
+    }).lean();
+
+    if (!branch) {
+      return res.status(403).json({ error: `No active branch found for bid: ${employee.bid} (e_id: ${employee.e_id}).` });
+    }
+
+    const order = await Order.findOne({ 
+      order_id: req.params.id, 
+      branch_name: branch.b_name 
+    }).lean();
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found or not accessible' });
+    }
+    res.json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function order_edit(req, res) {
   try {
     const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
 
@@ -171,24 +235,17 @@ const order_edit = async (req, res) => {
       return res.status(403).send(`No active branch found for bid: ${employee.bid} (e_id: ${employee.e_id}).`);
     }
 
-    const order = await Order.findOne({ 
-      order_id: req.params.id, 
-      branch_name: branch.b_name 
-    }).lean();
-
-    if (!order) {
-      return res.status(404).send('Order not found or not accessible');
-    }
+    // Render empty page; data loaded via API
     res.render('salesmanager/orders_feature/orderedit', {
       activePage: 'employee',
       activeRoute: 'orders',
-      order
+      order_id: req.params.id
     });
   } catch (error) {
-    console.error("Error displaying order edit:", error);
+    console.error("Error rendering order edit page:", error);
     res.status(500).send('Internal Server Error');
   }
-};
+}
 
 async function updateInventoryForOrder(order, branch) {
   try {
@@ -232,7 +289,7 @@ async function updateInventoryForOrder(order, branch) {
   }
 }
 
-const order_update = async (req, res) => {
+async function order_update(req, res) {
   try {
     const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
 
@@ -278,9 +335,9 @@ const order_update = async (req, res) => {
     console.error("Error updating order status:", error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
-};
+}
 
-const addorder_post = async (req, res) => {
+async function addorder_post(req, res) {
   try {
     const { branch_name, company_id, product_id, quantity, ordered_date } = req.body;
     const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
@@ -334,9 +391,9 @@ const addorder_post = async (req, res) => {
     console.error("Error adding order:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
-};
+}
 
-const updateDeliveryDate = async (req, res) => {
+async function updateDeliveryDate(req, res) {
   try {
     const { order_id, delivery_date, status } = req.body;
     const company = await Company.findOne({ c_id: req.user.c_id }).lean();
@@ -374,11 +431,13 @@ const updateDeliveryDate = async (req, res) => {
     console.error("Error updating delivery date:", error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
-};
+}
 
 module.exports = {
   orders_display,
+  getOrdersData,
   order_details,
+  getOrderById,
   order_edit,
   order_update,
   addorder_post,
