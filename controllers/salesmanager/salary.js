@@ -17,29 +17,61 @@ async function salary_display(req, res) {
     for (let i = 7; i >= 1; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       const monthYear = date
-        .toLocaleString('default', { month: 'short', year: 'numeric' })
+        .toLocaleString('en-US', { month: 'short', year: 'numeric' })
         .replace(' ', '-');
       monthYearOptions.push(monthYear);
     }
 
     // Get month-year from query, default to previous month (X-1)
     const defaultMonthYear = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-      .toLocaleString('default', { month: 'short', year: 'numeric' })
+      .toLocaleString('en-US', { month: 'short', year: 'numeric' })
+      .replace(' ', '-');
+    const monthYear = req.query.monthYear || defaultMonthYear;
+
+    res.render("salesmanager/salaries_feature/display_salary", {
+      activePage: 'employee',
+      activeRoute: 'salaries',
+      selectedMonthYear: monthYear,
+      monthYearOptions: monthYearOptions
+    });
+  } catch (error) {
+    console.error("[salary_display] Error rendering salaries page:", error);
+    res.status(500).send("Internal server error");
+  }
+}
+
+async function getSalaryData(req, res) {
+  try {
+    const user = res.locals.user;
+    console.log('[getSalaryData] User:', user);
+    const employee = await Employee.findOne({ e_id: user.emp_id, role: "Sales Manager", status: "active" });
+    if (!employee) {
+      console.log('[getSalaryData] Sales Manager not found for emp_id:', user.emp_id);
+      return res.status(404).json({ error: "Sales Manager not found" });
+    }
+
+    // Get current date and calculate 6-month range (X-7 to X-1)
+    const currentDate = new Date();
+    
+    // Get month-year from query, default to previous month (X-1)
+    const defaultMonthYear = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+      .toLocaleString('en-US', { month: 'short', year: 'numeric' })
       .replace(' ', '-');
     const monthYear = req.query.monthYear || defaultMonthYear;
     const [monthStr, yearStr] = monthYear.split("-");
+    const normalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).toLowerCase();
     const monthMap = {
       Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
       Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
     };
 
     // Validate month and year
-    if (!monthMap.hasOwnProperty(monthStr) || isNaN(yearStr)) {
-      console.log('[salary_display] Invalid month-year format:', monthYear);
-      return res.status(400).send("Invalid month-year format");
+    if (!monthMap.hasOwnProperty(normalizedMonth) || isNaN(yearStr)) {
+      console.log('[getSalaryData] Invalid month-year format:', monthYear);
+      return res.status(400).json({ error: "Invalid month-year format" });
     }
 
-    const month = monthMap[monthStr];
+    const month = monthMap[normalizedMonth];
     const year = parseInt(yearStr);
     const startDate = new Date(year, month, 1);
     const endDate = new Date(year, month + 1, 1);
@@ -48,8 +80,8 @@ async function salary_display(req, res) {
     const earliestDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 7, 1);
     const latestDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     if (startDate < earliestDate || startDate >= latestDate) {
-      console.log('[salary_display] Month-year out of allowed range:', monthYear);
-      return res.status(400).send("Selected month-year is outside the allowed 6-month range");
+      console.log('[getSalaryData] Month-year out of allowed range:', monthYear);
+      return res.status(400).json({ error: "Selected month-year is outside the allowed 6-month range" });
     }
 
     // Fetch employees from the same branch
@@ -105,17 +137,11 @@ async function salary_display(req, res) {
       })
     );
 
-    res.render("salesmanager/salaries_feature/display_salary", {
-      salary: salaryData,
-      activePage: 'employee',
-      activeRoute: 'salaries',
-      selectedMonthYear: monthYear,
-      monthYearOptions: monthYearOptions
-    });
+    res.json(salaryData);
   } catch (error) {
-    console.error("[salary_display] Error rendering salaries:", error);
-    res.status(500).send("Internal server error");
+    console.error("[getSalaryData] Error fetching salaries:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
-module.exports = { salary_display };
+module.exports = { salary_display, getSalaryData };

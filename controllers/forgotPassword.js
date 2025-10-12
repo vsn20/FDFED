@@ -3,10 +3,11 @@ const otpGenerator = require("otp-generator");
 const User = require("../models/users");
 const Employee = require("../models/employees");
 const Company = require("../models/company");
+const bcrypt = require("bcrypt");
 
 // Gmail credentials (replace with your actual email and app password)
-const EMAIL_USER = "electroland2005@gmail.com"; // Replace with your Gmail address
-const EMAIL_PASS = "edycvqdxyijeycqf"; // Replace with your 16-character app password
+const EMAIL_USER = "electroland2005@gmail.com";
+const EMAIL_PASS = "edycvqdxyijeycqf";
 
 // In-memory OTP storage (temporary, for demo purposes)
 const otpStorage = new Map();
@@ -84,7 +85,7 @@ async function sendOtp(req, res) {
 
     // Store OTP in-memory
     otpStorage.set(userEmail, { otp, timestamp: Date.now() });
-    setTimeout(() => otpStorage.delete(userEmail), 10 * 60 * 1000); // Expire after 10 minutes
+    setTimeout(() => otpStorage.delete(userEmail), 10 * 60 * 1000);
 
     // Configure Nodemailer
     const transporter = nodemailer.createTransport({
@@ -185,21 +186,25 @@ async function resetPassword(req, res) {
   
       // Check OTP expiration (10 minutes)
       const currentTime = Date.now();
-      const otpAge = (currentTime - storedOtpData.timestamp) / 1000 / 60; // In minutes
+      const otpAge = (currentTime - storedOtpData.timestamp) / 1000 / 60;
       if (otpAge > 10) {
         otpStorage.delete(userEmail);
         return res.status(400).json({ success: false, message: "OTP has expired. Please request a new OTP." });
       }
   
-      // Update password in plain text
-      await User.updateOne({ _id: user._id }, { password: newPassword });
+      // Hash the new password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+  
+      // Update password with hashed version
+      await User.updateOne({ _id: user._id }, { password: hashedPassword });
   
       // Clear OTP
       otpStorage.delete(userEmail);
   
       console.log(`Password reset successfully for ${userEmail} (${user.user_id}).`);
   
-      // Return success with redirect URL for client handling
+      // Return success wiedirect URL for client handling
       res.json({ 
         success: true, 
         message: "Password reset successfully! Redirecting to home page...",
@@ -210,4 +215,5 @@ async function resetPassword(req, res) {
       res.status(500).json({ success: false, message: "Failed to reset password. Please try again." });
     }
   }
+
 module.exports = { sendOtp, resetPassword };

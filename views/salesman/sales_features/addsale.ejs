@@ -53,6 +53,7 @@
 
     .form-group {
       margin-bottom: 15px;
+      position: relative;
     }
 
     .form-group label {
@@ -125,7 +126,12 @@
       margin-top: 20px;
     }
 
-    .button:hover {
+    .button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .button:hover:not(:disabled) {
       background-color: #555555;
     }
 
@@ -156,6 +162,18 @@
       font-size: 0.9rem;
       text-align: center;
       display: none;
+    }
+
+    .field-error {
+      color: #d63031;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .form-group.invalid input,
+    .form-group.invalid select {
+      border-color: #d63031;
     }
 
     @media (max-width: 768px) {
@@ -231,63 +249,88 @@
     <div class="content-area" id="content">
       <h2>Add Sale</h2>
 
-      <div class="error-message"></div>
+      <div class="error-message" id="form-error"></div>
 
       <form id="saleForm">
         <h3>Sale Information</h3>
         <div class="form-row">
           <div class="form-group">
             <label>Salesman Name</label>
-            <input type="text" name="salesman_name" value="<%= user?.emp_id || 'Unknown Salesman' %>" readonly>
+            <input type="text" name="salesman_name" id="salesmanName" value="<%= user?.emp_id || 'Unknown Salesman' %>" readonly>
           </div>
           <div class="form-group">
-            <label>Customer Name</label>
-            <input type="text" name="customer_name" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Sale Date</label>
-            <input type="date" name="sales_date" required>
+            <label>Customer Name <span style="color: red;">*</span></label>
+            <input type="text" name="customer_name" id="customerName" required>
+            <div class="field-error" id="customerName-error"></div>
           </div>
           <div class="form-group">
-            <label>Unique Code</label>
-            <input type="text" name="unique_code" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Customer Phone Number</label>
-            <input type="tel" name="phone_number" required placeholder="+1234567890" pattern="\+?[1-9]\d{1,14}">
+            <label>Sales Date <span style="color: red;">*</span></label>
+            <input type="date" name="sales_date" id="salesDate" required>
+            <div class="field-error" id="salesDate-error"></div>
           </div>
           <div class="form-group">
-            <label>Customer Address</label>
-            <input type="text" name="address" placeholder="Enter customer address">
+            <label>Unique Code <span style="color: red;">*</span></label>
+            <input type="text" name="unique_code" id="uniqueCode" required>
+            <div class="field-error" id="uniqueCode-error"></div>
           </div>
         </div>
 
         <h3>Product Information</h3>
         <div class="form-row">
           <div class="form-group">
-            <label>Company Name</label>
-            <select name="company_id" id="companySelect" required onchange="fetchProducts()">
+            <label>Company <span style="color: red;">*</span></label>
+            <select name="company_id" id="companySelect" required>
               <option value="">Select Company</option>
-              <% companies.forEach(company => { %>
-                <option value="<%= company.c_id %>"><%= company.cname %></option>
-              <% }) %>
             </select>
+            <div class="field-error" id="companySelect-error"></div>
           </div>
           <div class="form-group">
-            <label>Product</label>
-            <select name="product_id" id="productSelect" class="product-list" required onchange="updateProductDetails()">
+            <label>Product <span style="color: red;">*</span></label>
+            <select name="product_id" id="productSelect" class="product-list" required>
               <option value="">Select Product</option>
             </select>
+            <div class="field-error" id="productSelect-error"></div>
           </div>
         </div>
+
+        <h3>Transaction Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Purchased Price <span style="color: red;">*</span></label>
+            <input type="number" name="purchased_price" id="purchasedPrice" step="0.01" readonly required>
+            <div class="field-error" id="purchasedPrice-error"></div>
+          </div>
+          <div class="form-group">
+            <label>Sold Price <span style="color: red;">*</span></label>
+            <input type="number" name="sold_price" id="soldPrice" step="0.01" required>
+            <div class="field-error" id="soldPrice-error"></div>
+          </div>
+          <div class="form-group">
+            <label>Quantity <span style="color: red;">*</span></label>
+            <input type="number" name="quantity" id="quantity" required min="1" value="1">
+            <div class="field-error" id="quantity-error"></div>
+          </div>
+        </div>
+
+        <h3>Customer Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" name="phone_number" id="phoneNumber">
+            <div class="field-error" id="phoneNumber-error"></div>
+          </div>
+          <div class="form-group">
+            <label>Address <span style="color: red;">*</span></label>
+            <input type="text" name="address" id="address" required>
+            <div class="field-error" id="address-error"></div>
+          </div>
+        </div>
+
+        <h3>Installation Details</h3>
         <div class="form-row">
           <div class="form-group">
             <label>Installation</label>
-            <input type="text" name="installation" id="installation" readonly required>
+            <input type="text" name="installation" id="installation" readonly>
           </div>
           <div class="form-group">
             <label>Installation Type</label>
@@ -299,23 +342,7 @@
           </div>
         </div>
 
-        <h3>Transaction Details</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Purchased Price</label>
-            <input type="number" name="purchased_price" id="purchasedPrice" step="0.01" readonly required>
-          </div>
-          <div class="form-group">
-            <label>Sold Price</label>
-            <input type="number" name="sold_price" step="0.01" required>
-          </div>
-          <div class="form-group">
-            <label>Quantity</label>
-            <input type="number" name="quantity" required min="1" value="1">
-          </div>
-        </div>
-
-        <button type="submit" class="button">Add Sale</button>
+        <button type="submit" class="button" id="submitButton" disabled>Add Sale</button>
       </form>
 
       <a href="/salesman/sales" class="back-link">Back to Sales</a>
@@ -325,6 +352,246 @@
 
   <script>
     let productsData = [];
+    const validations = {
+      customerName: false,
+      salesDate: false,
+      uniqueCode: false,
+      companySelect: false,
+      productSelect: false,
+      purchasedPrice: true, // Readonly, always valid if populated
+      soldPrice: false,
+      quantity: false,
+      phoneNumber: true, // Optional
+      address: false
+    };
+
+    function updateSubmitButton() {
+      const submitButton = document.getElementById('submitButton');
+      const allValid = Object.values(validations).every(valid => valid);
+      submitButton.disabled = !allValid;
+    }
+
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(`${elementId}-error`);
+      const formGroup = errorElement.parentElement;
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      formGroup.classList.add('invalid');
+    }
+
+    function clearError(elementId) {
+      const errorElement = document.getElementById(`${elementId}-error`);
+      const formGroup = errorElement.parentElement;
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+      formGroup.classList.remove('invalid');
+    }
+
+    async function validateCustomerName() {
+      const customerName = document.getElementById('customerName').value.trim();
+      const regex = /^[a-zA-Z\s]+$/;
+      if (!customerName) {
+        showError('customerName', 'Customer name is required');
+        validations.customerName = false;
+      } else if (!regex.test(customerName)) {
+        showError('customerName', 'Customer name must contain only letters and spaces');
+        validations.customerName = false;
+      } else {
+        clearError('customerName');
+        validations.customerName = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateSalesDate() {
+      const salesDate = document.getElementById('salesDate').value;
+      const today = new Date();
+      today.setDate(today.getDate() + 1);
+      today.setHours(23, 59, 59, 999); // Set to end of today
+      const selectedDate = new Date(salesDate + 'T23:59:59.999Z');
+      if (!salesDate) {
+        showError('salesDate', 'Sales date is required');
+        validations.salesDate = false;
+      } else if (selectedDate > today) {
+        showError('salesDate', 'Sales date cannot be in the future');
+        validations.salesDate = false;
+      } else {
+        clearError('salesDate');
+        validations.salesDate = true;
+      }
+      updateSubmitButton();
+    }
+
+    async function validateUniqueCode() {
+      const uniqueCode = document.getElementById('uniqueCode').value.trim();
+      if (!uniqueCode) {
+        showError('uniqueCode', 'Unique code is required');
+        validations.uniqueCode = false;
+      } else {
+        try {
+          const response = await fetch('/salesman/check-unique-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ unique_code: uniqueCode })
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to check unique code');
+          }
+          if (!result.isUnique) {
+            showError('uniqueCode', 'Unique code already exists');
+            validations.uniqueCode = false;
+          } else {
+            clearError('uniqueCode');
+            validations.uniqueCode = true;
+          }
+        } catch (error) {
+          showError('uniqueCode', 'Error checking unique code');
+          validations.uniqueCode = false;
+        }
+      }
+      updateSubmitButton();
+    }
+
+    function validateCompanySelect() {
+      const companySelect = document.getElementById('companySelect').value;
+      if (!companySelect) {
+        showError('companySelect', 'Please select a company');
+        validations.companySelect = false;
+      } else {
+        clearError('companySelect');
+        validations.companySelect = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateProductSelect() {
+      const productSelect = document.getElementById('productSelect').value;
+      if (!productSelect) {
+        showError('productSelect', 'Please select a product');
+        validations.productSelect = false;
+      } else {
+        clearError('productSelect');
+        validations.productSelect = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validatePurchasedPrice() {
+      const purchasedPrice = parseFloat(document.getElementById('purchasedPrice').value);
+      if (isNaN(purchasedPrice) || purchasedPrice <= 0) {
+        showError('purchasedPrice', 'Purchased price must be a positive number');
+        validations.purchasedPrice = false;
+      } else {
+        clearError('purchasedPrice');
+        validations.purchasedPrice = true;
+      }
+      validateSoldPrice(); // Re-validate sold price when purchased price changes
+      updateSubmitButton();
+    }
+
+    function validateSoldPrice() {
+      const soldPrice = parseFloat(document.getElementById('soldPrice').value);
+      const purchasedPrice = parseFloat(document.getElementById('purchasedPrice').value);
+      if (!soldPrice || soldPrice <= 0) {
+        showError('soldPrice', 'Sold price must be a positive number');
+        validations.soldPrice = false;
+      } else if (!isNaN(purchasedPrice) && soldPrice < purchasedPrice) {
+        showError('soldPrice', 'Sold price must be greater than or equal to purchased price');
+        validations.soldPrice = false;
+      } else {
+        clearError('soldPrice');
+        validations.soldPrice = true;
+      }
+      updateSubmitButton();
+    }
+
+    async function validateQuantity() {
+      const quantity = parseInt(document.getElementById('quantity').value);
+      const productSelect = document.getElementById('productSelect').value;
+      const companySelect = document.getElementById('companySelect').value;
+      if (!quantity || quantity <= 0) {
+        showError('quantity', 'Quantity must be a positive integer');
+        validations.quantity = false;
+      } else if (productSelect && companySelect) {
+        try {
+          const response = await fetch('/salesman/check-inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productSelect, company_id: companySelect, quantity })
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to check inventory');
+          }
+          if (!result.isAvailable) {
+            showError('quantity', `Insufficient inventory (Available: ${result.availableQuantity})`);
+            validations.quantity = false;
+          } else {
+            clearError('quantity');
+            validations.quantity = true;
+          }
+        } catch (error) {
+          showError('quantity', 'Error checking inventory');
+          validations.quantity = false;
+        }
+      } else {
+        clearError('quantity');
+        validations.quantity = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validatePhoneNumber() {
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const regex = /^\d{10}$/;
+      if (phoneNumber && !regex.test(phoneNumber)) {
+        showError('phoneNumber', 'Phone number must be 10 digits');
+        validations.phoneNumber = false;
+      } else {
+        clearError('phoneNumber');
+        validations.phoneNumber = true;
+      }
+      updateSubmitButton();
+    }
+
+    function validateAddress() {
+      const address = document.getElementById('address').value.trim();
+      if (!address) {
+        showError('address', 'Address is required');
+        validations.address = false;
+      } else {
+        clearError('address');
+        validations.address = true;
+      }
+      updateSubmitButton();
+    }
+
+    async function fetchCompanies() {
+      try {
+        const response = await fetch('/salesman/companies', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const companies = await response.json();
+        if (!response.ok) {
+          throw new Error(companies.error || 'Failed to load companies');
+        }
+
+        const companySelect = document.getElementById('companySelect');
+        companySelect.innerHTML = '<option value="">Select Company</option>';
+        companies.forEach(company => {
+          const option = document.createElement('option');
+          option.value = company.c_id;
+          option.textContent = company.cname;
+          companySelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+        document.getElementById('form-error').textContent = 'Failed to load companies';
+        document.getElementById('form-error').style.display = 'block';
+      }
+    }
 
     async function fetchProducts() {
       const companySelect = document.getElementById('companySelect');
@@ -335,7 +602,6 @@
       const installationChargeInput = document.getElementById('installationCharge');
       const companyId = companySelect.value;
 
-      // Clear previous products and related fields
       productSelect.innerHTML = '<option value="">Select Product</option>';
       purchasedPriceInput.value = '';
       installationInput.value = '';
@@ -347,7 +613,7 @@
         try {
           const response = await fetch(`/salesman/products-by-company/${companyId}`);
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Failed to load products');
           }
           productsData = await response.json();
 
@@ -359,9 +625,14 @@
           });
         } catch (error) {
           console.error('Error fetching products:', error);
-          alert('Failed to load products. Please try again.');
+          document.getElementById('form-error').textContent = 'Failed to load products';
+          document.getElementById('form-error').style.display = 'block';
         }
       }
+      validateProductSelect();
+      validatePurchasedPrice();
+      validateQuantity();
+      validateSoldPrice();
     }
 
     function updateProductDetails() {
@@ -391,17 +662,24 @@
         installationTypeInput.value = '';
         installationChargeInput.value = '';
       }
+      validatePurchasedPrice();
+      validateQuantity();
+      validateSoldPrice();
     }
 
-    // Fetch API for form submission
     document.getElementById('saleForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const formData = new FormData(this);
       const data = Object.fromEntries(formData);
-
-      const errorDiv = document.querySelector('.error-message');
+      const errorDiv = document.getElementById('form-error');
       errorDiv.style.display = 'none';
       errorDiv.textContent = '';
+
+      if (!Object.values(validations).every(valid => valid)) {
+        errorDiv.textContent = 'Please correct all errors before submitting';
+        errorDiv.style.display = 'block';
+        return;
+      }
 
       try {
         const response = await fetch('/salesman/add-sale', {
@@ -425,6 +703,26 @@
         errorDiv.textContent = 'Failed to add sale. Please try again.';
         errorDiv.style.display = 'block';
       }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchCompanies();
+
+      document.getElementById('customerName').addEventListener('input', validateCustomerName);
+      document.getElementById('salesDate').addEventListener('change', validateSalesDate);
+      document.getElementById('uniqueCode').addEventListener('input', validateUniqueCode);
+      document.getElementById('companySelect').addEventListener('change', () => {
+        validateCompanySelect();
+        fetchProducts();
+      });
+      document.getElementById('productSelect').addEventListener('change', () => {
+        validateProductSelect();
+        updateProductDetails();
+      });
+      document.getElementById('soldPrice').addEventListener('input', validateSoldPrice);
+      document.getElementById('quantity').addEventListener('input', validateQuantity);
+      document.getElementById('phoneNumber').addEventListener('input', validatePhoneNumber);
+      document.getElementById('address').addEventListener('input', validateAddress);
     });
   </script>
 </body>

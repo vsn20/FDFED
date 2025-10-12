@@ -65,6 +65,43 @@
       font-size: 1.5rem;
     }
 
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -124,6 +161,18 @@
         width: 100%; /* Full width on mobile */
         height: auto; /* Auto height on mobile like sidebar */
         padding: 15px;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+
+      .search-group {
+        max-width: 100%;
       }
 
       h1 {
@@ -357,10 +406,10 @@
           <span class="feature-icon">🏬</span>
           <span class="feature-title">Inventory</span>
         </a>
-        <a href="/admin/customers" class="feature-item <%= activeRoute === 'customers' ? 'active' : '' %>">
+        <!-- <a href="/admin/customers" class="feature-item <%= activeRoute === 'customers' ? 'active' : '' %>">
           <span class="feature-icon">👤</span>
           <span class="feature-title">Customers</span>
-        </a>
+        </a> -->
         <a href="/admin/employees" class="feature-item <%= activeRoute === 'employees' ? 'active' : '' %>">
           <span class="feature-icon">👥</span>
           <span class="feature-title">Employees</span>
@@ -392,6 +441,12 @@
       <div class="header-container">
         <h1>Sales</h1>
       </div>
+      <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchSales">Search by Sale ID</label>
+          <input type="text" id="searchSales" placeholder="Enter Sale ID" oninput="filterSales()">
+        </div>
+      </div>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -403,16 +458,7 @@
               <th>Sale Date</th>
             </tr>
           </thead>
-          <tbody>
-            <% salers.forEach(sale => { %>
-              <tr onclick="window.location='/admin/sales/<%= sale.sales_id %>'">
-                <td data-label="Sale ID"><%= sale.sales_id %></td>
-                <td data-label="Branch Name"><%= sale.branch_name %></td>
-                <td data-label="Price">$<%= typeof sale.amount === 'number' ? sale.amount.toFixed(2) : '0.00' %></td>
-                <td data-label="Profit">$<%= typeof sale.profit_or_loss === 'number' ? sale.profit_or_loss.toFixed(2) : '0.00' %></td>
-                <td data-label="Sale Date"><%= new Date(sale.sales_date).toISOString().split('T')[0] %></td>
-              </tr>
-            <% }) %>
+          <tbody id="salesTableBody">
           </tbody>
         </table>
       </div>
@@ -420,5 +466,43 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/admin/sales/data')
+        .then(response => response.json())
+        .then(sales => {
+          const tbody = document.getElementById('salesTableBody');
+          sales.forEach(sale => {
+            const row = document.createElement('tr');
+            row.onclick = function() { window.location.href = `/admin/sales/${sale.sales_id}`; };
+            row.style.cursor = 'pointer';
+            row.innerHTML = `
+              <td data-label="Sale ID">${sale.sales_id}</td>
+              <td data-label="Branch Name">${sale.branch_name}</td>
+              <td data-label="Price">$${typeof sale.amount === 'number' ? sale.amount.toFixed(2) : '0.00'}</td>
+              <td data-label="Profit">$${typeof sale.profit_or_loss === 'number' ? sale.profit_or_loss.toFixed(2) : '0.00'}</td>
+              <td data-label="Sale Date">${new Date(sale.sales_date).toISOString().split('T')[0]}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(error => console.error('Error fetching sales:', error));
+    });
+
+    function filterSales() {
+      const searchInput = document.getElementById('searchSales').value.toLowerCase();
+      const rows = document.querySelectorAll('#salesTableBody tr');
+      rows.forEach(row => {
+        const saleIdCell = row.cells[0];
+        const saleId = saleIdCell ? saleIdCell.textContent.toLowerCase() : '';
+        if (searchInput === '' || saleId.includes(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  </script>
 </body>
 </html>

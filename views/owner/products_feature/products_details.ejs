@@ -140,6 +140,12 @@
       color: #636e72;
     }
 
+    .error-message {
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
@@ -184,99 +190,154 @@
 
     <!-- Content Area -->
     <div class="content-area" id="content">
-      <% if (product) { %>
-        <h1>Product Details</h1>
-        <div class="photos">
-          <% product.prod_photos.forEach(photo => { %>
-            <img src="<%= photo %>" alt="Product Photo">
-          <% }) %>
-        </div>
-        <div class="form-section">
-          <legend class="section-title">Product Information</legend>
-          <div class="field-group">
-            <div>
-              <label for="prod-id" class="field-label">Product ID</label>
-              <input type="text" id="prod-id" value="<%= product.prod_id %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="prod-name" class="field-label">Product Name</label>
-              <input type="text" id="prod-name" value="<%= product.Prod_name %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="com-id" class="field-label">Company ID</label>
-              <input type="text" id="com-id" value="<%= product.Com_id %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="model-no" class="field-label">Model Number</label>
-              <input type="text" id="model-no" value="<%= product.Model_no %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="com-name" class="field-label">Company Name</label>
-              <input type="text" id="com-name" value="<%= product.com_name %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="prod-year" class="field-label">Production Year</label>
-              <input type="text" id="prod-year" value="<%= product.prod_year %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="stock" class="field-label">Stock</label>
-              <input type="text" id="stock" value="<%= product.stock %>" class="field-input" disabled>
-            </div>
-            <!-- Add Stock Availability -->
-            <div>
-              <label for="stockavailability" class="field-label">Stock Availability</label>
-              <input type="text" id="stockavailability" value="<%= product.stockavailability %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="status" class="field-label">Status</label>
-              <input type="text" id="status" value="<%= product.Status %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="description" class="field-label">Description</label>
-              <input type="text" id="description" value="<%= product.prod_description %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="retail-price" class="field-label">Retail Price</label>
-              <input type="text" id="retail-price" value="<%= product.Retail_price %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="min-selling" class="field-label">Minimum Selling Price</label>
-              <input type="text" id="min-selling" value="<%= product.miniselling %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="created-at" class="field-label">Created At</label>
-              <input type="text" id="created-at" value="<%= product.createdAt %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="approved-at" class="field-label">Approved At</label>
-              <input type="text" id="approved-at" value="<%= product.approvedAt || 'N/A' %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="warranty" class="field-label">Warranty Period</label>
-              <input type="text" id="warranty" value="<%= product.warrantyperiod %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="installation" class="field-label">Installation</label>
-              <input type="text" id="installation" value="<%= product.installation %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="installation-type" class="field-label">Installation Type</label>
-              <input type="text" id="installation-type" value="<%= product.installationType %>" class="field-input" disabled>
-            </div>
-            <div>
-              <label for="installation-charge" class="field-label">Installation Charge</label>
-              <input type="text" id="installation-charge" value="<%= product.installationcharge %>" class="field-input" disabled>
-            </div>
+      <h1>Product Details</h1>
+      <div class="photos" id="photosContainer" style="display: none;"></div>
+      <div class="form-section" id="productFormSection" style="display: none;">
+        <legend class="section-title">Product Information</legend>
+        <div class="field-group">
+          <div>
+            <label for="prod-id" class="field-label">Product ID</label>
+            <input type="text" id="prod-id" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="prod-name" class="field-label">Product Name</label>
+            <input type="text" id="prod-name" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="com-id" class="field-label">Company ID</label>
+            <input type="text" id="com-id" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="model-no" class="field-label">Model Number</label>
+            <input type="text" id="model-no" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="com-name" class="field-label">Company Name</label>
+            <input type="text" id="com-name" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="prod-year" class="field-label">Production Year</label>
+            <input type="text" id="prod-year" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="stock" class="field-label">Stock</label>
+            <input type="text" id="stock" value="" class="field-input" disabled>
+          </div>
+          <!-- Add Stock Availability -->
+          <div>
+            <label for="stockavailability" class="field-label">Stock Availability</label>
+            <input type="text" id="stockavailability" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="status" class="field-label">Status</label>
+            <input type="text" id="status" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="description" class="field-label">Description</label>
+            <input type="text" id="description" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="retail-price" class="field-label">Retail Price</label>
+            <input type="text" id="retail-price" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="min-selling" class="field-label">Minimum Selling Price</label>
+            <input type="text" id="min-selling" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="created-at" class="field-label">Created At</label>
+            <input type="text" id="created-at" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="approved-at" class="field-label">Approved At</label>
+            <input type="text" id="approved-at" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="warranty" class="field-label">Warranty Period</label>
+            <input type="text" id="warranty" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="installation" class="field-label">Installation</label>
+            <input type="text" id="installation" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="installation-type" class="field-label">Installation Type</label>
+            <input type="text" id="installation-type" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="installation-charge" class="field-label">Installation Charge</label>
+            <input type="text" id="installation-charge" value="" class="field-input" disabled>
           </div>
         </div>
-        <a href="/admin/products/edit/<%= product.prod_id %>" class="edit-btn">Edit Product</a>
-        <a href="/admin/products" class="back-link">Back to Products</a>
-      <% } else { %>
-        <p>Product not found.</p>
-      <% } %>
+      </div>
+      <button id="editBtn" class="edit-btn" style="display: none;" onclick="window.location.href='/admin/products/edit/' + getProdId()">Edit Product</button>
+      <a href="/admin/products" class="back-link">Back to Products</a>
+      <p id="errorMessage" class="error-message" style="display: none;"></p>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    function getProdId() {
+      const path = window.location.pathname;
+      const parts = path.split('/');
+      return parts[parts.length - 1];
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const prodId = getProdId();
+      if (!prodId) return;
+
+      fetch(`/admin/products/data/${prodId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Product not found');
+          }
+          return response.json();
+        })
+        .then(product => {
+          // Photos
+          const photosContainer = document.getElementById('photosContainer');
+          if (product.prod_photos && product.prod_photos.length > 0) {
+            product.prod_photos.forEach(photo => {
+              const img = document.createElement('img');
+              img.src = photo;
+              img.alt = 'Product Photo';
+              photosContainer.appendChild(img);
+            });
+            photosContainer.style.display = 'flex';
+          }
+
+          // Fields
+          document.getElementById('prod-id').value = product.prod_id || '';
+          document.getElementById('prod-name').value = product.Prod_name || '';
+          document.getElementById('com-id').value = product.Com_id || '';
+          document.getElementById('model-no').value = product.Model_no || '';
+          document.getElementById('com-name').value = product.com_name || '';
+          document.getElementById('prod-year').value = product.prod_year || '';
+          document.getElementById('stock').value = product.stock || '';
+          document.getElementById('stockavailability').value = product.stockavailability || '';
+          document.getElementById('status').value = product.Status || '';
+          document.getElementById('description').value = product.prod_description || '';
+          document.getElementById('retail-price').value = product.Retail_price || '';
+          document.getElementById('min-selling').value = product.miniselling || '';
+          document.getElementById('created-at').value = product.createdAt || '';
+          document.getElementById('approved-at').value = product.approvedAt || 'N/A';
+          document.getElementById('warranty').value = product.warrantyperiod || '';
+          document.getElementById('installation').value = product.installation || '';
+          document.getElementById('installation-type').value = product.installationType || '';
+          document.getElementById('installation-charge').value = product.installationcharge || '';
+
+          document.getElementById('productFormSection').style.display = 'block';
+          document.getElementById('editBtn').style.display = 'block';
+        })
+        .catch(error => {
+          document.getElementById('errorMessage').textContent = 'Product not found.';
+          document.getElementById('errorMessage').style.display = 'block';
+          console.error('Error fetching product:', error);
+        });
+    });
+  </script>
 </body>
 </html>

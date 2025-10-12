@@ -17,6 +17,25 @@ async function sales_display(req, res) {
     const branch = await Branch.findOne({ bid: employee.bid }).lean();
     const branchName = branch ? branch.b_name : "Unknown Branch";
 
+    res.render("salesman/sales_features/sales", {
+      branchName: branchName,
+      activePage: 'employee',
+      activeRoute: 'sales'
+    });
+  } catch (error) {
+    console.error("Error rendering sales:", error);
+    res.status(500).send("Internal server error");
+  }
+}
+
+async function get_sales_data(req, res) {
+  try {
+    const user = res.locals.user;
+    const employee = await Employee.findOne({ e_id: user.emp_id });
+    if (!employee) {
+      return res.status(404).json({ error: "Salesman not found" });
+    }
+
     const sales = await Sale.find({ salesman_id: employee.e_id }).lean();
 
     const realsales = await Promise.all(
@@ -52,25 +71,21 @@ async function sales_display(req, res) {
         }
 
         return {
-          ...sale,
+          sales_id: sale.sales_id,
           company_name: companyName,
           product_name: productName,
           model_number: modelNumber,
           total_amount: sale.amount,
+          profit_or_loss: sale.profit_or_loss,
           saledate: sale.sales_date
         };
       })
     );
 
-    res.render("salesman/sales_features/sales", {
-      salers: realsales,
-      branchName: branchName,
-      activePage: 'employee',
-      activeRoute: 'sales'
-    });
+    res.json(realsales);
   } catch (error) {
-    console.error("Error rendering sales:", error);
-    res.status(500).send("Internal server error");
+    console.error("Error fetching sales data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
@@ -155,9 +170,7 @@ async function renderAddSaleForm(req, res) {
     const branch = await Branch.findOne({ bid: employee.bid }).lean();
     const branchName = branch ? branch.b_name : "Unknown Branch";
 
-    const companies = await Company.find({ active: "active" }).lean();
     res.render("salesman/sales_features/addsale", {
-      companies,
       branchName: branchName,
       activePage: 'employee',
       activeRoute: 'sales'
@@ -278,4 +291,157 @@ async function addSale(req, res) {
   }
 }
 
-module.exports = { sales_display, salesdetaildisplay, renderAddSaleForm, addSale };
+async function get_companies(req, res) {
+  try {
+    const companies = await Company.find({ active: "active" }).lean();
+    res.json(companies.map(company => ({
+      c_id: company.c_id,
+      cname: company.cname
+    })));
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function check_unique_code(req, res) {
+  try {
+    const { unique_code } = req.body;
+    const existingSale = await Sale.findOne({ unique_code }).lean();
+    res.json({ isUnique: !existingSale });
+  } catch (error) {
+    console.error("Error checking unique code:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function check_inventory(req, res) {
+  try {
+    const user = res.locals.user;
+    const employee = await Employee.findOne({ e_id: user.emp_id });
+    if (!employee) {
+      return res.status(404).json({ error: "Salesman not found" });
+    }
+
+    const { product_id, company_id, quantity } = req.body;
+    const inventory = await Inventory.findOne({
+      branch_id: employee.bid,
+      product_id,
+      company_id
+    }).lean();
+
+    if (!inventory || inventory.quantity < parseInt(quantity)) {
+      return res.json({
+        isAvailable: false,
+        availableQuantity: inventory ? inventory.quantity : 0
+      });
+    }
+
+    res.json({ isAvailable: true, availableQuantity: inventory.quantity });
+  } catch (error) {
+    console.error("Error checking inventory:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Placeholder for get_sale_details (to be provided if needed)
+async function get_sale_details(req, res) {
+  try {
+    const user = res.locals.user;
+    const employee = await Employee.findOne({ e_id: user.emp_id });
+    if (!employee) {
+      return res.status(404).json({ error: "Salesman not found" });
+    }
+
+    const id = req.params.sales_id;
+    const sale = await Sale.findOne({ sales_id: id, salesman_id: employee.e_id }).lean();
+
+    if (!sale) {
+      return res.status(404).json({ error: "Sale not found" });
+    }
+
+    let companyName = "Unknown Company";
+    let productName = "Unknown Product";
+    let modelNumber = "N/A";
+
+    if (typeof sale.company_id === "string") {
+      const company = await Company.findOne({ c_id: sale.company_id }).lean();
+      if (company) {
+        companyName = company.cname;
+      }
+    } else {
+      const company = await Company.findById(sale.company_id).lean();
+      if (company) {
+        companyName = company.cname;
+      }
+    }
+
+    if (typeof sale.product_id === "string") {
+      const product = await Product.findOne({ prod_id: sale.product_id }).lean();
+      if (product) {
+        productName = product.Prod_name;
+        modelNumber = product.Model_no;
+      }
+    } else {
+      const product = await Product.findById(sale.product_id).lean();
+      if (product) {
+        productName = product.Prod_name;
+        modelNumber = product.Model_no;
+      }
+    }
+
+    res.json({
+      ...sale,
+      company_name: companyName,
+      product_name: productName,
+      model_number: modelNumber,
+      salesman_name: `${employee.f_name} ${employee.last_name}`,
+      total_amount: sale.amount,
+      saledate: sale.sales_date,
+      price: sale.sold_price
+    });
+  } catch (error) {
+    console.error("Error fetching sale details:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Placeholder for updateInstallationStatus (to be provided if needed)
+async function updateInstallationStatus(req, res) {
+  try {
+    const user = res.locals.user;
+    const employee = await Employee.findOne({ e_id: user.emp_id });
+    if (!employee) {
+      return res.status(404).json({ error: "Salesman not found" });
+    }
+
+    const { sales_id, installation_status } = req.body;
+    const sale = await Sale.findOneAndUpdate(
+      { sales_id, salesman_id: employee.e_id },
+      { installation_status },
+      { new: true }
+    );
+
+    if (!sale) {
+      return res.status(404).json({ error: "Sale not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating installation status:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+module.exports = {
+  sales_display,
+  get_sales_data,
+  salesdetaildisplay,
+  renderAddSaleForm,
+  addSale,
+  get_companies,
+  check_unique_code,
+  check_inventory,
+  get_sale_details,
+  updateInstallationStatus
+};

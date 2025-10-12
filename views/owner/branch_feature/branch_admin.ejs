@@ -34,7 +34,24 @@
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             flex: 1;
+            height: calc(100vh - 90px);
+            overflow-y: auto;
             overflow-x: auto;
+        }
+
+        /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+        .content-area::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Hide scrollbar in Firefox */
+        .content-area {
+          scrollbar-width: none;
+        }
+
+        /* Hide scrollbar in IE/Edge */
+        .content-area {
+          -ms-overflow-style: none;
         }
 
         .content-area h1 {
@@ -48,6 +65,50 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1 1 45%;
+            min-width: 200px;
+            max-width: 400px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2d3436;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e6e9f0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            color: #2d3436;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input[readonly] {
+            background: #e9ecef;
+            cursor: default;
+        }
+
+        .search-group {
+            flex: 1 1 100%;
+            max-width: 300px;
         }
 
         .add-button {
@@ -136,11 +197,25 @@
 
             .content-area {
                 padding: 15px;
+                height: auto; /* Allow content area to expand on mobile */
             }
 
             .header-container {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 10px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                flex: 1 1 100%;
+            }
+
+            .search-group {
+                max-width: 100%;
             }
 
             .add-button {
@@ -200,13 +275,21 @@
         }
 
         @media (min-width: 769px) and (max-width: 1024px) {
+            .content-area h1 {
+                font-size: 1.3rem;
+            }
+
+            .form-group {
+                flex: 1 1 45%;
+            }
+
+            .search-group {
+                max-width: 250px;
+            }
+
             th, td {
                 padding: 10px;
                 font-size: 0.85rem;
-            }
-
-            .content-area h1 {
-                font-size: 1.3rem;
             }
         }
     </style>
@@ -221,6 +304,13 @@
             <div class="header-container">
                 <h1>Our Branches</h1>
                 <a href="/admin/branches/add" class="add-button">Add Branch</a>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group search-group">
+                    <label for="searchBranch">Search by Branch ID/Branch Name</label>
+                    <input type="text" id="searchBranch" placeholder="Enter Branch ID/Branch Name" oninput="filterBranches()">
+                </div>
             </div>
 
             <div id="loading">Loading branches...</div>
@@ -286,6 +376,22 @@
                     window.location.href = `/admin/branches/edit/${bid}`;
                 });
             });
+        }
+
+        function filterBranches() {
+            const searchInput = document.getElementById('searchBranch').value.toLowerCase();
+            const tableBody = document.getElementById('branches-tbody');
+            const rows = tableBody.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                const branchId = row.cells[0].textContent.toLowerCase();
+                const branchName = row.cells[1].textContent.toLowerCase();
+                if (searchInput === '' || branchId.includes(searchInput) || branchName.includes(searchInput)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
         }
 
         // Initial load

@@ -86,6 +86,12 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       background-color: #ffffff;
+      transition: border-color 0.3s;
+    }
+
+    input:focus:not([readonly]) {
+      border-color: #333;
+      outline: none;
     }
 
     .fire-button, .edit-button, .submit-button, .cancel-button {
@@ -158,6 +164,27 @@
       text-align: center;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
+    #employeeForm {
+      display: none;
+    }
+
+    .field-error {
+      color: #d63031;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    input.invalid {
+      border-color: #d63031;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -178,118 +205,199 @@
 
     <div class="content-area" id="content">
       <h1>Employee Details</h1>
-      <% if (error) { %>
-        <p style="color: red;"><%= error %></p>
-      <% } else if (employee) { %>
-        <% if (message) { %>
-          <div class="success-message"><%= message %></div>
-        <% } %>
-        <div id="employeeForm">
-          <fieldset>
-            <legend>Personal Details</legend>
-            <div class="field-group">
-              <div><label for="e_id">Employee ID</label><input type="text" id="e_id" value="<%= employee.e_id %>" readonly></div>
-              <div><label for="f_name">First Name</label><input type="text" id="f_name" value="<%= employee.f_name %>" readonly></div>
-              <div><label for="last_name">Last Name</label><input type="text" id="last_name" value="<%= employee.last_name %>" readonly></div>
-              <div><label for="role">Role</label><input type="text" id="role" value="<%= employee.role %>" readonly></div>
-              <div><label for="bid">Branch</label><input type="text" id="bid" value="<%= employee.bid || 'Not Assigned' %>" readonly></div>
-              <div><label for="status">Status</label><input type="text" id="status" value="<%= employee.status %>" readonly></div>
-              <div><label for="email">Email</label><input type="email" id="email" value="<%= employee.email %>" readonly></div>
-              <div><label for="phone_no">Phone Number</label><input type="tel" id="phone_no" value="<%= employee.phone_no || 'N/A' %>" readonly></div>
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend>Account and Salaries</legend>
-            <div class="field-group">
-              <div><label for="acno">Account Number</label><input type="text" id="acno" value="<%= employee.acno %>" readonly></div>
-              <div><label for="ifsc">IFSC Code</label><input type="text" id="ifsc" value="<%= employee.ifsc %>" readonly></div>
-              <div><label for="bankname">Bank Name</label><input type="text" id="bankname" value="<%= employee.bankname %>" readonly></div>
-              <div><label for="base_salary">Monthly Salary</label><input type="number" id="base_salary" value="<%= employee.base_salary %>" readonly></div>
-              <div><label for="address">Address</label><textarea id="address" readonly><%= employee.address || 'N/A' %></textarea></div>
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend>Additional Details</legend>
-            <div class="field-group">
-              <div><label for="createdBy">Created By</label><input type="text" id="createdBy" value="<%= employee.createdBy %>" readonly></div>
-              <div><label for="hiredAt">Hired At</label><input type="text" id="hiredAt" value="<%= employee.hiredAt %>" readonly></div>
-              <div><label for="fired_date">Fired Date</label><input type="text" id="fired_date" value="<%= employee.fired_date || 'N/A' %>" readonly></div>
-              <div><label for="reason_for_exit">Reason for Exit</label><input type="text" id="reason_for_exit" value="<%= employee.reason_for_exit || 'N/A' %>" readonly></div>
-            </div>
-          </fieldset>
-
-          <a href="/salesmanager/employees" class="back-button">Back to List</a>
-          <% if (employee.status === 'active') { %>
-            <button type="button" id="editButton" class="edit-button">Edit Salary</button>
-            <button type="button" id="fireButton" class="fire-button">Fire Employee</button>
-            <div id="fireForm" style="display:none;">
-              <label for="reason_for_exit">Reason for Exit:</label>
-              <input type="text" id="reason_for_exit" required>
-              <button type="button" class="submit-button" onclick="fireEmployee('<%= employee.e_id %>')">Submit</button>
-              <button type="button" class="cancel-button" onclick="document.getElementById('fireForm').style.display='none';">Cancel</button>
-            </div>
-          <% } %>
-        </div>
+      <% if (message) { %>
+        <div class="success-message"><%= message %></div>
       <% } %>
 
-      <div id="error-message" style="color: red;"></div>
-      <div id="success-message" class="success-message" style="display: none;"></div>
+      <div id="loading">Loading employee details...</div>
+
+      <div id="employeeForm" style="display: none;">
+        <fieldset>
+          <legend>Personal Details</legend>
+          <div class="field-group">
+            <div><label for="e_id">Employee ID</label><input type="text" id="e_id" readonly></div>
+            <div><label for="f_name">First Name</label><input type="text" id="f_name" readonly></div>
+            <div><label for="last_name">Last Name</label><input type="text" id="last_name" readonly></div>
+            <div><label for="email">Email</label><input type="email" id="email" readonly></div>
+            <div><label for="phone_no">Phone No</label><input type="text" id="phone_no" readonly></div>
+            <div><label for="address">Address</label><textarea id="address" readonly></textarea></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Employment Details</legend>
+          <div class="field-group">
+            <div><label for="role">Role</label><input type="text" id="role" readonly></div>
+            <div><label for="status">Status</label><input type="text" id="status" readonly></div>
+            <div><label for="bid">Branch ID</label><input type="text" id="bid" readonly></div>
+            <div><label for="base_salary">Monthly Salary</label><input type="number" id="base_salary" readonly step="0.01"><div class="field-error" id="salary-error">Monthly salary must be a postive number.</div></div>
+            <div id="editSalaryButtonContainer"><button id="editSalaryButton" class="edit-button">Edit Salary</button></div>
+            <div><label for="hiredAt">Hired At</label><input type="text" id="hiredAt" readonly></div>
+            <div><label for="resignation_date">Resignation Date</label><input type="text" id="resignation_date" readonly></div>
+            <div><label for="fired_date">Fired Date</label><input type="text" id="fired_date" readonly></div>
+            <div><label for="reason_for_exit">Reason for Exit</label><input type="text" id="reason_for_exit" readonly></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Bank Details</legend>
+          <div class="field-group">
+            <div><label for="acno">Account Number</label><input type="text" id="acno" readonly></div>
+            <div><label for="ifsc">IFSC Code</label><input type="text" id="ifsc" readonly></div>
+            <div><label for="bankname">Bank Name</label><input type="text" id="bankname" readonly></div>
+          </div>
+        </fieldset>
+
+        <div id="error-message" style="color: red;"></div>
+        <div class="success-message" id="success-message" style="display: none;"></div>
+
+        <a href="/salesmanager/employees" class="back-button">Back to Employees</a>
+        <button id="fireButton" class="fire-button">Fire Employee</button>
+        <div id="fireForm" style="display:none;">
+          <label for="reason_for_exit_input">Reason for Exit:</label>
+          <input type="text" id="reason_for_exit_input" name="reason_for_exit" required>
+          <button type="button" onclick="fireEmployee()">Submit</button>
+          <button type="button" onclick="document.getElementById('fireForm').style.display='none';">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
 
   <script>
-    const editButton = document.getElementById('editButton');
-    const fireButton = document.getElementById('fireButton');
-    const salaryInput = document.getElementById('base_salary');
+    const form = document.getElementById('employeeForm');
+    const loading = document.getElementById('loading');
     const errorMessage = document.getElementById('error-message');
     const successMessage = document.getElementById('success-message');
+    let salaryInput;
+    let editButton;
+    let fireButton = document.getElementById('fireButton');
 
-    if (editButton) {
-      editButton.addEventListener('click', () => {
-        salaryInput.readOnly = false;
-        salaryInput.focus();
-        editButton.style.display = 'none';
-
-        // Remove any existing salaryButtons container to prevent duplicates
-        const existingButtonContainer = document.getElementById('salaryButtons');
-        if (existingButtonContainer) {
-          existingButtonContainer.remove();
-        }
-
-        // Create new buttons
-        const submitButton = document.createElement('button');
-        submitButton.type = 'button';
-        submitButton.className = 'submit-button';
-        submitButton.textContent = 'Submit';
-        submitButton.onclick = () => updateSalary('<%= employee.e_id %>');
-
-        const cancelButton = document.createElement('button');
-        cancelButton.type = 'button';
-        cancelButton.className = 'cancel-button';
-        cancelButton.textContent = 'Cancel';
-        cancelButton.onclick = () => cancelEdit();
-
-        const buttonContainer = document.createElement('div');
-        buttonContainer.id = 'salaryButtons';
-        buttonContainer.appendChild(submitButton);
-        buttonContainer.appendChild(cancelButton);
-        document.getElementById('employeeForm').appendChild(buttonContainer);
-      });
+    // Validation Function for Salary
+    function validateSalary(field, errorElement) {
+      const value = parseFloat(field.value);
+      if (isNaN(value) || value <=0) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
     }
 
-    if (fireButton) {
-      fireButton.addEventListener('click', () => {
-        document.getElementById('fireForm').style.display = 'block';
-        fireButton.style.display = 'none';
-      });
+    async function loadEmployee() {
+      try {
+        const response = await fetch(`/salesmanager/employees/data/<%= e_id %>`);
+        if (!response.ok) throw new Error('Failed to fetch employee');
+        const employee = await response.json();
+
+        document.getElementById('e_id').value = employee.e_id;
+        document.getElementById('f_name').value = employee.f_name;
+        document.getElementById('last_name').value = employee.last_name;
+        document.getElementById('email').value = employee.email;
+        document.getElementById('phone_no').value = employee.phone_no || 'N/A';
+        document.getElementById('address').value = employee.address || 'N/A';
+        document.getElementById('role').value = employee.role;
+        document.getElementById('status').value = employee.status;
+        document.getElementById('bid').value = employee.bid || 'N/A';
+        salaryInput = document.getElementById('base_salary');
+        salaryInput.value = employee.base_salary;
+        document.getElementById('hiredAt').value = employee.hiredAt ? new Date(employee.hiredAt).toLocaleDateString() : 'N/A';
+        document.getElementById('resignation_date').value = employee.resignation_date ? new Date(employee.resignation_date).toLocaleDateString() : 'N/A';
+        document.getElementById('fired_date').value = employee.fired_date ? new Date(employee.fired_date).toLocaleDateString() : 'N/A';
+        document.getElementById('reason_for_exit').value = employee.reason_for_exit || 'N/A';
+        document.getElementById('acno').value = employee.acno;
+        document.getElementById('ifsc').value = employee.ifsc;
+        document.getElementById('bankname').value = employee.bankname;
+
+        if (employee.status !== 'active') {
+          fireButton.style.display = 'none';
+          document.getElementById('editSalaryButtonContainer').style.display = 'none';
+        }
+
+        editButton = document.getElementById('editSalaryButton');
+        if (editButton) {
+          editButton.addEventListener('click', editSalary);
+        }
+
+        if (fireButton) {
+          fireButton.addEventListener('click', () => {
+            document.getElementById('fireForm').style.display = 'block';
+            fireButton.style.display = 'none';
+          });
+        }
+
+        loading.style.display = 'none';
+        form.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading employee:', error);
+        loading.textContent = 'Error loading employee details. Please refresh.';
+      }
+    }
+
+    function editSalary() {
+      salaryInput.readOnly = false;
+      salaryInput.focus();
+
+      const salaryError = document.getElementById('salary-error');
+
+      // Add event listeners for real-time validation
+      const validateOnInput = () => validateSalary(salaryInput, salaryError);
+      const validateOnBlur = () => validateSalary(salaryInput, salaryError);
+
+      salaryInput.addEventListener('input', validateOnInput);
+      salaryInput.addEventListener('blur', validateOnBlur);
+
+      // Store references to remove later
+      salaryInput._validateOnInput = validateOnInput;
+      salaryInput._validateOnBlur = validateOnBlur;
+
+      const existingButtonContainer = document.getElementById('salaryButtons');
+      if (existingButtonContainer) {
+        existingButtonContainer.remove();
+      }
+
+      const submitButton = document.createElement('button');
+      submitButton.type = 'button';
+      submitButton.className = 'submit-button';
+      submitButton.textContent = 'Submit';
+      submitButton.onclick = () => {
+        if (validateSalary(salaryInput, salaryError)) {
+          updateSalary();
+        }
+      };
+
+      const cancelButton = document.createElement('button');
+      cancelButton.type = 'button';
+      cancelButton.className = 'cancel-button';
+      cancelButton.textContent = 'Cancel';
+      cancelButton.onclick = () => cancelEdit();
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.id = 'salaryButtons';
+      buttonContainer.appendChild(submitButton);
+      buttonContainer.appendChild(cancelButton);
+      document.getElementById('employeeForm').appendChild(buttonContainer);
+
+      // Initial validation
+      validateOnInput();
     }
 
     function cancelEdit() {
+      // Remove event listeners
+      if (salaryInput._validateOnInput) {
+        salaryInput.removeEventListener('input', salaryInput._validateOnInput);
+      }
+      if (salaryInput._validateOnBlur) {
+        salaryInput.removeEventListener('blur', salaryInput._validateOnBlur);
+      }
+
       salaryInput.readOnly = true;
+      salaryInput.classList.remove('invalid');
+      document.getElementById('salary-error').style.display = 'none';
       editButton.style.display = 'inline-block';
       const buttonContainer = document.getElementById('salaryButtons');
       if (buttonContainer) {
@@ -299,18 +407,19 @@
       successMessage.style.display = 'none';
     }
 
-    async function updateSalary(employeeId) {
-      const salaryValue = parseFloat(salaryInput.value);
+    async function updateSalary() {
+      const salaryError = document.getElementById('salary-error');
       errorMessage.textContent = '';
       successMessage.style.display = 'none';
 
-      if (isNaN(salaryValue) || salaryValue < 0) {
-        errorMessage.textContent = 'Monthly salary must be a non-negative number.';
+      if (!validateSalary(salaryInput, salaryError)) {
         return;
       }
 
+      const salaryValue = parseFloat(salaryInput.value);
+
       try {
-        const response = await fetch(`/salesmanager/employee/update-salary/${employeeId}`, {
+        const response = await fetch(`/salesmanager/employee/update-salary/<%= e_id %>`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -343,8 +452,8 @@
       }
     }
 
-    async function fireEmployee(employeeId) {
-      const reasonInput = document.getElementById('reason_for_exit');
+    async function fireEmployee() {
+      const reasonInput = document.getElementById('reason_for_exit_input');
       const reason = reasonInput.value.trim();
       errorMessage.textContent = '';
       successMessage.style.display = 'none';
@@ -359,7 +468,7 @@
       }
 
       try {
-        const response = await fetch(`/salesmanager/employee/fire/${employeeId}`, {
+        const response = await fetch(`/salesmanager/employee/fire/<%= e_id %>`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -378,6 +487,9 @@
         errorMessage.textContent = 'Network error: ' + error.message;
       }
     }
+
+    // Initial load
+    loadEmployee();
   </script>
 </body>
 </html>

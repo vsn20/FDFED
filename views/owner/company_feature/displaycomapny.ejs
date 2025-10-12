@@ -30,8 +30,26 @@
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             flex: 1;
+            height: calc(100vh - 90px);
+            overflow-y: auto;
             overflow-x: auto;
         }
+
+        /* Hide scrollbar visually in WebKit browsers (Chrome, Safari) */
+        .content-area::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Hide scrollbar in Firefox */
+        .content-area {
+          scrollbar-width: none;
+        }
+
+        /* Hide scrollbar in IE/Edge */
+        .content-area {
+          -ms-overflow-style: none;
+        }
+
         .content-area h1 {
             color: #2d3436;
             margin-bottom: 20px;
@@ -55,6 +73,42 @@
         }
         .add-button:hover {
             background-color: #555555;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1 1 45%;
+            min-width: 200px;
+            max-width: 400px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2d3436;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e6e9f0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            color: #2d3436;
+            transition: border-color 0.3s;
+        }
+        .form-group input[readonly] {
+            background: #e9ecef;
+            cursor: default;
+        }
+        .search-group {
+            flex: 1 1 100%;
+            max-width: 300px;
         }
         .table-wrapper {
             overflow-x: auto;
@@ -116,6 +170,7 @@
             }
             .content-area {
                 padding: 15px;
+                height: auto;
             }
             .header-container {
                 flex-direction: column;
@@ -128,6 +183,15 @@
             }
             .content-area h1 {
                 font-size: 1.2rem;
+            }
+            .form-row {
+                flex-direction: column;
+            }
+            .form-group {
+                flex: 1 1 100%;
+            }
+            .search-group {
+                max-width: 100%;
             }
             table {
                 display: block;
@@ -176,6 +240,12 @@
             .content-area h1 {
                 font-size: 1.3rem;
             }
+            .form-group {
+                flex: 1 1 45%;
+            }
+            .search-group {
+                max-width: 250px;
+            }
         }
     </style>
 </head>
@@ -189,6 +259,12 @@
             <div class="header-container">
                 <h1>Our Companies</h1>
                 <a href="/admin/addcompanie" class="add-button">Add Company</a>
+            </div>
+            <div class="form-row">
+                <div class="form-group search-group">
+                    <label for="searchCompany">Search by Company ID/Company Name</label>
+                    <input type="text" id="searchCompany" placeholder="Enter Company ID/Company Name" oninput="filterCompanies()">
+                </div>
             </div>
             <div id="loading">Loading companies...</div>
 
@@ -214,6 +290,7 @@
     <%- include('../../partials/footer') %>
 
     <script>
+        let allCompanies = [];
         const tbody = document.getElementById('companies-tbody');
         const loading = document.getElementById('loading');
         const tableContainer = document.getElementById('table-container');
@@ -222,26 +299,30 @@
             try {
                 const response = await fetch('/admin/company/data');
                 if (!response.ok) throw new Error('Failed to fetch');
-                const companies = await response.json();
-                tbody.innerHTML = ''; // Clear existing rows
-                companies.forEach(company => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td data-label="Company ID"><button class="clickable-btn" data-cid="${company.c_id}">${company.c_id}</button></td>
-                        <td data-label="Company Name"><button class="clickable-btn" data-cid="${company.c_id}">${company.cname}</button></td>
-                        <td data-label="Email"><button class="clickable-btn" data-cid="${company.c_id}">${company.email}</button></td>
-                        <td data-label="Phone"><button class="clickable-btn" data-cid="${company.c_id}">${company.phone}</button></td>
-                        <td data-label="Address"><button class="clickable-btn" data-cid="${company.c_id}">${company.address}</button></td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                attachEventListeners();
+                allCompanies = await response.json();
+                renderTable(allCompanies);
                 loading.style.display = 'none';
                 tableContainer.style.display = 'block';
             } catch (error) {
                 console.error('Error loading companies:', error);
                 loading.textContent = 'Error loading companies. Please refresh.';
             }
+        }
+
+        function renderTable(companies) {
+            tbody.innerHTML = ''; // Clear existing rows
+            companies.forEach(company => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td data-label="Company ID"><button class="clickable-btn" data-cid="${company.c_id}">${company.c_id}</button></td>
+                    <td data-label="Company Name"><button class="clickable-btn" data-cid="${company.c_id}">${company.cname}</button></td>
+                    <td data-label="Email"><button class="clickable-btn" data-cid="${company.c_id}">${company.email}</button></td>
+                    <td data-label="Phone"><button class="clickable-btn" data-cid="${company.c_id}">${company.phone}</button></td>
+                    <td data-label="Address"><button class="clickable-btn" data-cid="${company.c_id}">${company.address}</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+            attachEventListeners();
         }
 
         function attachEventListeners() {
@@ -251,6 +332,22 @@
                     window.location.href = `/admin/company/edit/${cid}`;
                 });
             });
+        }
+
+        function filterCompanies() {
+            const searchInput = document.getElementById('searchCompany').value.toLowerCase();
+            const tableBody = document.getElementById('companies-tbody');
+            const rows = tableBody.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                const companyId = row.cells[0].textContent.toLowerCase();
+                const companyName = row.cells[1].textContent.toLowerCase();
+                if (searchInput === '' || companyId.includes(searchInput) || companyName.includes(searchInput)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
         }
 
         // Initial load

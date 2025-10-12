@@ -122,6 +122,11 @@
       cursor: default;
     }
 
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -169,6 +174,12 @@
       background: #f8f9fd;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -204,6 +215,10 @@
 
       .form-group {
         flex: 1 1 100%;
+      }
+
+      .search-group {
+        max-width: 100%;
       }
 
       table {
@@ -256,6 +271,10 @@
         flex: 1 1 45%;
       }
 
+      .search-group {
+        max-width: 250px;
+      }
+
       th, td {
         padding: 10px;
         font-size: 0.85rem;
@@ -276,18 +295,24 @@
       </div>
 
       <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchSaleId">Search by Sale ID</label>
+          <input type="text" id="searchSaleId" placeholder="Enter Sale ID (e.g., S001)" oninput="filterSales()">
+        </div>
         <div class="form-group">
           <label>Branch ID</label>
-          <input type="text" value="<%= branchid %>" readonly>
+          <input type="text" id="branchId" readonly>
         </div>
         <div class="form-group">
           <label>Branch Name</label>
-          <input type="text" value="<%= branchname %>" readonly>
+          <input type="text" id="branchName" readonly>
         </div>
       </div>
 
-      <div class="table-wrapper">
-        <table>
+      <div id="loading">Loading sales...</div>
+
+      <div class="table-wrapper" id="table-container" style="display: none;">
+        <table id="salesTable">
           <thead>
             <tr>
               <th>Sale ID</th>
@@ -297,16 +322,8 @@
               <th>Sale Date</th>
             </tr>
           </thead>
-          <tbody>
-            <% sales.forEach(sale => { %>
-              <tr onclick="window.location.href='/salesmanager/sales/<%= sale.sales_id %>'">
-                <td data-label="Sale ID"><%= sale.sales_id %></td>
-                <td data-label="Salesman"><%= sale.salesman_name %></td>
-                <td data-label="Customer"><%= sale.customer_name %></td>
-                <td data-label="Total Amount">$<%= sale.total_amount.toFixed(2) %></td>
-                <td data-label="Sale Date"><%= new Date(sale.saledate).toISOString().split('T')[0] %></td>
-              </tr>
-            <% }) %>
+          <tbody id="salesTableBody">
+            <!-- Data populated via JS -->
           </tbody>
         </table>
       </div>
@@ -314,5 +331,57 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    const tbody = document.getElementById('salesTableBody');
+    const loading = document.getElementById('loading');
+    const tableContainer = document.getElementById('table-container');
+    const branchIdInput = document.getElementById('branchId');
+    const branchNameInput = document.getElementById('branchName');
+
+    async function loadSales() {
+      try {
+        const response = await fetch('/salesmanager/sales/data');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        tbody.innerHTML = ''; // Clear existing rows
+        data.sales.forEach(sale => {
+          const row = document.createElement('tr');
+          row.onclick = () => window.location.href = `/salesmanager/sales/${sale.sales_id}`;
+          row.innerHTML = `
+            <td data-label="Sale ID">${sale.sales_id}</td>
+            <td data-label="Salesman">${sale.salesman_name}</td>
+            <td data-label="Customer">${sale.customer_name}</td>
+            <td data-label="Total Amount">$${sale.total_amount.toFixed(2)}</td>
+            <td data-label="Sale Date">${new Date(sale.saledate).toISOString().split('T')[0]}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        branchIdInput.value = data.branchid;
+        branchNameInput.value = data.branchname;
+        loading.style.display = 'none';
+        tableContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading sales:', error);
+        loading.textContent = 'Error loading sales. Please refresh.';
+      }
+    }
+
+    function filterSales() {
+      const searchInput = document.getElementById('searchSaleId').value.toLowerCase();
+      const rows = tbody.getElementsByTagName('tr');
+      for (let row of rows) {
+        const saleId = row.cells[0].textContent.toLowerCase();
+        if (searchInput === '' || saleId.startsWith(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    }
+
+    // Initial load
+    loadSales();
+  </script>
 </body>
 </html>

@@ -155,6 +155,18 @@
       display: none;
     }
 
+    .field-error {
+      color: #d63031;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .form-group input.invalid,
+    .form-group select.invalid {
+      border-color: #d63031;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -240,26 +252,31 @@
             <select id="salesmanSelect" name="salesman_name" required>
               <option value="">Select Salesman</option>
             </select>
+            <div class="field-error" id="salesman-error">Please select a salesman.</div>
           </div>
           <div class="form-group">
             <label>Customer Name</label>
-            <input type="text" name="customer_name" required>
+            <input type="text" name="customer_name" required minlength="2">
+            <div class="field-error" id="customer-error">Please enter customer name.</div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Sale Date</label>
             <input type="date" name="saledate" required>
+            <div class="field-error" id="saledate-error">Please select a sale date.</div>
           </div>
           <div class="form-group">
             <label>Unique Code</label>
-            <input type="text" name="unique_code">
+            <input type="text" name="unique_code" required>
+            <div class="field-error" id="unique-code-error">Please enter a unique code.</div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Phone Number</label>
-            <input type="tel" name="phone_number" required pattern="\+?[1-9]\d{1,14}" placeholder="+1234567890">
+            <input type="tel" name="phone_number" required pattern="^\+?\d{10}$" placeholder="+1234567890">
+            <div class="field-error" id="phone-error">Please enter a valid 10-digit phone number.</div>
           </div>
           <div class="form-group">
             <label>Address</label>
@@ -274,12 +291,14 @@
             <select id="companySelect" name="company_id" required onchange="fetchProducts()">
               <option value="">Select Company</option>
             </select>
+            <div class="field-error" id="company-error">Please select a company.</div>
           </div>
           <div class="form-group">
             <label>Product</label>
             <select id="productSelect" name="product_id" class="product-list" required onchange="updateProductDetails()">
               <option value="">Select Product</option>
             </select>
+            <div class="field-error" id="product-error">Please select a product.</div>
           </div>
         </div>
         <div class="form-row">
@@ -302,14 +321,17 @@
           <div class="form-group">
             <label>Purchased Price</label>
             <input type="number" id="purchasedPrice" name="purchased_price" step="0.01" readonly required>
+            <div class="field-error" id="purchased-price-error">Purchased price is required.</div>
           </div>
           <div class="form-group">
             <label>Sold Price</label>
-            <input type="number" name="sold_price" step="0.01" required>
+            <input type="number" name="sold_price" step="0.01" required min="0">
+            <div class="field-error" id="sold-price-error">Please enter a valid sold price greater than 0.</div>
           </div>
           <div class="form-group">
             <label>Quantity</label>
             <input type="number" name="quantity" required min="1" value="1">
+            <div class="field-error" id="quantity-error">Please enter a quantity greater than 0.</div>
           </div>
         </div>
 
@@ -409,6 +431,7 @@
       const installationInput = document.getElementById('installation');
       const installationTypeInput = document.getElementById('installationType');
       const installationChargeInput = document.getElementById('installationCharge');
+      const purchasedPriceError = document.getElementById('purchased-price-error');
       const selectedProductId = productSelect.value;
 
       if (selectedProductId) {
@@ -419,18 +442,168 @@
           installationInput.value = selectedProduct.installation || '';
           installationTypeInput.value = selectedProduct.installationType || '';
           installationChargeInput.value = selectedProduct.installationcharge || '';
+          validatePurchasedPrice(purchasedPriceInput, purchasedPriceError);
         } else {
           purchasedPriceInput.value = '';
           installationInput.value = '';
           installationTypeInput.value = '';
           installationChargeInput.value = '';
+          purchasedPriceInput.classList.remove('invalid');
+          purchasedPriceError.style.display = 'none';
         }
       } else {
         purchasedPriceInput.value = '';
         installationInput.value = '';
         installationTypeInput.value = '';
         installationChargeInput.value = '';
+        purchasedPriceInput.classList.remove('invalid');
+        purchasedPriceError.style.display = 'none';
       }
+    }
+
+    // Form Validation Functions
+    function validateRequired(field, errorElement) {
+      if (!field.value.trim()) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    function validateCustomerName(field, errorElement) {
+      const value = field.value.trim();
+      if (!value) {
+        errorElement.textContent = 'Please enter customer name.';
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else if (value.length < 2) {
+        errorElement.textContent = 'Customer name must be at least 2 characters.';
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    function validatePhone(field, errorElement) {
+      const value = field.value.trim();
+      let cleanPhone = value.replace(/\+/, '');
+      if (!value || cleanPhone.length !== 10 || !/^\d{10}$/.test(cleanPhone)) {
+        field.classList.add('invalid');
+        errorElement.textContent = 'Please enter a valid 10-digit phone number.';
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    function validateSoldPrice(field, errorElement) {
+      const value = parseFloat(field.value);
+      if (isNaN(value) || value <= 0) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    function validateQuantity(field, errorElement) {
+      const value = parseInt(field.value);
+      if (isNaN(value) || value < 1) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    function validatePurchasedPrice(field, errorElement) {
+      const value = parseFloat(field.value);
+      if (isNaN(value) || value <= 0) {
+        field.classList.add('invalid');
+        errorElement.style.display = 'block';
+        return false;
+      } else {
+        field.classList.remove('invalid');
+        errorElement.style.display = 'none';
+        return true;
+      }
+    }
+
+    // Add Event Listeners for Real-time Validation
+    function addValidationListeners() {
+      // Salesman Select
+      const salesmanSelect = document.getElementById('salesmanSelect');
+      const salesmanError = document.getElementById('salesman-error');
+      salesmanSelect.addEventListener('blur', () => validateRequired(salesmanSelect, salesmanError));
+      salesmanSelect.addEventListener('change', () => validateRequired(salesmanSelect, salesmanError));
+
+      // Customer Name
+      const customerInput = document.querySelector('input[name="customer_name"]');
+      const customerError = document.getElementById('customer-error');
+      customerInput.addEventListener('blur', () => validateCustomerName(customerInput, customerError));
+      customerInput.addEventListener('input', () => validateCustomerName(customerInput, customerError));
+
+      // Sale Date
+      const saleDateInput = document.querySelector('input[name="saledate"]');
+      const saleDateError = document.getElementById('saledate-error');
+      saleDateInput.addEventListener('blur', () => validateRequired(saleDateInput, saleDateError));
+      saleDateInput.addEventListener('change', () => validateRequired(saleDateInput, saleDateError));
+
+      // Unique Code
+      const uniqueCodeInput = document.querySelector('input[name="unique_code"]');
+      const uniqueCodeError = document.getElementById('unique-code-error');
+      uniqueCodeInput.addEventListener('blur', () => validateRequired(uniqueCodeInput, uniqueCodeError));
+      uniqueCodeInput.addEventListener('input', () => validateRequired(uniqueCodeInput, uniqueCodeError));
+
+      // Phone Number
+      const phoneInput = document.querySelector('input[name="phone_number"]');
+      const phoneError = document.getElementById('phone-error');
+      phoneInput.addEventListener('blur', () => validatePhone(phoneInput, phoneError));
+      phoneInput.addEventListener('input', () => validatePhone(phoneInput, phoneError));
+
+      // Company Select
+      const companySelect = document.getElementById('companySelect');
+      const companyError = document.getElementById('company-error');
+      companySelect.addEventListener('blur', () => validateRequired(companySelect, companyError));
+      companySelect.addEventListener('change', () => validateRequired(companySelect, companyError));
+
+      // Product Select
+      const productSelect = document.getElementById('productSelect');
+      const productError = document.getElementById('product-error');
+      productSelect.addEventListener('blur', () => validateRequired(productSelect, productError));
+      productSelect.addEventListener('change', () => validateRequired(productSelect, productError));
+
+      // Purchased Price (readonly, validated in updateProductDetails)
+
+      // Sold Price
+      const soldPriceInput = document.querySelector('input[name="sold_price"]');
+      const soldPriceError = document.getElementById('sold-price-error');
+      soldPriceInput.addEventListener('blur', () => validateSoldPrice(soldPriceInput, soldPriceError));
+      soldPriceInput.addEventListener('input', () => validateSoldPrice(soldPriceInput, soldPriceError));
+
+      // Quantity
+      const quantityInput = document.querySelector('input[name="quantity"]');
+      const quantityError = document.getElementById('quantity-error');
+      quantityInput.addEventListener('blur', () => validateQuantity(quantityInput, quantityError));
+      quantityInput.addEventListener('input', () => validateQuantity(quantityInput, quantityError));
     }
 
     const form = document.getElementById('sale-form');
@@ -440,6 +613,74 @@
       const errorMessage = document.getElementById('error-message');
       errorMessage.style.display = 'none';
       errorMessage.textContent = '';
+
+      // Form validation
+      let valid = true;
+      const fieldErrors = document.querySelectorAll('.field-error');
+      fieldErrors.forEach(error => error.style.display = 'none');
+
+      // Required fields
+      const requiredFields = form.querySelectorAll('[required]');
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          valid = false;
+          const errorId = `${field.id || field.name}-error`;
+          const errorEl = document.getElementById(errorId);
+          if (errorEl) errorEl.style.display = 'block';
+          field.classList.add('invalid');
+        }
+      });
+
+      // Customer name length
+      const customerInput = form.querySelector('input[name="customer_name"]');
+      const customerValue = customerInput.value.trim();
+      if (customerValue.length < 2) {
+        valid = false;
+        document.getElementById('customer-error').textContent = 'Customer name must be at least 2 characters.';
+        document.getElementById('customer-error').style.display = 'block';
+        customerInput.classList.add('invalid');
+      }
+
+      // Phone number
+      const phoneInput = form.querySelector('input[name="phone_number"]');
+      const phoneValue = phoneInput.value.trim();
+      let cleanPhone = phoneValue.replace(/\+/, '');
+      if (!phoneValue || cleanPhone.length !== 10 || !/^\d{10}$/.test(cleanPhone)) {
+        valid = false;
+        document.getElementById('phone-error').textContent = 'Please enter a valid 10-digit phone number.';
+        document.getElementById('phone-error').style.display = 'block';
+        phoneInput.classList.add('invalid');
+      }
+
+      // Sold price > 0
+      const soldPrice = parseFloat(form.querySelector('input[name="sold_price"]').value);
+      if (isNaN(soldPrice) || soldPrice <= 0) {
+        valid = false;
+        document.getElementById('sold-price-error').style.display = 'block';
+        form.querySelector('input[name="sold_price"]').classList.add('invalid');
+      }
+
+      // Quantity > 0
+      const quantity = parseInt(form.querySelector('input[name="quantity"]').value);
+      if (isNaN(quantity) || quantity < 1) {
+        valid = false;
+        document.getElementById('quantity-error').style.display = 'block';
+        form.querySelector('input[name="quantity"]').classList.add('invalid');
+      }
+
+      // Validate purchased price
+      const purchasedPrice = parseFloat(form.querySelector('input[name="purchased_price"]').value);
+      if (isNaN(purchasedPrice) || purchasedPrice <= 0) {
+        valid = false;
+        document.getElementById('purchased-price-error').style.display = 'block';
+        form.querySelector('input[name="purchased_price"]').classList.add('invalid');
+      }
+
+      if (!valid) {
+        errorMessage.textContent = 'Please fix the errors in the form.';
+        errorMessage.style.display = 'block';
+        return;
+      }
 
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
@@ -476,6 +717,7 @@
       console.log('[DOMContentLoaded] Initializing form');
       fetchSalesmen();
       fetchCompanies();
+      addValidationListeners();
     });
   </script>
 </body>

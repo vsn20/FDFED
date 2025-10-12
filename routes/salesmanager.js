@@ -12,10 +12,8 @@ async function calculateProfit(sales, branchId, startDate) {
   let totalRetailCost = 0;
   let totalOrderPurchaseCost = 0;
 
-  // Log sales for debugging
   console.log(`[Debug] Calculating profit for ${sales.length} sales, startDate: ${startDate.toISOString()}`);
 
-  // Calculate total sales amount and retail cost
   for (const sale of sales) {
     totalSalesAmount += sale.sold_price * sale.quantity;
     const product = await Product.findOne({ prod_id: sale.product_id });
@@ -26,14 +24,12 @@ async function calculateProfit(sales, branchId, startDate) {
     }
   }
 
-  // Fetch accepted orders for the branch within the date range
   const orders = await Order.find({
     branch_id: branchId,
     status: "accepted",
     order_date: { $gte: startDate }
   });
 
-  // Calculate total purchase cost from accepted orders
   for (const order of orders) {
     const product = await Product.findOne({ prod_id: order.product_id });
     if (product && product.Purchase_price != null) {
@@ -44,14 +40,12 @@ async function calculateProfit(sales, branchId, startDate) {
     }
   }
 
-  // Fetch active salesmen for the branch, checking hiredAt
   const salesmen = await Employee.find({
     bid: branchId,
     role: "Salesman",
     status: "active"
   });
   const totalSalesmenSalaries = salesmen.reduce((sum, salesman) => {
-    // Set salary to 0 if hired after the start of the month
     if (salesman.hiredAt && salesman.hiredAt > startDate) {
       console.log(`[Debug] Salesman ${salesman.e_id} not hired by ${startDate.toISOString()}, salary: 0`);
       return sum;
@@ -60,7 +54,6 @@ async function calculateProfit(sales, branchId, startDate) {
     return sum + (salesman.base_salary || 0);
   }, 0);
 
-  // Fetch the sales manager for the branch
   const branch = await Branch.findOne({ bid: branchId, active: "active" });
   let salesManagerSalary = 0;
   if (branch && branch.manager_id) {
@@ -73,7 +66,6 @@ async function calculateProfit(sales, branchId, startDate) {
     }
   }
 
-  // Calculate profit
   const profit = totalSalesAmount - (totalRetailCost + totalOrderPurchaseCost + totalSalesmenSalaries + salesManagerSalary);
   console.log(`[Debug] Profit calc: Sales=${totalSalesAmount}, Retail=${totalRetailCost}, OrderPurchaseCost=${totalOrderPurchaseCost}, SalesmenSalaries=${totalSalesmenSalaries}, ManagerSalary=${salesManagerSalary}, Profit=${profit}`);
   return profit;
@@ -108,20 +100,16 @@ router.get("/home", async (req, res) => {
       });
     }
 
-    // Get date ranges (using UTC to avoid time zone issues)
     const now = new Date();
     const currentYear = now.getUTCFullYear();
-    const currentMonth = now.getUTCMonth(); // 0-based (0 = January)
+    const currentMonth = now.getUTCMonth();
     
-    // Previous month: full month
     const previousMonthDate = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
     const previousMonthStart = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
-    const previousMonthEnd = new Date(Date.UTC(currentYear, currentMonth, 0)); // Last day of previous month
+    const previousMonthEnd = new Date(Date.UTC(currentYear, currentMonth, 0));
 
-    // Cumulative: all sales up to end of previous month
     const cumulativeEnd = previousMonthEnd;
 
-    // Fetch sales
     const previousMonthSales = await Sale.find({
       branch_id: branch.bid,
       sales_date: { $gte: previousMonthStart, $lte: previousMonthEnd }
@@ -134,11 +122,9 @@ router.get("/home", async (req, res) => {
     });
     console.log(`[Debug] Cumulative sales up to ${cumulativeEnd.toISOString()}: ${cumulativeSales.length}`);
 
-    // Calculate profits
     const previousMonthProfit = await calculateProfit(previousMonthSales, branch.bid, previousMonthStart);
-    const cumulativeProfit = await calculateProfit(cumulativeSales, branch.bid, new Date(0)); // Earliest possible date for cumulative
+    const cumulativeProfit = await calculateProfit(cumulativeSales, branch.bid, new Date(0));
 
-    // Generate months for dropdown (x-7 to x-1)
     const months = [];
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
@@ -148,7 +134,7 @@ router.get("/home", async (req, res) => {
       const date = new Date(Date.UTC(currentYear, currentMonth - i, 1));
       months.push({
         year: date.getUTCFullYear(),
-        month: date.getUTCMonth() + 1, // 1-based for API
+        month: date.getUTCMonth() + 1,
         name: `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`
       });
     }
@@ -176,7 +162,6 @@ router.get("/home", async (req, res) => {
   }
 });
 
-// Route for fetching profit by selected month
 router.get("/profit-by-month", async (req, res) => {
   try {
     const emp_id = req.user?.emp_id;
@@ -194,13 +179,13 @@ router.get("/profit-by-month", async (req, res) => {
       return res.status(404).json({ error: "No branch assigned" });
     }
 
-    const [year, month] = req.query.month.split('-').map(Number); // e.g., "2025-4"
+    const [year, month] = req.query.month.split('-').map(Number);
     if (!year || !month || month < 1 || month > 12) {
       return res.status(400).json({ error: "Invalid year or month" });
     }
-    const monthIndex = month - 1; // Convert to 0-based
+    const monthIndex = month - 1;
     const startDate = new Date(Date.UTC(year, monthIndex, 1));
-    const endDate = new Date(Date.UTC(year, monthIndex + 1, 0)); // Last day of the month
+    const endDate = new Date(Date.UTC(year, monthIndex + 1, 0));
 
     const sales = await Sale.find({
       branch_id: branch.bid,
@@ -222,22 +207,38 @@ router.get("/profit-by-month", async (req, res) => {
   }
 });
 
-const { inventory_display } = require("../controllers/salesmanager/inventory_display");
+const { inventory_display, getInventoryData } = require("../controllers/salesmanager/inventory_display");
 router.get("/stocks", (req, res) => {
   console.log('[Route] Accessing /salesmanager/stocks');
   inventory_display(req, res);
 });
+router.get("/stocks/data", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/stocks/data');
+  getInventoryData(req, res);
+});
 
-const { customers_display } = require("../controllers/salesmanager/admin_customers_display");
+const { customers_display, getCustomersData } = require("../controllers/salesmanager/admin_customers_display");
 router.get("/customers", (req, res) => {
   console.log('[Route] Accessing /salesmanager/customers');
   customers_display(req, res);
 });
+router.get("/customers/data", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/customers/data');
+  getCustomersData(req, res);
+});
 
-const { renderAddSaleForm, sales_display, sales_details, addsale_post, getSalesmen, getCompanies } = require('../controllers/salesmanager/sales');
+const { renderAddSaleForm, sales_display, getSalesData, sales_details, getSaleById, addsale_post, getSalesmen, getCompanies } = require('../controllers/salesmanager/sales');
 router.get('/sales', (req, res) => {
   console.log('[Route] Accessing /salesmanager/sales');
   sales_display(req, res);
+});
+router.get('/sales/data', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/sales/data');
+  getSalesData(req, res);
+});
+router.get('/sales/data/:id', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/sales/data/:id');
+  getSaleById(req, res);
 });
 router.get('/sales/:id', (req, res) => {
   console.log('[Route] Accessing /salesmanager/sales/:id');
@@ -260,10 +261,18 @@ router.get('/companies', (req, res) => {
   getCompanies(req, res);
 });
 
-const { orders_display, order_details, order_edit, order_update, addorder_post, renderAddOrderForm } = require('../controllers/salesmanager/orders');
+const { orders_display, getOrdersData, getOrderById, order_details, order_edit, order_update, addorder_post, renderAddOrderForm } = require('../controllers/salesmanager/orders');
 router.get('/orders', (req, res) => {
   console.log('[Route] Accessing /salesmanager/orders');
   orders_display(req, res);
+});
+router.get('/orders/data', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/orders/data');
+  getOrdersData(req, res);
+});
+router.get('/orders/data/:id', (req, res) => {
+  console.log('[Route] Accessing /salesmanager/orders/data/:id');
+  getOrderById(req, res);
 });
 router.get('/orders/:id', (req, res) => {
   console.log('[Route] Accessing /salesmanager/orders/:id');
@@ -292,10 +301,14 @@ router.get("/products-by-company/:companyId", (req, res) => {
   getProductsByCompany(req, res);
 });
 
-const { salary_display } = require("../controllers/salesmanager/salary");
+const { salary_display, getSalaryData } = require("../controllers/salesmanager/salary");
 router.get("/salaries", (req, res) => {
   console.log('[Route] Accessing /salesmanager/salaries');
   salary_display(req, res);
+});
+router.get("/salaries/data", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/salaries/data');
+  getSalaryData(req, res);
 });
 
 const { salesmanager_messages_display, render_compose_message_form, compose_message, view_sent_messages, view_message } = require("../controllers/salesmanager/salesmanager_messages_display");
@@ -305,10 +318,22 @@ router.post("/messages/compose", compose_message);
 router.get("/messages/view", view_message);
 router.get("/messages/sent", view_sent_messages);
 
-const { employeeDisplay, employeeDetail, fireEmployee, updateSalesmanSalary, editSalesManager, updateSalesManager, renderAddEmployeeForm, addEmployee } = require("../controllers/salesmanager/salesmanager_employee");
+const { employeeDisplay, getSelfData, getEmployeesData, employeeDetail, getEmployeeById, fireEmployee, updateSalesmanSalary, editSalesManager, updateSalesManager, renderAddEmployeeForm, addEmployee } = require("../controllers/salesmanager/salesmanager_employee");
 router.get("/employees", (req, res) => {
   console.log('[Route] Accessing /salesmanager/employees');
   employeeDisplay(req, res);
+});
+router.get("/self/data", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/self/data');
+  getSelfData(req, res);
+});
+router.get("/employees/data", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/employees/data');
+  getEmployeesData(req, res);
+});
+router.get("/employees/data/:e_id", (req, res) => {
+  console.log('[Route] Accessing /salesmanager/employees/data/:e_id');
+  getEmployeeById(req, res);
 });
 router.get("/employee-details/:e_id", (req, res) => {
   console.log('[Route] Accessing /salesmanager/employee-details/:e_id');

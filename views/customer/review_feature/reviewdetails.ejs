@@ -192,6 +192,16 @@
       display: none;
     }
 
+    .success-message {
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+      display: none;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -238,10 +248,10 @@
     <div class="content-area" id="content">
       <h1>Review Sale</h1>
       <% if (sale) { %>
-        <form id="review-form" action="/customer/reviews" method="POST">
-          <input type="hidden" name="sale_id" value="<%= sale.sale_id %>">
-          <fieldset class="form-section">
-            <legend class="section-title">Sale Information</legend>
+        <div id="review-form">
+          <input type="hidden" id="sale_id" value="<%= sale.sale_id %>">
+          <div class="form-section">
+            <div class="section-title">Sale Information</div>
             <div class="field-group">
               <div>
                 <label for="sale-id" class="field-label">Sale ID:</label>
@@ -264,11 +274,11 @@
                 <input type="text" id="purchase-date" value="<%= sale.purchasedate %>" class="field-input disabled-field" readonly>
               </div>
             </div>
-          </fieldset>
+          </div>
 
           <!-- Review Section -->
-          <fieldset class="form-section review-section">
-            <legend class="section-title">Review</legend>
+          <div class="form-section review-section">
+            <div class="section-title">Review</div>
             <div class="field-group">
               <div>
                 <label class="field-label">Rating:</label>
@@ -292,11 +302,15 @@
                 <p id="review-error" class="error-message">Please enter a review.</p>
               </div>
             </div>
-          </fieldset>
+          </div>
+
+          <!-- Success/Error Messages -->
+          <div id="success-message" class="success-message"></div>
+          <div id="error-message" class="error-message"></div>
 
           <!-- Submit Button -->
-          <button type="submit" class="form-btn">Submit Review</button>
-        </form>
+          <button type="button" class="form-btn" onclick="submitReview()">Submit Review</button>
+        </div>
       <% } else { %>
         <p>Sale not found.</p>
       <% } %>
@@ -306,19 +320,22 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    document.getElementById('review-form').addEventListener('submit', async (event) => {
-      event.preventDefault(); // Prevent default form submission
-
+    async function submitReview() {
       // Client-side validation
       const rating = document.querySelector('input[name="rating"]:checked');
       const review = document.querySelector('#review').value.trim();
+      const saleId = document.querySelector('#sale_id').value;
       const ratingError = document.querySelector('#rating-error');
       const reviewError = document.querySelector('#review-error');
+      const successMessage = document.querySelector('#success-message');
+      const errorMessage = document.querySelector('#error-message');
       let hasError = false;
 
       // Reset error messages
       ratingError.style.display = 'none';
       reviewError.style.display = 'none';
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
 
       if (!rating) {
         ratingError.style.display = 'block';
@@ -334,30 +351,39 @@
         return; // Stop submission if there are validation errors
       }
 
-      const form = event.target;
-      const formData = new FormData(form);
+      const data = {
+        sale_id: saleId,
+        rating: parseInt(rating.value),
+        review: review
+      };
 
       try {
-        const response = await fetch(form.action, {
-          method: form.method,
-          body: formData,
+        const response = await fetch('/customer/reviews', {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'Accept': 'application/json'
-          }
+          },
+          body: JSON.stringify(data)
         });
 
         const result = await response.json();
 
         if (result.success) {
-          window.location.href = result.redirect; // Redirect to the specified URL
+          successMessage.textContent = 'Review submitted successfully';
+          successMessage.style.display = 'block';
+          setTimeout(() => {
+            window.location.href = result.redirect; // Redirect to the specified URL
+          }, 1000);
         } else {
-          alert(result.message || 'Error submitting review');
+          errorMessage.textContent = result.message || 'Error submitting review';
+          errorMessage.style.display = 'block';
         }
       } catch (error) {
-        console.error('Error submitting review:', error);
-        alert('An error occurred while submitting the review');
+        errorMessage.textContent = 'An error occurred while submitting the review';
+        errorMessage.style.display = 'block';
       }
-    });
+    }
   </script>
 </body>
 </html>

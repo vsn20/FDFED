@@ -40,7 +40,7 @@
 
     .content-area h1 {
       color: #2d3436;
-      margin-bottom: 20px; /* Standardized margin */
+      margin-bottom: 10px; /* Reduced margin to align with search bar */
       font-size: 1.5rem; /* Standardized font size */
     }
 
@@ -48,9 +48,16 @@
     .header-container {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 20px; /* Standardized margin */
       flex-wrap: wrap; /* Allow wrapping on small screens */
+    }
+
+    .left-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
     }
 
     /* Add button styling (not used here but kept for consistency) */
@@ -68,6 +75,20 @@
 
     .add-button:hover {
       background-color: #555555;
+    }
+
+    /* Search container styling */
+    .search-container {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    #searchInput {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 250px;
+      font-size: 0.9rem;
     }
 
     /* Branch fields styling */
@@ -182,6 +203,18 @@
         gap: 10px;
       }
 
+      .left-section {
+        width: 100%;
+      }
+
+      .search-container {
+        width: 100%;
+      }
+
+      #searchInput {
+        width: 100%;
+      }
+
       .add-button {
         margin-top: 5px;
         width: 100%;
@@ -252,6 +285,24 @@
         padding: 10px;
         font-size: 0.85rem;
       }
+
+      #searchInput {
+        width: 220px;
+      }
+    }
+
+    /* Success message styling */
+    .success-message {
+      color: green;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
+    /* Error message styling */
+    .error-message {
+      color: red;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
     }
   </style>
 </head>
@@ -264,19 +315,30 @@
     <!-- Content Area -->
     <div class="content-area" id="content">
       <div class="header-container">
-        <h1>Inventory</h1>
+        <div class="left-section">
+          <h1>Inventory</h1>
+          <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search by Product ID or Name...">
+          </div>
+        </div>
         <!-- Add button can be added here if needed, e.g., <a href="/salesman/inventory/add" class="add-button">Add Stock</a> -->
       </div>
 
+      <!-- Success/Error Messages -->
+      <% if (successMessage) { %>
+        <div class="success-message"><%= successMessage %></div>
+      <% } %>
+      <div class="error-message" id="error-message" style="display: none;"></div>
+
       <!-- Branch Fields -->
-      <div class="form-row">
+      <div class="form-row" id="branch-fields" style="display: none;">
         <div class="form-group">
           <label>Branch ID</label>
-          <input type="text" value="<%= branchid %>" readonly>
+          <input type="text" id="branchid" readonly>
         </div>
         <div class="form-group">
           <label>Branch Name</label>
-          <input type="text" value="<%= branchname %>" readonly>
+          <input type="text" id="branchname" readonly>
         </div>
       </div>
 
@@ -291,16 +353,8 @@
               <th>Quantity</th>
             </tr>
           </thead>
-          <tbody>
-            <% stocks.forEach(s => { %>
-              <tr>
-                <td data-label="Product ID"><%= s.pid %></td>
-                <td data-label="Product Name"><%= s.pname %></td>
-                <td data-label="Company Name"><%= s.cname %></td>
-                <td data-label="Model No"><%= s.modelno %></td>
-                <td data-label="Quantity"><%= s.quantity %></td>
-              </tr>
-            <% }) %>
+          <tbody id="inventory-table-body">
+            <!-- Table rows will be populated dynamically -->
           </tbody>
         </table>
       </div>
@@ -310,7 +364,65 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    // Add any necessary script logic here if needed
+    async function loadInventoryData() {
+      try {
+        const response = await fetch('/salesman/stocks/data', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load inventory data');
+        }
+
+        // Populate branch fields
+        const branchFields = document.getElementById('branch-fields');
+        const branchIdInput = document.getElementById('branchid');
+        const branchNameInput = document.getElementById('branchname');
+        branchIdInput.value = data.branchid;
+        branchNameInput.value = data.branchname;
+        branchFields.style.display = 'flex';
+
+        // Populate table
+        const tableBody = document.getElementById('inventory-table-body');
+        tableBody.innerHTML = ''; // Clear existing rows
+        data.stocks.forEach(stock => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td data-label="Product ID">${stock.pid}</td>
+            <td data-label="Product Name">${stock.pname}</td>
+            <td data-label="Company Name">${stock.cname}</td>
+            <td data-label="Model No">${stock.modelno}</td>
+            <td data-label="Quantity">${stock.quantity}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+        // Initialize search functionality
+        const searchInput = document.getElementById('searchInput');
+        const rows = tableBody.querySelectorAll('tr');
+
+        searchInput.addEventListener('input', () => {
+          const filter = searchInput.value.toLowerCase();
+          rows.forEach(row => {
+            const productId = row.querySelector('td:first-child').textContent.toLowerCase();
+            const productName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            row.style.display = (productId.includes(filter) || productName.includes(filter)) ? '' : 'none';
+          });
+        });
+      } catch (error) {
+        console.error('[LoadInventoryData] Error:', error);
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.textContent = error.message || 'Failed to load inventory data';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    // Load data when the page loads
+    window.addEventListener('DOMContentLoaded', loadInventoryData);
   </script>
 </body>
 </html>

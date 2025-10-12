@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Complaints - ElectroLand</title>
   <style>
-    /* Structural CSS */
     * {
       margin: 0;
       padding: 0;
@@ -34,7 +33,30 @@
       padding: 20px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
-      overflow-x: auto;
+      height: calc(100vh - 90px);
+      overflow-y: hidden;
+      transition: overflow-y 0.1s ease;
+    }
+
+    .content-area:hover {
+      overflow-y: auto;
+    }
+
+    .content-area::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .content-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .content-area::-webkit-scrollbar-thumb {
+      background: #4a5568;
+      border-radius: 4px;
+    }
+
+    .content-area::-webkit-scrollbar-thumb:hover {
+      background: #636e72;
     }
 
     .content-area h1 {
@@ -43,90 +65,58 @@
       font-size: 1.5rem;
     }
 
-    /* Header container styling */
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    table {
+      width: 100%;
+      border-collapse: collapse;
       margin-bottom: 20px;
     }
 
-    /* Add button styling */
-    .add-button {
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e6e9f0;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      color: #2d3436;
+      font-weight: 600;
+    }
+
+    td {
+      color: #636e72;
+    }
+
+    .clickable-btn {
+      background: none;
+      border: none;
+      color: #333333;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .clickable-btn:hover {
+      color: #555555;
+    }
+
+    .add-btn {
       display: inline-block;
       padding: 10px 20px;
       background-color: #333333;
       color: white;
-      text-decoration: none;
+      border: none;
       border-radius: 5px;
-      transition: background-color 0.3s;
       font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: 20px;
     }
 
-    .add-button:hover {
+    .add-btn:hover {
       background-color: #555555;
     }
 
-    /* Table styling */
-    .table-wrapper {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    table {
-      width: 100%;
-      min-width: 800px;
-      border-collapse: collapse;
-      background: #ffffff;
-      border-radius: 10px;
-      border-spacing: 0;
-    }
-
-    thead {
-      background: #333333;
-    }
-
-    th {
-      color: white;
-      padding: 12px;
-      text-align: left;
-      font-size: 0.9rem;
-      border-bottom: 2px solid #ffffff;
-    }
-
-    td {
-      padding: 12px;
-      text-align: left;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #e6e9f0;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:nth-child(even) {
-      background: #f8f9fd;
-    }
-
-    /* Clickable button styling */
-    .clickable-btn {
-      background: none;
-      border: none;
-      color: inherit;
-      text-decoration: none;
-      cursor: pointer;
-      padding: 0;
-      font-size: inherit;
-      width: 100%;
-      text-align: left;
-    }
-
-    .clickable-btn:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -135,26 +125,16 @@
 
       .content-area {
         padding: 15px;
+        height: auto;
+        overflow-y: hidden;
       }
 
-      .header-container {
-        flex-direction: column;
-        align-items: flex-start;
+      .content-area:hover {
+        overflow-y: auto;
       }
 
-      .add-button {
-        margin-top: 10px;
-        width: 100%;
-        text-align: center;
-      }
-
-      .content-area h1 {
-        font-size: 1.2rem;
-      }
-
-      table {
+      table, thead, tbody, th, td, tr {
         display: block;
-        min-width: 0;
       }
 
       thead {
@@ -162,115 +142,106 @@
       }
 
       tr {
-        display: flex;
-        flex-direction: column;
         margin-bottom: 15px;
         border: 1px solid #e6e9f0;
         border-radius: 5px;
         padding: 10px;
-        background: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       }
 
       td {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
-        font-size: 0.85rem;
-        border-bottom: 1px dashed #e6e9f0;
-      }
-
-      td:last-child {
-        border-bottom: none;
+        padding: 8px;
+        position: relative;
       }
 
       td:before {
         content: attr(data-label);
         font-weight: bold;
         color: #2d3436;
-        margin-right: 10px;
-        min-width: 100px;
-      }
-
-      .clickable-btn {
         flex: 1;
-        text-align: right;
-      }
-    }
-
-    @media (min-width: 769px) and (max-width: 1024px) {
-      th, td {
-        padding: 10px;
-        font-size: 0.85rem;
       }
 
-      .content-area h1 {
-        font-size: 1.3rem;
+      td:last-child {
+        border-bottom: none;
+      }
+
+      .add-btn {
+        width: 100%;
+        padding: 8px;
       }
     }
   </style>
 </head>
 <body>
   <%- include('../../partials/navbar') %>
-
   <div class="container">
     <%- include('../../partials/customer_sidebar') %>
-
-    <!-- Content Area -->
-    <div class="content-area" id="content">
-      <div class="header-container">
-        <h1>Complaints</h1>
-        <a href="/customer/complaints/add" class="add-button">Add Complaint</a>
-      </div>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Complaint ID</th>
-              <th>Sale ID</th>
-              <th>Product ID</th>
-              <th>Product Name</th>
-              <th>Company Name</th>
-              <th>Purchase Date</th>
-              <th>Complaint Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% data.forEach(complaint => { %>
-              <tr>
-                <td data-label="Complaint ID"><button class="clickable-btn" data-bid="<%= complaint.complaint_id %>"><%= complaint.complaint_id %></button></td>
-                <td data-label="Sale ID"><%= complaint.sale_id %></td>
-                <td data-label="Product ID"><%= complaint.prod_id %></td>
-                <td data-label="Product Name"><%= complaint.Prod_name %></td>
-                <td data-label="Company Name"><%= complaint.com_name %></td>
-                <td data-label="Purchase Date"><%= complaint.purchasedate %></td>
-                <td data-label="Complaint Date"><%= complaint.complaint_date %></td>
-                <td data-label="Status"><%= complaint.status %></td>
-              </tr>
-            <% }) %>
-            <% if (data.length === 0) { %>
-              <tr>
-                <td colspan="8" style="text-align: center;">No complaints found.</td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
+    <div class="content-area">
+      <h1>Complaints</h1>
+      <a href="/customer/complaints/add" class="add-btn">Add New Complaint</a>
+      <table>
+        <thead>
+          <tr>
+            <th>Complaint ID</th>
+            <th>Sale ID</th>
+            <th>Product Name</th>
+            <th>Company Name</th>
+            <th>Purchase Date</th>
+            <th>Complaint Date</th>
+            <th>Status</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody id="complaints-table">
+          <tr>
+            <td colspan="8">Loading complaints...</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
-
   <%- include('../../partials/footer') %>
 
   <script>
-    document.querySelectorAll('.clickable-btn').forEach(button => {
-      button.addEventListener('click', () => {
-        const bid = button.getAttribute('data-bid');
-        // Optionally, redirect to a complaint details page if needed
-        // window.location.href = `/customer/complaints/totaldetails/${bid}`;
-      });
-    });
+    async function loadComplaints() {
+      try {
+        const response = await fetch('/customer/complaints/data');
+        const complaints = await response.json();
+
+        if (response.ok && Array.isArray(complaints)) {
+          const tableBody = document.getElementById('complaints-table');
+          if (complaints.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8">No complaints found.</td></tr>';
+            return;
+          }
+
+          tableBody.innerHTML = complaints.map(complaint => `
+            <tr>
+              <td data-label="Complaint ID">
+                <button class="clickable-btn" onclick="window.location.href='/customer/complaints/totaldetails/${complaint.complaint_id}'">
+                  ${complaint.complaint_id}
+                </button>
+              </td>
+              <td data-label="Sale ID">${complaint.sale_id}</td>
+              <td data-label="Product Name">${complaint.Prod_name}</td>
+              <td data-label="Company Name">${complaint.com_name}</td>
+              <td data-label="Purchase Date">${complaint.purchasedate}</td>
+              <td data-label="Complaint Date">${complaint.complaint_date}</td>
+              <td data-label="Status">${complaint.status}</td>
+              <td data-label="Description">${complaint.complaint_info}</td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('complaints-table').innerHTML = '<tr><td colspan="8">Error loading complaints.</td></tr>';
+        }
+      } catch (error) {
+        console.error('Error loading complaints:', error);
+        document.getElementById('complaints-table').innerHTML = '<tr><td colspan="8">Error loading complaints.</td></tr>';
+      }
+    }
+
+    window.onload = loadComplaints;
   </script>
 </body>
 </html>

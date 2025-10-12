@@ -6,8 +6,20 @@ const Employee = require("../models/employees");
 
 async function sales_display(req, res) {
   try {
+    res.render("owner/salesfeatures/sales", {
+      activePage: 'employee',
+      activeRoute: 'sales',
+    });
+  } catch (error) {
+    console.error("[sales_display] Error rendering sales:", error);
+    res.status(500).send("Internal server error");
+  }
+}
+
+async function getSalesData(req, res) {
+  try {
     const sales = await Sale.find().lean();
-    console.log('[sales_display] Raw sales data:', sales);
+    console.log('[getSalesData] Raw sales data:', sales);
 
     const mappedSales = await Promise.all(
       sales.map(async (sale) => {
@@ -66,26 +78,34 @@ async function sales_display(req, res) {
       })
     );
 
-    console.log('[sales_display] Mapped sales data:', mappedSales);
+    console.log('[getSalesData] Mapped sales data:', mappedSales);
 
-    res.render("owner/salesfeatures/sales", {
-      salers: mappedSales,
-      activePage: 'employee',
-      activeRoute: 'sales',
-    });
+    res.json(mappedSales);
   } catch (error) {
-    console.error("[sales_display] Error rendering sales:", error);
-    res.status(500).send("Internal server error");
+    console.error("[getSalesData] Error fetching sales:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
 async function salesdetaildisplay(req, res) {
   try {
+    res.render("owner/salesfeatures/saleDetails", {
+      activePage: 'employee',
+      activeRoute: 'sales',
+    });
+  } catch (error) {
+    console.error("[salesdetaildisplay] Error rendering sale details:", error);
+    res.status(500).send("Internal server error");
+  }
+}
+
+async function getSaleDetail(req, res) {
+  try {
     const id = req.params.sales_id;
     const sale = await Sale.findOne({ sales_id: id }).lean();
 
     if (!sale) {
-      return res.status(404).send("Sale not found");
+      return res.status(404).json({ error: "Sale not found" });
     }
 
     let companyName = "Unknown Company";
@@ -143,25 +163,23 @@ async function salesdetaildisplay(req, res) {
       }
     }
 
-    res.render("owner/salesfeatures/saleDetails", {
-      sale: {
-        ...sale,
-        branch_name: branchName,
-        company_name: companyName,
-        product_name: productName,
-        model_number: modelNumber,
-        salesman_name: salesmanName,
-        amount: sale.amount ?? 0, // Ensure amount is defined
-        profit_or_loss: sale.profit_or_loss ?? 0, // Ensure profit_or_loss is defined
-        sales_date: sale.sales_date || new Date(), // Ensure sales_date is defined
-      },
-      activePage: 'employee',
-      activeRoute: 'sales',
-    });
+    const mappedSale = {
+      ...sale,
+      branch_name: branchName,
+      company_name: companyName,
+      product_name: productName,
+      model_number: modelNumber,
+      salesman_name: salesmanName,
+      amount: sale.amount ?? 0, // Ensure amount is defined
+      profit_or_loss: sale.profit_or_loss ?? 0, // Ensure profit_or_loss is defined
+      sales_date: sale.sales_date || new Date(), // Ensure sales_date is defined
+    };
+
+    res.json(mappedSale);
   } catch (error) {
-    console.error("[salesdetaildisplay] Error rendering sale details:", error);
-    res.status(500).send("Internal server error");
+    console.error("[getSaleDetail] Error fetching sale details:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
-module.exports = { sales_display, salesdetaildisplay };
+module.exports = { sales_display, salesdetaildisplay, getSalesData, getSaleDetail };

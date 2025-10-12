@@ -11,11 +11,24 @@ router.get("/previouspurchases/totaldetails/data/:saleid", getSaleById);
 router.get("/previouspurchases/totaldetails/:saleid", total_previous_data_display);
 
 // Complaints
-const { complaint_data, complaint_datadetails, complaint_add, complaint_submit } = require("../controllers/customer/complaints");
-router.get("/complaints", complaint_data);
-router.get("/complaints/totaldetails/:saleid", complaint_datadetails);
-router.get("/complaints/add", complaint_add);
-router.post("/complaints/submit", complaint_submit);
+const {
+  complaints_display,
+  getComplaintsData,
+  getComplaintById,
+  getEligibleSales,
+  render_add_complaint_form,
+  add_complaint,
+  render_edit_complaint_form,
+  update_complaint,
+} = require("../controllers/customer/complaints");
+router.get("/complaints", complaints_display);
+router.get("/complaints/data", getComplaintsData);
+router.get("/complaints/totaldetails/:complaint_id", getComplaintById);
+router.get("/complaints/eligible-sales", getEligibleSales);
+router.get("/complaints/add", render_add_complaint_form);
+router.post("/complaints/add", add_complaint);
+router.get("/complaints/edit/:complaint_id", render_edit_complaint_form);
+router.post("/complaints/edit/:complaint_id", update_complaint);
 
 // Reviews
 const { review_display, review_datadetails, review_update } = require("../controllers/customer/reviews");
