@@ -82,8 +82,15 @@ router.get("/customers", customers_display);
 const { inventory_display } = require("../controllers/inventory_display");
 router.get("/stocks", inventory_display);
 
-const { sales_display, salesdetaildisplay } = require("../controllers/sales_display");
+const { 
+  sales_display, 
+  salesdetaildisplay,
+  getSalesData,
+  getSaleDetail 
+} = require("../controllers/sales_display");
 router.get("/sales", sales_display);
+router.get("/sales/data", getSalesData);
+router.get("/sales/data/:sales_id", getSaleDetail);
 router.get("/sales/:sales_id", salesdetaildisplay);
 
 const { profits_display, profitByMonth } = require("../controllers/profits_display");
