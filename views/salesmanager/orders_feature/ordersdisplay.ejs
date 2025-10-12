@@ -122,6 +122,11 @@
       cursor: default;
     }
 
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -206,6 +211,10 @@
         flex: 1 1 100%;
       }
 
+      .search-group {
+        max-width: 100%;
+      }
+
       table {
         display: block;
         min-width: 0;
@@ -256,6 +265,10 @@
         flex: 1 1 45%;
       }
 
+      .search-group {
+        max-width: 250px;
+      }
+
       th, td {
         padding: 10px;
         font-size: 0.85rem;
@@ -276,6 +289,10 @@
       </div>
 
       <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchOrder">Search by Order ID/Product Name</label>
+          <input type="text" id="searchOrder" placeholder="Enter Order ID/Product Name" oninput="filterOrders()">
+        </div>
         <div class="form-group">
           <label>Branch ID</label>
           <input type="text" value="<%= branchid %>" readonly>
@@ -287,7 +304,7 @@
       </div>
 
       <div class="table-wrapper">
-        <table>
+        <table id="ordersTable">
           <thead>
             <tr>
               <th>Order ID</th>
@@ -298,7 +315,7 @@
               <th>Delivery Date</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="ordersTableBody">
             <% orders.forEach(order => { %>
               <tr onclick="window.location.href='/salesmanager/orders/<%= order.order_id %>'">
                 <td data-label="Order ID"><%= order.order_id %></td>
@@ -316,5 +333,23 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    function filterOrders() {
+      const searchInput = document.getElementById('searchOrder').value.toLowerCase();
+      const tableBody = document.getElementById('ordersTableBody');
+      const rows = tableBody.getElementsByTagName('tr');
+
+      for (let row of rows) {
+        const orderId = row.cells[0].textContent.toLowerCase();
+        const productName = row.cells[3].textContent.toLowerCase();
+        if (searchInput === '' || orderId.includes(searchInput) || productName.includes(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    }
+  </script>
 </body>
 </html>
