@@ -73,6 +73,14 @@
       background-color: #e6f3ff;
       cursor: pointer;
     }
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+    #table-container {
+      display: none;
+    }
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -127,7 +135,8 @@
     <% } %>
     <div class="content-area">
       <h1>Manage Orders</h1>
-      <div class="table-wrapper">
+      <div id="loading">Loading orders...</div>
+      <div class="table-wrapper" id="table-container">
         <table>
           <thead>
             <tr>
@@ -139,22 +148,8 @@
               <th>Delivery Date</th>
             </tr>
           </thead>
-          <tbody>
-            <% orders.forEach(order => { %>
-              <tr class="clickable" 
-    <% if (order.status === 'Pending') { %>
-        onclick="window.location.href='/company/orders/pending/edit/<%= order.order_id %>'"
-    <% } %>>
-                <td data-label="Order ID"><%= order.order_id %></td>
-                <td data-label="Branch"><%= order.branch_name %></td>
-                <td data-label="Product"><%= order.product_name %></td>
-                <td data-label="Quantity"><%= order.quantity %></td>
-                <td data-label="Status"><%= order.status %></td>
-                <td data-label="Delivery Date">
-                  <%= order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set' %>
-                </td>
-              </tr>
-            <% }) %>
+          <tbody id="orders-tbody">
+            <!-- Data populated via JS -->
           </tbody>
         </table>
       </div>
@@ -165,5 +160,45 @@
   <% } catch (e) { %>
     <p>Error rendering footer: <%= e.message %></p>
   <% } %>
+  <script>
+    const tbody = document.getElementById('orders-tbody');
+    const loading = document.getElementById('loading');
+    const tableContainer = document.getElementById('table-container');
+
+    async function loadOrders() {
+      try {
+        const response = await fetch('/company/orders/data');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const orders = await response.json();
+        tbody.innerHTML = ''; // Clear existing rows
+        orders.forEach(order => {
+          const row = document.createElement('tr');
+          if (order.status === 'Pending') {
+            row.classList.add('clickable');
+            row.onclick = () => window.location.href = `/company/orders/pending/edit/${order.order_id}`;
+          }
+          row.innerHTML = `
+            <td data-label="Order ID">${order.order_id}</td>
+            <td data-label="Branch">${order.branch_name}</td>
+            <td data-label="Product">${order.product_name}</td>
+            <td data-label="Quantity">${order.quantity}</td>
+            <td data-label="Status">${order.status}</td>
+            <td data-label="Delivery Date">
+              ${order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not Set'}
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        loading.style.display = 'none';
+        tableContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        loading.textContent = 'Error loading orders. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadOrders();
+  </script>
 </body>
 </html>
