@@ -172,6 +172,12 @@
       text-align: center;
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -275,6 +281,7 @@
     <div class="content-area" id="content">
       <div class="header-container">
         <h1>Inventory</h1>
+        <a href="/salesmanager/add-order" class="add-button">Add Order</a>
       </div>
 
       <% if (typeof successMessage !== 'undefined') { %>
@@ -293,33 +300,23 @@
         </div>
       </div>
 
-      <div class="table-wrapper">
-        <% if (hasStocks) { %>
-          <table>
-            <thead>
-              <tr>
-                <th>Product ID</th>
-                <th>Product Name</th>
-                <th>Company Name</th>
-                <th>Model No</th>
-                <th>Quantity</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% stocks.forEach(s => { %>
-                <tr>
-                  <td data-label="Product ID"><%= s.product_id %></td>
-                  <td data-label="Product Name"><%= s.product_name %></td>
-                  <td data-label="Company Name"><%= s.company_name %></td>
-                  <td data-label="Model No"><%= s.model_no %></td>
-                  <td data-label="Quantity"><%= s.quantity %></td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        <% } else { %>
-          <p class="no-data">No inventory records found for this branch.</p>
-        <% } %>
+      <div id="loading">Loading inventory...</div>
+
+      <div class="table-wrapper" id="table-container" style="display: none;">
+        <table id="inventory-table">
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Product Name</th>
+              <th>Company Name</th>
+              <th>Model No</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-tbody">
+            <!-- Data populated via JS -->
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -327,7 +324,50 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    // Add any necessary script logic here if needed
+    const tbody = document.getElementById('inventory-tbody');
+    const loading = document.getElementById('loading');
+    const tableContainer = document.getElementById('table-container');
+
+    async function loadInventory() {
+      try {
+        const response = await fetch('/salesmanager/stocks/data');
+        if (!response.ok) throw new Error('Failed to fetch inventory data');
+        const stocks = await response.json();
+        
+        tbody.innerHTML = ''; // Clear existing rows
+        if (stocks.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="no-data">No inventory data available for this branch.</td></tr>';
+        } else {
+          stocks.forEach(stock => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td data-label="Product ID">${stock.product_id}</td>
+              <td data-label="Product Name">${stock.product_name}</td>
+              <td data-label="Company Name">${stock.company_name}</td>
+              <td data-label="Model No">${stock.model_no}</td>
+              <td data-label="Quantity">${stock.quantity}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+        loading.style.display = 'none';
+        tableContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading inventory:', error);
+        loading.textContent = 'Error loading inventory. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadInventory();
+
+    // Listen for messages to refresh inventory data (e.g., after adding an order)
+    window.addEventListener('message', async (event) => {
+      if (event.origin !== window.location.origin) return; // Security check
+      if (event.data.type === 'refreshInventory') {
+        loadInventory();
+      }
+    });
   </script>
 </body>
 </html>

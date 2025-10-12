@@ -186,13 +186,13 @@
     <div class="content-area" id="content">
       <h1>View Sale</h1>
       <% if (sale) { %>
-        <form action="/customer/complaints" method="POST">
+        <form id="complaint-form">
           <fieldset class="form-section">
             <legend class="section-title">Sale Information</legend>
             <div class="field-group">
               <div>
                 <label for="sale-id" class="field-label">sale_id:</label>
-                <input type="text" id="sale-id" name="sale_id" value="<%= sale.sale_id %>" class="field-input disabled-field" readonly>
+                <input type="text"sale-id" name="sale_id" value="<%= sale.sale_id %>" class="field-input disabled-field" readonly>
               </div>
               <div>
                 <label for="prod-id" class="field-label">prod_id:</label>
@@ -243,7 +243,7 @@
             <div class="field-group">
               <div>
                 <label for="complaint" class="field-label">Complaint:</label>
-                <textarea id="complaint" name="complaint" class="field-textarea" placeholder="Enter your complaint here..." required></textarea>
+                <textarea id="complaint" name="complaint_info" class="field-textarea" placeholder="Enter your complaint here..." required></textarea>
               </div>
             </div>
           </fieldset>
@@ -251,6 +251,41 @@
           <!-- Submit Button -->
           <button type="submit" class="form-btn">Submit</button>
         </form>
+
+        <script>
+          document.getElementById('complaint-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const sale_id = document.getElementById('sale-id').value;
+            const complaint_info = document.getElementById('complaint').value;
+
+            if (!sale_id || !complaint_info) {
+              alert('Sale ID and complaint description are required');
+              return;
+            }
+
+            try {
+              const response = await fetch('/customer/complaints/submit', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sale_id, complaint_info }),
+              });
+
+              const result = await response.json();
+
+              if (result.success) {
+                window.location.href = result.redirect;
+              } else {
+                alert(result.message || 'Failed to submit complaint');
+              }
+            } catch (error) {
+              console.error('Error submitting complaint:', error);
+              alert('An error occurred while submitting the complaint');
+            }
+          });
+        </script>
       <% } else { %>
         <p>Sale not found.</p>
       <% } %>

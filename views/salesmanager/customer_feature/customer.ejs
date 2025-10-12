@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - ElectroLand</title>
+  <title>Customers - ElectroLand</title>
   <style>
     /* Structural CSS */
     * {
@@ -24,68 +24,65 @@
       margin-top: 90px;
       display: flex;
       flex: 1;
-      gap: 25px; /* Standardized gap */
-      padding: 0 20px !important; /* Standardized padding with !important to prevent override */
-      max-width: 100%; /* Ensure it doesn’t exceed viewport */
+      gap: 25px;
+      padding: 0 20px !important;
+      max-width: 100%;
     }
 
     .content-area {
       background: #ffffff;
       border-radius: 15px;
-      padding: 20px; /* Standardized padding */
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Standardized shadow */
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       flex: 1;
-      overflow-x: auto; /* Consistent overflow */
+      overflow-x: auto;
     }
 
     .content-area h1 {
       color: #2d3436;
-      margin-bottom: 20px; /* Standardized margin */
-      font-size: 1.5rem; /* Standardized font size */
+      margin-bottom: 20px;
+      font-size: 1.5rem;
     }
 
-    /* Header container styling */
     .header-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px; /* Standardized margin */
-      flex-wrap: wrap; /* Allow wrapping on small screens */
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
-    /* Add button styling (not used here but kept for consistency) */
     .add-btn {
       display: inline-block;
       padding: 10px 20px;
-      background-color: #333333; /* Consistent button color */
+      background-color: #333333;
       color: white;
       border: none;
       border-radius: 5px;
-      font-size: 0.9rem; /* Standardized font size */
+      font-size: 0.9rem;
       cursor: pointer;
       transition: background-color 0.3s;
-      text-decoration: none; /* Added for potential link use */
+      text-decoration: none;
     }
 
     .add-btn:hover {
-      background-color: #555555; /* Consistent hover color */
+      background-color: #555555;
     }
 
-    /* Table styling */
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
-      scrollbar-width: none; /* Hide scrollbar in Firefox */
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
     .table-wrapper::-webkit-scrollbar {
-      display: none; /* Hide scrollbar in Webkit browsers */
+      display: none;
     }
 
     table {
       width: 100%;
-      min-width: 600px; /* Standardized min-width */
+      min-width: 600px;
       border-collapse: collapse;
       background: #ffffff;
       border-radius: 10px;
@@ -98,16 +95,16 @@
 
     th {
       color: white;
-      padding: 12px; /* Standardized padding */
+      padding: 12px;
       text-align: left;
-      font-size: 0.9rem; /* Standardized font size */
+      font-size: 0.9rem;
       border-bottom: 2px solid #ffffff;
     }
 
     td {
-      padding: 12px; /* Standardized padding */
+      padding: 12px;
       text-align: left;
-      font-size: 0.9rem; /* Standardized font size */
+      font-size: 0.9rem;
       border-bottom: 1px solid #e6e9f0;
     }
 
@@ -119,11 +116,24 @@
       background: #f8f9fd;
     }
 
-    /* Responsive adjustments */
+    .no-data {
+      color: #888;
+      font-style: italic;
+      font-size: 0.9rem;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
-        padding: 0 10px !important; /* Consistent responsive padding */
+        padding: 0 10px !important;
       }
 
       .content-area {
@@ -211,12 +221,13 @@
     <div class="content-area" id="content">
       <div class="header-container">
         <h1>Our Customers</h1>
-        <!-- Add button can be reintroduced if needed, e.g., <a href="/admin/customers/add" class="add-btn">Add Customer</a> -->
+        <!-- Add button can be added later if needed -->
       </div>
 
-      <!-- Table to display customer data -->
-      <div class="table-wrapper">
-        <table>
+      <div id="loading">Loading customers...</div>
+
+      <div class="table-wrapper" id="table-container" style="display: none;">
+        <table id="customers-table">
           <thead>
             <tr>
               <th>Customer ID</th>
@@ -226,16 +237,8 @@
               <th>Profit</th>
             </tr>
           </thead>
-          <tbody>
-            <% customerData.forEach(customer => { %>
-              <tr>
-                <td data-label="Customer ID"><%= customer.cid %></td>
-                <td data-label="First Name"><%= customer.customer_first_name %></td>
-                <td data-label="Last Name"><%= customer.customer_last_name %></td>
-                <td data-label="Phone Number"><%= customer.customer_ph_no %></td>
-                <td data-label="Profit"><%= customer.profit_from_customer %></td>
-              </tr>
-            <% }) %>
+          <tbody id="customers-tbody">
+            <!-- Data populated via JS -->
           </tbody>
         </table>
       </div>
@@ -243,5 +246,52 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    const tbody = document.getElementById('customers-tbody');
+    const loading = document.getElementById('loading');
+    const tableContainer = document.getElementById('table-container');
+
+    async function loadCustomers() {
+      try {
+        const response = await fetch('/salesmanager/customers/data');
+        if (!response.ok) throw new Error('Failed to fetch customer data');
+        const customers = await response.json();
+        
+        tbody.innerHTML = ''; // Clear existing rows
+        if (customers.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="no-data">No customer data available.</td></tr>';
+        } else {
+          customers.forEach(customer => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td data-label="Customer ID">${customer.cid}</td>
+              <td data-label="First Name">${customer.customer_first_name}</td>
+              <td data-label="Last Name">${customer.customer_last_name}</td>
+              <td data-label="Phone Number">${customer.customer_ph_no}</td>
+              <td data-label="Profit">${customer.profit_from_customer}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+        loading.style.display = 'none';
+        tableContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading customers:', error);
+        loading.textContent = 'Error loading customers. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadCustomers();
+
+    // Listen for messages to refresh customer data
+    window.addEventListener('message', async (event) => {
+      if (event.origin !== window.location.origin) return; // Security check
+      if (event.data.type === 'refreshCustomers') {
+        loadCustomers();
+      }
+    });
+  </script>
 </body>
 </html>

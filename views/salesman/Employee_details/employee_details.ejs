@@ -156,7 +156,7 @@
         <button id="editButton" class="edit-button">Edit</button>
       </div>
 
-      <form id="employeeForm" action="/salesman/employees/update" method="POST">
+      <form id="employeeForm">
         <div class="form-container">
           <!-- Personal Details Section -->
           <fieldset>
@@ -261,38 +261,74 @@
 
           editButton.style.display = 'none';
           const submitButton = document.createElement('button');
-          submitButton.type = 'submit';
+          submitButton.type = 'button';
           submitButton.className = 'submit-button';
           submitButton.textContent = 'Submit';
           employeeForm.appendChild(submitButton);
-        });
 
-        employeeForm.addEventListener('submit', (e) => {
-          let isValid = true;
-          const requiredFields = [
-            { id: 'firstName', errorId: 'firstNameError' },
-            { id: 'lastName', errorId: 'lastNameError' },
-            { id: 'email', errorId: 'emailError' },
-            { id: 'accountNumber', errorId: 'accountNumberError' },
-            { id: 'ifscCode', errorId: 'ifscCodeError' },
-            { id: 'bank', errorId: 'bankError' }
-          ];
+          submitButton.addEventListener('click', async () => {
+            let isValid = true;
+            const requiredFields = [
+              { id: 'firstName', errorId: 'firstNameError' },
+              { id: 'lastName', errorId: 'lastNameError' },
+              { id: 'email', errorId: 'emailError' },
+              { id: 'accountNumber', errorId: 'accountNumberError' },
+              { id: 'ifscCode', errorId: 'ifscCodeError' },
+              { id: 'bank', errorId: 'bankError' }
+            ];
 
-          requiredFields.forEach(field => {
-            const input = document.getElementById(field.id);
-            const error = document.getElementById(field.errorId);
-            if (input.value.trim() === '') {
-              error.style.display = 'block';
-              isValid = false;
-            } else {
-              error.style.display = 'none';
+            requiredFields.forEach(field => {
+              const input = document.getElementById(field.id);
+              const error = document.getElementById(field.errorId);
+              if (input.value.trim() === '') {
+                error.style.display = 'block';
+                isValid = false;
+              } else {
+                error.style.display = 'none';
+              }
+            });
+
+            if (!isValid) {
+              alert('Please fill in all required fields.');
+              return;
+            }
+
+            // Collect form data
+            const formData = new FormData(employeeForm);
+            const data = {
+              firstName: formData.get('firstName'),
+              lastName: formData.get('lastName'),
+              status: formData.get('status'),
+              email: formData.get('email'),
+              phoneNumber: formData.get('phoneNumber'),
+              accountNumber: formData.get('accountNumber'),
+              ifscCode: formData.get('ifscCode'),
+              bank: formData.get('bank'),
+              address: formData.get('address')
+            };
+
+            try {
+              const response = await fetch('/salesman/employees/update', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+              });
+
+              if (response.ok) {
+                // Redirect with success message
+                window.location.href = '/salesman/employees?success=Employee%20details%20updated%20successfully!';
+              } else {
+                const errorData = await response.json();
+                const errorMessage = encodeURIComponent(errorData.message || 'Failed to update employee details');
+                window.location.href = `/salesman/employees?error=${errorMessage}`;
+              }
+            } catch (error) {
+              const errorMessage = encodeURIComponent(error.message || 'Failed to update employee details');
+              window.location.href = `/salesman/employees?error=${errorMessage}`;
             }
           });
-
-          if (!isValid) {
-            e.preventDefault();
-            alert('Please fill in all required fields.');
-          }
         });
       </script>
     </div>

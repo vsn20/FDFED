@@ -122,6 +122,11 @@
       cursor: default;
     }
 
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -206,6 +211,10 @@
         flex: 1 1 100%;
       }
 
+      .search-group {
+        max-width: 100%;
+      }
+
       table {
         display: block;
         min-width: 0;
@@ -256,6 +265,10 @@
         flex: 1 1 45%;
       }
 
+      .search-group {
+        max-width: 250px;
+      }
+
       th, td {
         padding: 10px;
         font-size: 0.85rem;
@@ -276,6 +289,10 @@
       </div>
 
       <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchSaleId">Search by Sale ID</label>
+          <input type="text" id="searchSaleId" placeholder="Enter Sale ID (e.g., S001)" oninput="filterSales()">
+        </div>
         <div class="form-group">
           <label>Branch ID</label>
           <input type="text" value="<%= branchid %>" readonly>
@@ -287,7 +304,7 @@
       </div>
 
       <div class="table-wrapper">
-        <table>
+        <table id="salesTable">
           <thead>
             <tr>
               <th>Sale ID</th>
@@ -297,7 +314,7 @@
               <th>Sale Date</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="salesTableBody">
             <% sales.forEach(sale => { %>
               <tr onclick="window.location.href='/salesmanager/sales/<%= sale.sales_id %>'">
                 <td data-label="Sale ID"><%= sale.sales_id %></td>
@@ -314,5 +331,22 @@
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    function filterSales() {
+      const searchInput = document.getElementById('searchSaleId').value.toLowerCase();
+      const tableBody = document.getElementById('salesTableBody');
+      const rows = tableBody.getElementsByTagName('tr');
+
+      for (let row of rows) {
+        const saleId = row.cells[0].textContent.toLowerCase();
+        if (searchInput === '' || saleId.includes(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    }
+  </script>
 </body>
 </html>

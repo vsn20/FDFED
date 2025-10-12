@@ -30,99 +30,6 @@
       max-width: 100%;
     }
 
-    .sidebar {
-      width: 250px;
-      background: linear-gradient(180deg, #2d3748, #1a2a44);
-      border-radius: 15px;
-      padding: 30px 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      height: calc(100vh - 90px);
-      overflow-y: auto;
-    }
-
-    .sidebar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .sidebar {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .dashboard-btn {
-      display: block;
-      font-size: 1.5rem;
-      color: #fff;
-      background: linear-gradient(90deg, #4a5568, #2d3748);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 30px;
-      text-align: center;
-      position: relative;
-      transition: all 0.3s ease;
-      text-decoration: none;
-    }
-
-    .dashboard-btn::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 50%;
-      height: 3px;
-      background: linear-gradient(to right, transparent, #FFD700, transparent);
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-    }
-
-    .dashboard-btn:hover {
-      background: linear-gradient(90deg, #636e72, #4a5568);
-      transform: scale(1.02);
-    }
-
-    .features {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 12px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      color: #e2e8f0;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .feature-item:hover {
-      background: linear-gradient(to right, #4a5568, #2d3748);
-      color: #FFD700;
-      transform: translateX(5px);
-    }
-
-    .feature-item.active {
-      background: linear-gradient(to right, #FFD700, #d4b106);
-      color: #2d3748;
-      font-weight: bold;
-    }
-
-    .feature-icon {
-      font-size: 1.4rem;
-      width: 30px;
-      text-align: center;
-    }
-
-    .feature-title {
-      font-weight: 500;
-      font-size: 1rem;
-    }
-
     .content-area {
       background: #ffffff;
       border-radius: 15px;
@@ -257,27 +164,20 @@
       display: block;
     }
 
+    .success-message {
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+      display: none;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
         padding: 0 10px;
-      }
-
-      .sidebar {
-        width: 100%;
-        height: auto;
-        margin-bottom: 20px;
-        border-radius: 15px;
-        overflow-y: auto;
-      }
-
-      .sidebar::-webkit-scrollbar {
-        display: none;
-      }
-
-      .sidebar {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
       }
 
       .content-area {
@@ -304,12 +204,6 @@
       .form-group {
         min-width: 100%;
       }
-
-      .submit-btn {
-        width: 100%;
-        padding: 10px;
-        font-size: 0.95em;
-      }
     }
   </style>
 </head>
@@ -317,48 +211,16 @@
   <%- include('../../partials/navbar') %>
 
   <div class="container">
-    <div class="sidebar">
-      <a href="/salesmanager/home" class="dashboard-btn">SalesManager Dashboard</a>
-      <div class="features">
-        <a href="/salesmanager/sales" class="feature-item <%= activeRoute === 'sales' ? 'active' : '' %>">
-          <span class="feature-icon">💰</span>
-          <span class="feature-title">Sales</span>
-        </a>
-        <a href="/salesmanager/orders" class="feature-item <%= activeRoute === 'orders' ? 'active' : '' %>">
-          <span class="feature-icon">📝</span>
-          <span class="feature-title">Orders</span>
-        </a>
-        <a href="/salesmanager/stocks" class="feature-item <%= activeRoute === 'stocks' ? 'active' : '' %>">
-          <span class="feature-icon">🏬</span>
-          <span class="feature-title">Inventory</span>
-        </a>
-        <a href="/salesmanager/customers" class="feature-item <%= activeRoute === 'customers' ? 'active' : '' %>">
-          <span class="feature-icon">👤</span>
-          <span class="feature-title">Customers</span>
-        </a>
-        <a href="/salesmanager/employees" class="feature-item <%= activeRoute === 'employees' ? 'active' : '' %>">
-          <span class="feature-icon">👥</span>
-          <span class="feature-title">Employees</span>
-        </a>
-        <a href="/salesmanager/salaries" class="feature-item <%= activeRoute === 'salaries' ? 'active' : '' %>">
-          <span class="feature-icon">💸</span>
-          <span class="feature-title">Salaries</span>
-        </a>
-        <a href="/salesmanager/messages" class="feature-item <%= activeRoute === 'messages' ? 'active' : '' %>">
-          <span class="feature-icon">✉️</span>
-          <span class="feature-title">Messages</span>
-        </a>
-      </div>
-    </div>
+    <%- include('../../partials/salesmanager_sidebar') %>
 
     <div class="content-area" id="content">
       <h1>Edit Profile</h1>
       <% if (error) { %>
         <p class="error-message"><%= error %></p>
       <% } %>
+      <div id="success-message" class="success-message"></div>
       <% if (salesManager) { %>
-        <form action="/salesmanager/update-salesmanager" method="POST" id="editForm" onsubmit="return validateForm()">
-          <!-- Personal Details Section -->
+        <div id="editForm">
           <div class="section">
             <h2>Personal Details</h2>
             <div class="form-row">
@@ -399,7 +261,6 @@
             </div>
           </div>
 
-          <!-- Account and Salaries Section -->
           <div class="section">
             <h2>Account and Salaries</h2>
             <div class="form-row">
@@ -419,13 +280,13 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="base_salary">Monthly Salary</label>
-                <input type="number" id="base_salary" name="base_salary" value="<%= salesManager.base_salary %>" required min="0">
+                <input type="number" id="base_salary" name="base_salary" value="<%= salesManager.base_salary %>" readonly>
               </div>
             </div>
           </div>
 
-          <button type="submit" class="submit-btn">Update</button>
-        </form>
+          <button type="button" class="submit-btn" onclick="updateSalesManager()">Update</button>
+        </div>
       <% } else { %>
         <p>Sales Manager data not available</p>
       <% } %>
@@ -435,35 +296,79 @@
   <%- include('../../partials/footer') %>
 
   <script>
-    function validateForm() {
-      let isValid = true;
-
-      // Validate email
+    async function updateSalesManager() {
       const email = document.getElementById('email');
-      const emailError = document.getElementById('emailError');
+      const phone = document.getElementById('phone_no');
+      const errorMessage = document.querySelector('.error-message') || document.createElement('p');
+      errorMessage.className = 'error-message';
+      const successMessage = document.getElementById('success-message');
+      const form = document.getElementById('editForm');
+
+      email.style.borderColor = '#ced4da';
+      phone.style.borderColor = '#ced4da';
+      errorMessage.textContent = '';
+      successMessage.style.display = 'none';
+
       const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailPattern.test(email.value)) {
-        emailError.style.display = 'block';
-        isValid = false;
-      } else {
-        emailError.style.display = 'none';
+        email.style.borderColor = '#dc3545';
+        errorMessage.textContent = 'Please enter a valid email address';
+        form.insertBefore(errorMessage, form.firstChild);
+        return;
       }
 
-      // Validate phone number
-      const phone = document.getElementById('phone_no');
-      const phoneError = document.getElementById('phoneError');
       const phonePattern = /^\d{10}$/;
       if (phone.value && !phonePattern.test(phone.value)) {
-        phoneError.style.display = 'block';
-        isValid = false;
-      } else {
-        phoneError.style.display = 'none';
+        phone.style.borderColor = '#dc3545';
+        errorMessage.textContent = 'Phone number must be exactly 10 digits';
+        form.insertBefore(errorMessage, form.firstChild);
+        return;
       }
 
-      return isValid;
+      const data = {
+        f_name: document.getElementById('f_name').value,
+        last_name: document.getElementById('last_name').value,
+        email: email.value,
+        phone_no: phone.value,
+        address: document.getElementById('address').value,
+        acno: document.getElementById('acno').value,
+        ifsc: document.getElementById('ifsc').value,
+        bankname: document.getElementById('bankname').value,
+      };
+
+      if (!data.f_name || !data.last_name || !data.email || !data.acno || !data.ifsc || !data.bankname) {
+        errorMessage.textContent = 'All required fields must be filled';
+        form.insertBefore(errorMessage, form.firstChild);
+        return;
+      }
+
+      try {
+        const response = await fetch('/salesmanager/update-salesmanager', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.error) {
+          errorMessage.textContent = result.error;
+          form.insertBefore(errorMessage, form.firstChild);
+        } else {
+          successMessage.textContent = 'Profile updated successfully';
+          successMessage.style.display = 'block';
+          setTimeout(() => {
+            window.location.href = '/salesmanager/employees?message=Profile updated successfully';
+          }, 1000);
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error: ' + error.message;
+        form.insertBefore(errorMessage, form.firstChild);
+      }
     }
 
-    // Real-time validation for phone number
     document.getElementById('phone_no').addEventListener('input', function (e) {
       this.value = this.value.replace(/[^0-9]/g, '');
       if (this.value.length > 10) {

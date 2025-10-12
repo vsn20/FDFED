@@ -232,22 +232,18 @@
 
       <div id="error-message" class="error-message"></div>
 
-      <form id="sale-form" action="/salesmanager/add-sale" method="POST">
+      <form id="sale-form">
         <h3>Sale Information</h3>
         <div class="form-row">
           <div class="form-group">
-            <label>Branch Name</label>
-            <input type="text" name="branch_name" value="<%= branchName %>" readonly>
-          </div>
-          <div class="form-group">
             <label>Salesman Name</label>
-            <select id="salesman_name" name="salesman_name" required>
-              <option value="" disabled selected>Select salesman</option>
+            <select id="salesmanSelect" name="salesman_name" required>
+              <option value="">Select Salesman</option>
             </select>
           </div>
           <div class="form-group">
             <label>Customer Name</label>
-            <input type="text" name="customer_name" required placeholder="Enter customer name">
+            <input type="text" name="customer_name" required>
           </div>
         </div>
         <div class="form-row">
@@ -257,17 +253,17 @@
           </div>
           <div class="form-group">
             <label>Unique Code</label>
-            <input type="text" name="unique_code" required placeholder="Enter unique code">
+            <input type="text" name="unique_code">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Customer Phone Number</label>
-            <input type="tel" name="phone_number" required placeholder="+1234567890" pattern="\+?[1-9]\d{1,14}">
+            <label>Phone Number</label>
+            <input type="tel" name="phone_number" required pattern="\+?[1-9]\d{1,14}" placeholder="+1234567890">
           </div>
           <div class="form-group">
-            <label>Customer Address</label>
-            <input type="text" name="address" placeholder="Enter customer address">
+            <label>Address</label>
+            <input type="text" name="address">
           </div>
         </div>
 
@@ -275,29 +271,29 @@
         <div class="form-row">
           <div class="form-group">
             <label>Company Name</label>
-            <select name="company_id" id="companySelect" required onchange="fetchProducts()">
-              <option value="" disabled selected>Select Company</option>
+            <select id="companySelect" name="company_id" required onchange="fetchProducts()">
+              <option value="">Select Company</option>
             </select>
           </div>
           <div class="form-group">
             <label>Product</label>
-            <select name="product_id" id="productSelect" class="product-list" required onchange="updateProductDetails()">
-              <option value="" disabled selected>Select Product</option>
+            <select id="productSelect" name="product_id" class="product-list" required onchange="updateProductDetails()">
+              <option value="">Select Product</option>
             </select>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Installation</label>
-            <input type="text" name="installation" id="installation" readonly required>
+            <input type="text" id="installation" name="installation" readonly>
           </div>
           <div class="form-group">
             <label>Installation Type</label>
-            <input type="text" name="installationType" id="installationType" readonly>
+            <input type="text" id="installationType" name="installationType" readonly>
           </div>
           <div class="form-group">
             <label>Installation Charge</label>
-            <input type="text" name="installationcharge" id="installationCharge" readonly>
+            <input type="text" id="installationCharge" name="installationcharge" readonly>
           </div>
         </div>
 
@@ -305,22 +301,22 @@
         <div class="form-row">
           <div class="form-group">
             <label>Purchased Price</label>
-            <input type="number" name="purchased_price" id="purchasedPrice" step="0.01" readonly required>
+            <input type="number" id="purchasedPrice" name="purchased_price" step="0.01" readonly required>
           </div>
           <div class="form-group">
             <label>Sold Price</label>
-            <input type="number" name="sold_price" step="0.01" required placeholder="Enter sold price">
+            <input type="number" name="sold_price" step="0.01" required>
           </div>
           <div class="form-group">
             <label>Quantity</label>
-            <input type="number" name="quantity" required placeholder="Enter quantity" min="1" value="1">
+            <input type="number" name="quantity" required min="1" value="1">
           </div>
         </div>
 
         <button type="submit" class="button">Add Sale</button>
       </form>
 
-      <a href="/.These changes ensure the addsale.ejs form includes the new fields (address, installation, installationType, installationcharge) while keeping rating and review as null by default (not included in the form). The installation-related fields are populated from the Product model and are readonly to reflect their source from the Product schema. The JavaScript logic has been updated to handle these new fields appropriately. Let me know if you need further adjustments!salesmanager/sales" class="back-link">Back to Sales</a>
+      <a href="/salesmanager/sales" class="back-link">Back to Sales</a>
     </div>
   </div>
 
@@ -328,79 +324,36 @@
 
   <script>
     let productsData = [];
-    let salesmen = [];
 
     async function fetchSalesmen() {
       try {
-        console.log('[fetchSalesmen] Fetching salesmen from /salesmanager/salesmen');
-        const response = await fetch('/salesmanager/salesmen', {
-          headers: {
-            'Accept': 'application/json'
-          },
-          credentials: 'include'
-        });
-        console.log('[fetchSalesmen] Response status:', response.status);
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.log('[fetchSalesmen] Error response:', errorText);
-          throw new Error('Network response was not ok: ' + errorText);
-        }
-        salesmen = await response.json();
-        console.log('[fetchSalesmen] Response data:', salesmen);
-        const salesmanSelect = document.getElementById('salesman_name');
-        salesmanSelect.innerHTML = '<option value="" disabled selected>Select salesman</option>';
+        const response = await fetch('/salesmanager/salesmen');
+        const salesmen = await response.json();
+        const salesmanSelect = document.getElementById('salesmanSelect');
         salesmen.forEach(salesman => {
           const option = document.createElement('option');
           option.value = `${salesman.f_name} ${salesman.last_name}`;
           option.textContent = `${salesman.f_name} ${salesman.last_name}`;
           salesmanSelect.appendChild(option);
         });
-        if (salesmen.length === 0) {
-          console.log('[fetchSalesmen] No salesmen found');
-          document.getElementById('error-message').textContent = 'No active salesmen found for this branch.';
-          document.getElementById('error-message').style.display = 'block';
-        }
       } catch (error) {
-        console.error('[fetchSalesmen] Error fetching salesmen:', error);
-        document.getElementById('error-message').textContent = 'Failed to load salesmen. Please try again.';
-        document.getElementById('error-message').style.display = 'block';
+        console.error('Error fetching salesmen:', error);
       }
     }
 
     async function fetchCompanies() {
       try {
-        console.log('[fetchCompanies] Fetching companies from /salesmanager/companies');
-        const response = await fetch('/salesmanager/companies', {
-          headers: {
-            'Accept': 'application/json'
-          },
-          credentials: 'include'
-        });
-        console.log('[fetchCompanies] Response status:', response.status);
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.log('[fetchCompanies] Error response:', errorText);
-          throw new Error('Network response was not ok: ' + errorText);
-        }
+        const response = await fetch('/salesmanager/companies');
         const companies = await response.json();
-        console.log('[fetchCompanies] Response data:', companies);
         const companySelect = document.getElementById('companySelect');
-        companySelect.innerHTML = '<option value="" disabled selected>Select Company</option>';
         companies.forEach(company => {
           const option = document.createElement('option');
           option.value = company.c_id;
           option.textContent = company.cname;
           companySelect.appendChild(option);
         });
-        if (companies.length === 0) {
-          console.log('[fetchCompanies] No companies found');
-          document.getElementById('error-message').textContent = 'No active companies found.';
-          document.getElementById('error-message').style.display = 'block';
-        }
       } catch (error) {
-        console.error('[fetchCompanies] Error fetching companies:', error);
-        document.getElementById('error-message').textContent = 'Failed to load companies. Please try again.';
-        document.getElementById('error-message').style.display = 'block';
+        console.error('Error fetching companies:', error);
       }
     }
 
@@ -413,7 +366,7 @@
       const installationChargeInput = document.getElementById('installationCharge');
       const companyId = companySelect.value;
 
-      productSelect.innerHTML = '<option value="" disabled selected>Select Product</option>';
+      productSelect.innerHTML = '<option value="">Select Product</option>';
       purchasedPriceInput.value = '';
       installationInput.value = '';
       installationTypeInput.value = '';
@@ -422,13 +375,7 @@
 
       if (companyId) {
         try {
-          console.log('[fetchProducts] Fetching products for companyId:', companyId);
-          const response = await fetch(`/salesmanager/products-by-company/${companyId}`, {
-            headers: {
-              'Accept': 'application/json'
-            },
-            credentials: 'include'
-          });
+          const response = await fetch(`/salesmanager/products-by-company/${companyId}`);
           console.log('[fetchProducts] Response status:', response.status);
           if (!response.ok) {
             const errorText = await response.text();
@@ -513,7 +460,7 @@
         console.log('[sale-form] Response data:', result);
 
         if (result.success) {
-          window.location.href = result.redirect;
+          window.location.href = '/salesmanager/sales';
         } else {
           errorMessage.textContent = result.message || 'An error occurred while adding the sale.';
           errorMessage.style.display = 'block';

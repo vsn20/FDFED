@@ -1,4 +1,3 @@
-// customer.js
 const customerData = [
     {
         cid: "C001",
@@ -46,16 +45,28 @@ const customerData = [
 
 async function customers_display(req, res) {
     try {
-        const activeCustomers = customerData;
+        // Render empty page; data loaded via API
         res.render("salesmanager/customer_feature/customer", {
-            customerData: activeCustomers,
             activePage: 'employee',
             activeRoute: 'customers'
         });
     } catch (error) {
-        console.error("Error rendering customers:", error);
+        console.error("Error rendering customers page:", error);
         res.status(500).send("Internal Server Error");
     }
 }
 
-module.exports = {customers_display };
+async function getCustomersData(req, res) {
+    try {
+        const activeCustomers = customerData;
+        res.json(activeCustomers);
+    } catch (error) {
+        console.error("Error fetching customers:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = {
+    customers_display,
+    getCustomersData
+};

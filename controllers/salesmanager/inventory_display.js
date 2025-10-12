@@ -33,27 +33,10 @@ async function inventory_display(req, res) {
       return res.status(403).send(`No active branch for bid: ${employee.bid}.`);
     }
 
-    console.log("[InventoryDisplay] Fetching inventory for branch:", { bid: branch.bid, b_name: branch.b_name });
-    const stocks = await Inventory.find({ branch_id: branch.bid }).lean();
-    
-    if (stocks.length === 0) {
-      console.log("[InventoryDisplay] No inventory records found for branch:", branch.bid);
-    } else {
-      console.log("[InventoryDisplay] Fetched stocks:", stocks.map(s => ({
-        product_id: s.product_id,
-        product_name: s.product_name,
-        company_id: s.company_id,
-        company_name: s.company_name,
-        model_no: s.model_no,
-        quantity: s.quantity
-      })));
-    }
-
+    // Render empty page; data loaded via API
     res.render('salesmanager/inventory_feature/display_inventory', {
       activePage: 'employee',
       activeRoute: 'stocks',
-      stocks,
-      hasStocks: stocks.length > 0,
       branchid: branch.bid,
       branchname: branch.b_name,
       successMessage: req.query.success ? 'Inventory updated successfully!' : undefined
@@ -64,6 +47,56 @@ async function inventory_display(req, res) {
   }
 }
 
+async function getInventoryData(req, res) {
+  try {
+    console.log("[GetInventoryData] Session user:", req.user);
+    const employee = await Employee.findOne({ e_id: req.user.emp_id }).lean();
+
+    if (!employee) {
+      console.log("[GetInventoryData] Employee not found:", req.user.emp_id);
+      return res.status(403).json({ error: `No employee found for emp_id: ${req.user.emp_id}.` });
+    }
+
+    if (employee.status !== "active") {
+      console.log("[GetInventoryData] Employee not active:", { e_id: employee.e_id, status: employee.status });
+      return res.status(403).json({ error: `Employee (e_id: ${employee.e_id}) is not active.` });
+    }
+
+    if (!employee.bid) {
+      console.log("[GetInventoryData] No bid assigned:", { e_id: employee.e_id });
+      return res.status(403).json({ error: `No branch assigned to employee (e_id: ${employee.e_id}).` });
+    }
+
+    const branch = await Branch.findOne({ bid: employee.bid, active: "active" }).lean();
+    if (!branch) {
+      console.log("[GetInventoryData] No active branch for bid:", employee.bid);
+      return res.status(403).json({ error: `No active branch for bid: ${employee.bid}.` });
+    }
+
+    console.log("[GetInventoryData] Fetching inventory for branch:", { bid: branch.bid, b_name: branch.b_name });
+    const stocks = await Inventory.find({ branch_id: branch.bid }).lean();
+
+    if (stocks.length === 0) {
+      console.log("[GetInventoryData] No inventory records found for branch:", branch.bid);
+    } else {
+      console.log("[GetInventoryData] Fetched stocks:", stocks.map(s => ({
+        product_id: s.product_id,
+        product_name: s.product_name,
+        company_id: s.company_id,
+        company_name: s.company_name,
+        model_no: s.model_no,
+        quantity: s.quantity
+      })));
+    }
+
+    res.json(stocks);
+  } catch (error) {
+    console.error("[GetInventoryData] Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+// Rest of the functions remain unchanged
 async function renderAddOrderForm(req, res) {
   try {
     console.log("[AddOrderForm] Session user:", req.user);
@@ -211,7 +244,6 @@ const order_details = async (req, res) => {
   }
 };
 
-// Shared function to update inventory when order is accepted
 async function updateInventoryForOrder(order, branch, session = null) {
   try {
     console.log(`[InventoryUpdate] Starting for order: ${order.order_id}`, {
@@ -497,6 +529,7 @@ const updateOrderStatus = async (req, res) => {
 
 module.exports = {
   inventory_display,
+  getInventoryData, // Export the new function
   orders_display,
   order_details,
   addorder_post,

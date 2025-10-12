@@ -4,19 +4,40 @@ const Branch = require("../../models/branches");
 
 async function inventory_display(req, res) {
   try {
-    const user = res.locals.user;
-    const employee = await Employee.findOne({ e_id: user.emp_id }).lean();
+    // Render empty page; data loaded via API
+    res.render("salesman/inventory_feature/display_inventory", {
+      activePage: 'employee',
+      activeRoute: 'stocks',
+      successMessage: req.query.success ? 'Inventory data loaded successfully!' : undefined
+    });
+  } catch (error) {
+    console.error("[InventoryDisplay] Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+}
+
+async function get_inventory_data(req, res) {
+  try {
+    console.log("[GetInventoryData] Session user:", res.locals.user);
+    const employee = await Employee.findOne({ e_id: res.locals.user.emp_id, role: "Salesman", status: "active" }).lean();
     if (!employee) {
-      return res.status(404).send("Salesman not found");
+      console.log("[GetInventoryData] Salesman not found:", res.locals.user.emp_id);
+      return res.status(403).json({ error: `No employee found for emp_id: ${res.locals.user.emp_id}.` });
+    }
+
+    if (!employee.bid) {
+      console.log("[GetInventoryData] No bid assigned:", { e_id: employee.e_id });
+      return res.status(403).json({ error: `No branch assigned to employee (e_id: ${employee.e_id}).` });
     }
 
     const branch = await Branch.findOne({ bid: employee.bid, active: "active" }).lean();
     if (!branch) {
-      return res.status(404).send("Active branch not found");
+      console.log("[GetInventoryData] Active branch not found:", employee.bid);
+      return res.status(404).json({ error: "Active branch not found" });
     }
 
     const stocks = await Inventory.find({ branch_id: branch.bid }).lean();
-    // Map to match EJS template field names
+    // Map to match expected field names
     const formattedStocks = stocks.map(stock => ({
       pid: stock.product_id,
       pname: stock.product_name,
@@ -25,17 +46,15 @@ async function inventory_display(req, res) {
       quantity: stock.quantity
     }));
 
-    res.render("salesman/inventory_feature/display_inventory", {
+    res.json({
       stocks: formattedStocks,
       branchid: branch.bid,
-      branchname: branch.b_name,
-      activePage: 'employee',
-      activeRoute: 'stocks'
+      branchname: branch.b_name
     });
   } catch (error) {
-    console.error("Error rendering inventory:", error);
-    res.status(500).send("Internal server error");
+    console.error("[GetInventoryData] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
-module.exports = { inventory_display };
+module.exports = { inventory_display, get_inventory_data };

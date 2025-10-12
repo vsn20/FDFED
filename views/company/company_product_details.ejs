@@ -236,13 +236,13 @@
             </div>
             <div>
               <label for="stockavailability" class="field-label">Stock Availability</label>
-              <form id="stockavailability-form" action="/company/products/update-stockavailability/<%= product.prod_id %>" method="POST">
+              <div id="stockavailability-form">
                 <select id="stockavailability" name="stockavailability" class="field-select">
                   <option value="instock" <%= product.stockavailability === 'instock' ? 'selected' : '' %>>In Stock</option>
                   <option value="outofstock" <%= product.stockavailability === 'outofstock' ? 'selected' : '' %>>Out of Stock</option>
                 </select>
-                <button type="submit" class="update-btn">Update Availability</button>
-              </form>
+                <button class="update-btn" onclick="updateStockAvailability('<%= product.prod_id %>')">Update Availability</button>
+              </div>
               <div id="error-message"></div>
             </div>
             <div>
@@ -293,37 +293,32 @@
   <%- include('../partials/footer') %>
 
   <script>
-    const form = document.getElementById('stockavailability-form');
-    const errorMessage = document.getElementById('error-message');
-
-    form.addEventListener('submit', async function(event) {
-      event.preventDefault();
+    async function updateStockAvailability(prodId) {
+      const errorMessage = document.getElementById('error-message');
+      const stockAvailability = document.getElementById('stockavailability').value;
 
       errorMessage.textContent = '';
 
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-
       try {
-        const response = await fetch(`/company/products/update-stockavailability/<%= product.prod_id %>`, {
+        const response = await fetch(`/company/products/update-stockavailability/${prodId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ stockavailability: stockAvailability }),
         });
 
         const result = await response.json();
 
         if (result.success) {
-          window.location.reload(); // Refresh to show updated value
+          window.location.reload();
         } else {
           errorMessage.textContent = result.message || 'An error occurred while updating stock availability.';
         }
       } catch (error) {
         errorMessage.textContent = 'Network error: ' + error.message;
       }
-    });
+    }
   </script>
 </body>
 </html>
