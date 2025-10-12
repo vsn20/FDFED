@@ -57,6 +57,43 @@
       margin-bottom: 20px;
     }
 
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1 1 45%;
+      min-width: 200px;
+      max-width: 400px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e6e9f0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      color: #2d3436;
+      transition: border-color 0.3s;
+    }
+
+    .search-group {
+      flex: 1 1 100%;
+      max-width: 300px;
+    }
+
     .header-buttons {
       display: flex;
       gap: 10px;
@@ -146,6 +183,18 @@
         align-items: flex-start;
       }
 
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+
+      .search-group {
+        max-width: 100%;
+      }
+
       .header-buttons {
         margin-top: 10px;
         flex-direction: column;
@@ -215,6 +264,12 @@
           <button onclick="window.location.href='/admin/products/new'">New Products</button>
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group search-group">
+          <label for="searchProduct">Search by Product ID</label>
+          <input type="text" id="searchProduct" placeholder="Enter Product ID" oninput="filterProducts()">
+        </div>
+      </div>
 
       <!-- Product items -->
       <div class="products-container" id="productsContainer">
@@ -257,6 +312,20 @@
         })
         .catch(error => console.error('Error fetching products:', error));
     });
+
+    function filterProducts() {
+      const searchInput = document.getElementById('searchProduct').value.toLowerCase();
+      const productItems = document.querySelectorAll('.product-item');
+      productItems.forEach(item => {
+        const prodIdElement = item.querySelector('.product-details span:first-child');
+        const prodId = prodIdElement ? prodIdElement.textContent.toLowerCase() : '';
+        if (searchInput === '' || prodId.includes(searchInput)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
 
     function initSlideshow() {
       document.querySelectorAll('.slideshow-container').forEach(container => {

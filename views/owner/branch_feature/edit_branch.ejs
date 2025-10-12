@@ -147,6 +147,18 @@
             color: #636e72;
         }
 
+        .error {
+            border-color: #e74c3c !important;
+            background-color: #ffe6e6 !important;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -208,6 +220,7 @@
                             <div>
                                 <label for="branch-name" class="field-label">Branch Name</label>
                                 <input type="text" id="branch-name" name="b_name" class="field-input" required>
+                                <div class="error-message" id="branch-name-error"></div>
                             </div>
                             <div>
                                 <label for="manager-name" class="field-label">Manager Name</label>
@@ -221,9 +234,10 @@
                                 <label for="manager-phone" class="field-label">Manager Phone</label>
                                 <input type="tel" id="manager-phone" name="manager_ph_no" class="field-input disabled-field" readonly>
                             </div>
-                            <div class="field-group">
+                            <div>
                                 <label for="address" class="field-label">Address</label>
                                 <textarea id="address" name="address" class="field-textarea" required></textarea>
+                                <div class="error-message" id="address-error"></div>
                             </div>
                         </div>
                     </fieldset>
@@ -248,6 +262,49 @@
         const errorMessage = document.getElementById('error-message');
         const successMessage = document.getElementById('success-message');
         const submitBtn = form.querySelector('button[type="submit"]');
+
+        // DOM elements for validation
+        const branchNameInput = document.getElementById('branch-name');
+        const addressInput = document.getElementById('address');
+
+        const branchNameError = document.getElementById('branch-name-error');
+        const addressError = document.getElementById('address-error');
+
+        // Validation functions
+        function validateBranchName(name) {
+            if (!name) {
+                return 'Branch name is required.';
+            }
+            if (name.length < 2) {
+                return 'Branch name must be at least 2 characters long.';
+            }
+            return '';
+        }
+
+        function validateAddress(address) {
+            if (!address) {
+                return 'Address is required.';
+            }
+            if (address.length < 10) {
+                return 'Address must be at least 10 characters long.';
+            }
+            return '';
+        }
+
+        // Real-time validation on input
+        branchNameInput.addEventListener('input', function() {
+            const error = validateBranchName(this.value);
+            branchNameError.textContent = error;
+            branchNameError.style.display = error ? 'block' : 'none';
+            this.classList.toggle('error', !!error);
+        });
+
+        addressInput.addEventListener('input', function() {
+            const error = validateAddress(this.value);
+            addressError.textContent = error;
+            addressError.style.display = error ? 'block' : 'none';
+            this.classList.toggle('error', !!error);
+        });
 
         async function loadBranch() {
             try {
@@ -276,6 +333,10 @@
                 });
                 loading.style.display = 'none';
                 formContainer.style.display = 'block';
+
+                // Trigger validation on load for pre-filled values
+                branchNameInput.dispatchEvent(new Event('input'));
+                addressInput.dispatchEvent(new Event('input'));
             } catch (error) {
                 console.error('Error loading branch:', error);
                 loading.textContent = 'Error loading branch details. Please refresh.';
@@ -284,6 +345,25 @@
 
         form.addEventListener('submit', async function(event) {
             event.preventDefault();
+
+            // Validate all fields
+            const branchNameErrorMsg = validateBranchName(branchNameInput.value);
+            const addressErrorMsg = validateAddress(addressInput.value);
+
+            branchNameError.textContent = branchNameErrorMsg;
+            branchNameError.style.display = branchNameErrorMsg ? 'block' : 'none';
+            addressError.textContent = addressErrorMsg;
+            addressError.style.display = addressErrorMsg ? 'block' : 'none';
+
+            // Highlight errors
+            branchNameInput.classList.toggle('error', !!branchNameErrorMsg);
+            addressInput.classList.toggle('error', !!addressErrorMsg);
+
+            if (branchNameErrorMsg || addressErrorMsg) {
+                errorMessage.textContent = 'Please fix the errors above.';
+                return;
+            }
+
             errorMessage.textContent = '';
             successMessage.textContent = '';
             submitBtn.disabled = true;

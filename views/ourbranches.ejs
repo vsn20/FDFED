@@ -169,6 +169,12 @@
       content: '📍';
     }
 
+    #loading {
+      text-align: center;
+      padding: 20px;
+      color: #636e72;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -227,30 +233,57 @@
     <div class="content-area">
       <h1>Our Branches</h1>
 
-      <% if (error) { %>
-        <p class="error-message"><%= error %></p>
-      <% } %>
+      <div id="loading">Loading branches...</div>
 
-      <div class="branches-grid">
-        <% if (branches && branches.length > 0) { %>
-          <% branches.forEach(branch => { %>
-            <div class="branch-card">
-              <h3><%= branch.b_name %></h3>
-              <div class="branch-info">
-                <p><span>Manager:</span> <%= branch.manager_name %></p>
-                <p><span>Email:</span> <%= branch.manager_email %></p>
-                <p><span>Phone:</span> <%= branch.manager_ph_no %></p>
-                <p><span>Location:</span> <%= branch.location %></p>
-              </div>
-            </div>
-          <% }) %>
-        <% } else { %>
-          <p class="error-message">No active branches available</p>
-        <% } %>
+      <div class="branches-grid" id="branches-grid" style="display: none;">
+        <!-- Data populated via JS -->
       </div>
     </div>
   </div>
 
   <%- include('./partials/footer') %>
+
+  <script>
+    const loading = document.getElementById('loading');
+    const branchesGrid = document.getElementById('branches-grid');
+
+    async function loadBranches() {
+      try {
+        const response = await fetch('/our-branches/data');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        
+        if (data.error) {
+          branchesGrid.innerHTML = `<p class="error-message">${data.error}</p>`;
+        } else if (data.branches && data.branches.length > 0) {
+          data.branches.forEach(branch => {
+            const card = document.createElement('div');
+            card.className = 'branch-card';
+            card.innerHTML = `
+              <h3>${branch.b_name}</h3>
+              <div class="branch-info">
+                <p><span>Manager:</span> ${branch.manager_name}</p>
+                <p><span>Email:</span> ${branch.manager_email}</p>
+                <p><span>Phone:</span> ${branch.manager_ph_no}</p>
+                <p><span>Location:</span> ${branch.location}</p>
+              </div>
+            `;
+            branchesGrid.appendChild(card);
+          });
+        } else {
+          branchesGrid.innerHTML = '<p class="error-message">No active branches available</p>';
+        }
+        
+        loading.style.display = 'none';
+        branchesGrid.style.display = 'grid';
+      } catch (error) {
+        console.error('Error loading branches:', error);
+        loading.textContent = 'Error loading branches. Please refresh.';
+      }
+    }
+
+    // Initial load
+    loadBranches();
+  </script>
 </body>
 </html>
