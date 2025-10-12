@@ -111,6 +111,12 @@
       background: #636e72;
     }
 
+    .error-message {
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+    }
+
     @media (max-width: 768px) {
       .container {
         margin-top: 60px;
@@ -168,47 +174,98 @@
 
     <div class="content-area" id="content">
       <h1>Edit Product</h1>
-      <% if (product) { %>
-        <form action="/admin/products/edit/<%= product.prod_id %>" method="POST">
-          <fieldset class="form-section">
-            <legend class="section-title">Product Information</legend>
-            <div class="field-group">
-              <div>
-                <label for="prod-id" class="field-label">Product ID</label>
-                <input type="text" id="prod-id" name="prod_id" value="<%= product.prod_id %>" class="field-input" disabled>
-              </div>
-              <div>
-                <label for="prod-name" class="field-label">Product Name</label>
-                <input type="text" id="prod-name" name="prod_name" value="<%= product.Prod_name %>" class="field-input" disabled>
-              </div>
-              <div>
-                <label for="com-id" class="field-label">Company ID</label>
-                <input type="text" id="com-id" name="com_id" value="<%= product.Com_id %>" class="field-input" disabled>
-              </div>
-              <div>
-                <label for="model-no" class="field-label">Model Number</label>
-                <input type="text" id="model-no" name="model_no" value="<%= product.Model_no %>" class="field-input" disabled>
-              </div>
-              <div>
-                <label for="com-name" class="field-label">Company Name</label>
-                <input type="text" id="com-name" name="com_name" value="<%= product.com_name %>" class="field-input" disabled>
-              </div>
-              <div>
-                <label for="status" class="field-label">Status</label>
-                <select id="status" name="status" class="field-select" required>
-                  <option value="Hold" <%= product.Status === 'Hold' ? 'selected' : '' %> disabled>Hold (Initial State)</option>
-                  <option value="Accepted" <%= product.Status === 'Accepted' ? 'selected' : '' %>>Accepted (Move to Products)</option>
-                  <option value="Rejected" <%= product.Status === 'Rejected' ? 'selected' : '' %>>Rejected (Move to Rejected)</option>
-                </select>
-              </div>
-            </div>
-          </fieldset>
-          <button type="submit" class="form-btn">Update Product</button>
-        </form>
-      <% } else { %>
-        <p>Product not found.</p>
-      <% } %>
+      <fieldset class="form-section" id="productFormSection" style="display: none;">
+        <legend class="section-title">Product Information</legend>
+        <div class="field-group">
+          <div>
+            <label for="prod-id" class="field-label">Product ID</label>
+            <input type="text" id="prod-id" name="prod_id" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="prod-name" class="field-label">Product Name</label>
+            <input type="text" id="prod-name" name="prod_name" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="com-id" class="field-label">Company ID</label>
+            <input type="text" id="com-id" name="com_id" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="model-no" class="field-label">Model Number</label>
+            <input type="text" id="model-no" name="model_no" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="com-name" class="field-label">Company Name</label>
+            <input type="text" id="com-name" name="com_name" value="" class="field-input" disabled>
+          </div>
+          <div>
+            <label for="status" class="field-label">Status</label>
+            <select id="status" name="status" class="field-select" required>
+              <option value="Hold" disabled>Hold (Initial State)</option>
+              <option value="Accepted">Accepted (Move to Products)</option>
+              <option value="Rejected">Rejected (Move to Rejected)</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+      <button type="button" id="updateBtn" class="form-btn" style="display: none;">Update Product</button>
+      <p id="errorMessage" class="error-message" style="display: none;"></p>
     </div>
   </div>
 
   <%- include('../../partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const path = window.location.pathname;
+      const parts = path.split('/');
+      const prodId = parts[parts.length - 1];
+      if (!prodId) return;
+
+      fetch(`/admin/products/data/${prodId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Product not found');
+          }
+          return response.json();
+        })
+        .then(product => {
+          document.getElementById('prod-id').value = product.prod_id || '';
+          document.getElementById('prod-name').value = product.Prod_name || '';
+          document.getElementById('com-id').value = product.Com_id || '';
+          document.getElementById('model-no').value = product.Model_no || '';
+          document.getElementById('com-name').value = product.com_name || '';
+          document.getElementById('status').value = product.Status || 'Hold';
+          document.getElementById('productFormSection').style.display = 'block';
+          document.getElementById('updateBtn').style.display = 'block';
+        })
+        .catch(error => {
+          document.getElementById('errorMessage').textContent = 'Product not found.';
+          document.getElementById('errorMessage').style.display = 'block';
+          console.error('Error fetching product:', error);
+        });
+
+      document.getElementById('updateBtn').addEventListener('click', function() {
+        const formData = new FormData();
+        formData.append('status', document.getElementById('status').value);
+
+        fetch(`/admin/products/edit/${prodId}`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = data.redirect || '/admin/products';
+          } else {
+            alert('Update failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error updating product:', error);
+          alert('Update failed');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
