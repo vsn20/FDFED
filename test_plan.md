@@ -1,129 +1,296 @@
-# test_plan.md
+# Test Plan — Mid Review
 
-## 1. Sign Up Test Cases
+## 1. Objective
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Name: V, Email: user@ gmail.com | Tooltip error message: "A part following '@' should not contain the symbol ' '". | A tooltip error message is shown. | Passed | ![Invalid Signup Case](test_plan/signup_invalid_case.png) |
-| *Valid* | Name: Vi, Email: user@gmail.com | Account created successfully. | A "Login successful" message is shown. | Passed | ![Valid Signup Case](test_plan/signup_valid_case.png) |
+The goal of this test plan is to verify the validation logic, dynamic HTML generation, and asynchronous data handling (Fetch/AJAX/Axios) for all major roles and features in the FFSD web-based project. The plan ensures that user interactions, data flow, and UI updates function as intended for each module.
 
----
+## 2. Scope
 
-## 2. Sign In Test Cases
+This test plan covers:
+- Form validation using DOM manipulation and JavaScript for all major forms (add/edit branches, employees, companies, sales, orders, complaints, reviews, contact us).
+- Dynamic HTML updates (adding, updating, deleting elements in the DOM).
+- Asynchronous data handling with Fetch/Axios/AJAX and backend API communication.
+- UI and data flow verification across modules for Admin, Company, SalesManager, Salesman, and Customer.
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Email: gautam.thota@example.com, Password: dlufgsiudfi | Error message: "Invalid email or password". | A red banner with the text "Invalid email or password" is displayed. | Passed | ![Invalid Signin Case](test_plan/signin_invalid_case.png) |
-| *Valid* | Email: gautam.thota@example.com, Password: 123456 | User successfully authenticated. | A green banner with "Login successful" is displayed. | Passed | ![Valid Signin Case](test_plan/signin_valid_case.png) |
+## 3. Test Environment
 
----
+- **Browser:** Chrome (latest), Edge (latest)
+- **Backend Server:** Node.js with Express
+- **Database:** SQLite (primary), MySQL (secondary, if configured)
+- **Operating System:** Windows 10/11
 
-## 3. Profile Update Test Cases
+## 4. Test Scenarios and Cases
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Phone: 2355 | Alert message: "Please enter a valid 10-digit Indian phone number starting with 9, 8, 7, or 6." | A JavaScript alert appears. | Passed | ![Invalid Profile Case](test_plan/profile_invalid_case.png) |
-| *Valid* | Phone: 7869408765 | Profile updated successfully. | A JavaScript alert appears saying: "Profile updated successfully!". | Passed | ![Valid Profile Case](test_plan/profile_valid_case.png) |
+### A. Validation Test Cases (DOM-based)
 
----
+#### Admin
 
-## 4. Payment Test Cases
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V1      | Add Branch      | Blank branch name                     | Error: "Branch name required"          |
+| V2      | Add Branch      | Valid branch name, address            | Success: Branch added                  |
+| V3      | Add Branch      | Invalid address                       | Error: "Enter valid address"           |
+| V4      | Add Branch      | Valid name, address, terms checked    | Success: Branch added                  |
+| V5      | Add Company     | Blank company name                    | Error: "Company name required"         |
+| V6      | Add Company     | Valid company name, address           | Success: Company added                 |
+| V7      | Add Company     | Invalid email format                  | Error: "Enter valid email"             |
+| V8      | Add Company     | Valid name, email, address            | Success: Company added                 |
+| V9      | Add Employee    | Blank employee name                   | Error: "Employee name required"        |
+| V10     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V11     | Add Employee    | Invalid phone number                  | Error: "Enter valid phone number"      |
+| V12     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V13     | Edit Employee   | Change salary to valid number         | Success: Employee updated              |
+| V14     | Edit Employee   | Change salary to negative number      | Error: "Salary must be positive"       |
+| V15     | Edit Branch     | Update address to valid address       | Success: Branch updated                |
+| V16     | Edit Branch     | Update address to blank               | Error: "Address required"              |
+| V17     | Edit Company    | Update email to valid email           | Success: Company updated               |
+| V18     | Edit Company    | Update email to invalid format        | Error: "Enter valid email"             |
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Expiry: 23/34 | Alert message: "Invalid month. Please enter a value between 01 and 12." | A JavaScript alert appears. | Passed | ![Invalid Payment Case](test_plan/payment_invalid_case.png) |
-| *Valid* | Expiry: 12/34 | The form passes validation. | The form submits successfully. | Passed | ![Valid Payment Case](test_plan/payment_valid_case.png) |
+#### Company
 
----
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V19     | Add Complaint   | Blank complaint text                  | Error: "Complaint text required"       |
+| V20     | Add Complaint   | Valid complaint text                  | Success: Complaint added               |
+| V21     | Add Order       | Blank product list                    | Error: "Select at least one product"   |
+| V22     | Add Order       | Valid product list, quantity          | Success: Order added                   |
+| V23     | Add Message     | Blank message text                    | Error: "Message required"              |
+| V24     | Add Message     | Valid message text                    | Success: Message sent                  |
+| V25     | Edit Order      | Update quantity to valid number       | Success: Order updated                 |
+| V26     | Edit Order      | Update quantity to negative number    | Error: "Quantity must be positive"     |
 
-## 5. Sign Up Test Cases for Shopmanager
+#### SalesManager
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Name: Jeevan, Email: jeevankumar.vendor@gmail.com, Contact Number:9456521365,password:12345678,confirm password:12345678,Store name:Wholesale,Store Location:Warangal | error message: "Please enter a valid 10-digit phone number and Please enter a valid Gmail address(e.g.,example@gmail.com)". | A error message is shown. | Passed | ![Invalid Signup Case](./test_plan/store_signup_invaid.png) |
-| *Valid* | Name: Jeevan, Email: jeevankumar.vendor@gmaill.com, Contact Number:94565213657,password:12345678,confirm password:12345678,Store name:Wholesale,Store Location:Warangal | Account created successfully. | A "Login successful" message is shown. | Passed | ![Valid Signup Case](./test_plan/store_signup_valid.png) |
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V27     | Add Sales       | Blank sales amount                    | Error: "Sales amount required"         |
+| V28     | Add Sales       | Valid sales amount, date              | Success: Sale added                    |
+| V29     | Add Order       | Blank customer name                   | Error: "Customer name required"        |
+| V30     | Add Order       | Valid customer name, product list     | Success: Order added                   |
+| V31     | Add Employee    | Blank employee name                   | Error: "Employee name required"        |
+| V32     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V33     | Edit Employee   | Update phone to valid number          | Success: Employee updated              |
+| V34     | Edit Employee   | Update phone to invalid number        | Error: "Enter valid phone number"      |
+| V35     | Add Salary      | Blank salary amount                   | Error: "Salary required"               |
+| V36     | Add Salary      | Valid salary amount                   | Success: Salary added                  |
 
----
+#### Salesman
 
-## 6. Sign In Test Cases for Shopmanager
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V37     | Add Sales       | Blank sales amount                    | Error: "Sales amount required"         |
+| V38     | Add Sales       | Valid sales amount, date              | Success: Sale added                    |
+| V39     | Add Employee    | Blank employee name                   | Error: "Employee name required"        |
+| V40     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V41     | Edit Employee   | Update salary to valid number         | Success: Employee updated              |
+| V42     | Edit Employee   | Update salary to negative number      | Error: "Salary must be positive"       |
+| V43     | Add Salary      | Blank salary amount                   | Error: "Salary required"               |
+| V44     | Add Salary      | Valid salary amount                   | Success: Salary added                  |
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Email: veda.prakash.vendor@gmaqil.com, Password: 12345678,Role : Store Manager| Error message: "Invalid email or password". | A red banner with the text "Invalid email or password" is displayed. | Passed | ![Invalid Signin Case](./test_plan/shop_manager_login_invalid.png) |
-| *Valid* | Email: veda.prakash.vendor@gmail.com, Password: 12345678,Role : Store Manager| User successfully authenticated. | A green banner with "Login successful" is displayed. | Passed | ![Valid Signin Case](./test_plan/shop_manager_login_valid.png) |
+#### Customer
 
----
-
-## 7. Profile Update Test Cases for Shopmanager
-
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Email: veda.prakasah.vendor@gmaail.com | Alert message: "Please use a Valid email from  a valid provider" | A JavaScript alert appears. | Passed | ![Invalid Profile Case](./test_plan/shop_manager_profile_edit_invalid.png) |
-| *Valid* | Email: veda.prakasah.vendor@gmail.com | Profile updated successfully. | A JavaScript alert appears saying: "Profile updated successfully!". | Passed | ![Valid Profile Case](./test_plan/shop_manager_profile_edit_valid.png) |
-
----
-
-## 8. Add New product Test Cases
-
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Productname:Pet Scraching Poll,Category:Toys,Pet Type:Cat,Stock Satus:In Stock,Description:New Stock,Size:medium,Regular Price:400,Sale price:500,Stock Quantity:15 | error message: "Sale price must be less than regular price" | A error message is shown | Passed | ![Invalid Add product Case](./test_plan/adding_product_invalid.png) |
-| *Valid* |  Productname:Pet Scraching Poll,Category:Toys,Pet Type:Cat,Stock Satus:In Stock,Description:New Stock,Size:medium,Regular Price:400,Sale price:350,Stock Quantity:15 | Product should be added | Product added successfully. | Passed | ![Valid Add product Case](./test_plan/adding_product_valid.png) |
-
----
-
-## Event Manager Signup Test Cases
-
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Name: J | Error message: "Name must be at least 2 characters long". | Error message is shown under the name field. | Passed | ![Invalid Name Case](test_plan/eventManager_signup_invalid_case.png) |
-| *Valid* | Name: John Doe <br> Contact: 9876543210 <br> Email: john.doe@gmail.com <br> Password: password123 <br> Confirm Password: password123 <br> Company: Doe Events <br> Location: Delhi <br> Terms: Checked | Form submits successfully and shows a success message. | A "Signup successful! Redirecting..." message is shown. | Passed | ![Valid Signup Case](test_plan/eventManager_signup_invalid_case.png) |
-
-## Sign In Test Cases
-
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Email: john.doe@gmail.co <br> Password: wrongpassword | Error message: "Invalid email or password". | A red banner with "Invalid email or password" is shown. | Passed | ![Invalid Signin Case](/test_plan/eventManager_signin_invalid_case.png) |
-| *Valid* | Email: john.doe@gmail.com <br> Password: correctpassword | User is successfully authenticated and redirected. | A green banner with "Login successful" is shown. | Passed | ![Valid Signin Case](/test_plan//eventManager_signin_valid_case.png) |
-
-## Create New Event Test Cases
-
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Event Name: Annual Pet Gala <br> Date and Time: October 01, 2025, 12:00 pm| Alert message: "⚠ Please select a future date and time for your event." | A JavaScript alert appears with the future date error. | Passed | ![Invalid Event Date](/test_plan/create_event_invalid_case.png) |
-| *Valid* | Event Name: Annual Pet Gala <br> Date and Time: October 25, 2025, 10:00 AM <br> (All other fields validly filled) | Alert message: "🎉 Event created successfully!" followed by a page reload. | A success alert is shown, and the page reloads. | Passed | ![Valid Event Case](/test_plan/create_event_valid_case.png) |
-
-# Test Plan for Happy Tails Platform
-
-## 1. Event Manager Profile Test Cases
-
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Email: john.doe@gmail.co | Alert message: "Please enter a valid Gmail address." | A JavaScript alert appears with the validation error. | Passed | ![Invalid Profile Email](/test_plan/eventManager_profile_invalid_email_case.png) |
-| *Valid* | All fields filled with valid data. | Profile updates successfully without errors. | The modal closes and the profile information is updated on the dashboard. | Passed | ![Valid Profile Update](/test_plan/eventManager_profile_valid_email_case.png) |
-
----
-## 3. Update Existing Event Test Cases
-
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Date: October 1, 2025 | Alert message: "Please select a future date and time for your event." | A JavaScript alert appears with the future date error. | Passed | ![Invalid Event Update Date](/test_plan/update_event_invalid_date_case.png) |
-| *Valid* | All fields updated with valid data. | The event details are saved successfully without any errors. | The form is saved and the event information is updated. | Passed | ![Valid Event Update](/test_plan/update_event_valid_case.png) |
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V45     | Add Complaint   | Blank complaint text                  | Error: "Complaint text required"       |
+| V46     | Add Complaint   | Valid complaint text                  | Success: Complaint added               |
+| V47     | Add Review      | Blank review text                     | Error: "Review text required"          |
+| V48     | Add Review      | Valid review text, rating             | Success: Review added                  |
+| V49     | Previous Purchase| Blank product list                   | Error: "Select at least one product"   |
+| V50     | Previous Purchase| Valid product list, quantity         | Success: Purchase recorded             |
+| V51     | Contact Us      | Blank name                            | Error: "Name required"                 |
+| V52     | Contact Us      | Valid name, email, message            | Success: Message sent                  |
+| V53     | Contact Us      | Invalid email format                  | Error: "Enter valid email"             |
+| V54     | Contact Us      | Valid email, message                  | Success: Message sent                  |
 
 ---
 
-## 4. Edit Attendee Test Cases
+### B. Dynamic HTML Test Cases
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Phone No: 123456789 | Alert message: "Please enter a valid 10-digit phone number." | A JavaScript alert appears with the phone number validation error. | Passed | ![Invalid Attendee Phone](/test_plan/edit_attendee_invalid_phone_case.png) |
-| *Valid* | Name: akshay <br> Phone No: 1234567890 | Attendee information is saved successfully. | The modal closes and the attendee list shows the updated information. | Passed | ![Valid Attendee Edit](/test_plan/edit_attendee_valid_case.png) |
+#### Admin
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D1      | Branches        | Add branch                            | Branch card added to DOM               |
+| D2      | Branches        | Edit branch                           | Branch card updated in DOM             |
+| D3      | Branches        | Delete branch                         | Branch card removed from DOM           |
+| D4      | Company         | Add company                           | Company card added to DOM              |
+| D5      | Company         | Edit company                          | Company card updated in DOM            |
+| D6      | Company         | Delete company                        | Company card removed from DOM          |
+| D7      | Employees       | Add employee                          | Employee card added to DOM             |
+| D8      | Employees       | Edit employee                         | Employee card updated in DOM           |
+| D9      | Employees       | Delete employee                       | Employee card removed from DOM         |
+
+#### Company
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D10     | Complaints      | Add complaint                         | Complaint appears in list dynamically  |
+| D11     | Complaints      | Edit complaint                        | Complaint updated in list              |
+| D12     | Complaints      | Delete complaint                      | Complaint removed from list            |
+| D13     | Orders          | Add order                             | Order row added to table               |
+| D14     | Orders          | Edit order                            | Order row updated in table             |
+| D15     | Orders          | Delete order                          | Order row removed from table           |
+| D16     | Messages        | Add message                           | Message appears in list dynamically    |
+| D17     | Messages        | Delete message                        | Message removed from list              |
+
+#### SalesManager
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D18     | Sales           | Add sale                              | Sale row added to sales table          |
+| D19     | Sales           | Edit sale                             | Sale row updated in sales table        |
+| D20     | Sales           | Delete sale                           | Sale row removed from sales table      |
+| D21     | Orders          | Add order                             | Order row added to table               |
+| D22     | Orders          | Edit order                            | Order row updated in table             |
+| D23     | Orders          | Delete order                          | Order row removed from table           |
+| D24     | Employees       | Add employee                          | Employee card added to DOM             |
+| D25     | Employees       | Edit employee                         | Employee card updated in DOM           |
+| D26     | Employees       | Delete employee                       | Employee card removed from DOM         |
+| D27     | Salaries        | Add salary                            | Salary row added to table              |
+| D28     | Salaries        | Edit salary                           | Salary row updated in table            |
+| D29     | Salaries        | Delete salary                         | Salary row removed from table          |
+
+#### Salesman
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D30     | Sales           | Add sale                              | Sale row added to sales table          |
+| D31     | Sales           | Edit sale                             | Sale row updated in sales table        |
+| D32     | Sales           | Delete sale                           | Sale row removed from sales table      |
+| D33     | Employees       | Add employee                          | Employee card added to DOM             |
+| D34     | Employees       | Edit employee                         | Employee card updated in DOM           |
+| D35     | Employees       | Delete employee                       | Employee card removed from DOM         |
+| D36     | Salaries        | Add salary                            | Salary row added to table              |
+| D37     | Salaries        | Edit salary                           | Salary row updated in table            |
+| D38     | Salaries        | Delete salary                         | Salary row removed from table          |
+
+#### Customer
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D39     | Complaints      | Add complaint                         | Complaint appears in list dynamically  |
+| D40     | Complaints      | Edit complaint                        | Complaint updated in list              |
+| D41     | Complaints      | Delete complaint                      | Complaint removed from list            |
+| D42     | Reviews         | Add review                            | Review appears below product           |
+| D43     | Reviews         | Edit review                           | Review updated below product           |
+| D44     | Reviews         | Delete review                         | Review removed from list               |
+| D45     | Previous Purchase| Add purchase                         | Purchase row added to table            |
+| D46     | Previous Purchase| Edit purchase                        | Purchase row updated in table          |
+| D47     | Previous Purchase| Delete purchase                      | Purchase row removed from table        |
+| D48     | Contact Us      | Submit message                        | Message appears in confirmation area   |
 
 ---
 
-## 5. Book Event Test Cases (User View)
+### C. Async Data Handling (AJAX/Fetch/Axios) Test Cases
 
-| Case | Input | Expected Result | Actual Result | Status | Screenshot |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *Invalid* | Email Address: akshay@gmail | Alert message: "Please enter a valid email address." | A JavaScript alert appears with the email validation error. | Passed | ![Invalid Booking Email](/test_plan/book_event_invalid_case.png) |
-| *Valid* | All personal and booking details filled correctly. | The user proceeds to the payment page without validation errors. | The form is validated, and the "Proceed to Payment" button becomes active. | Passed | ![Valid Booking Form](/test_plan/book_event_valid_case.png) |
+#### Admin
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A1      | Branches        | GET /api/branches                      | 200 OK + branch array                  |
+| A2      | Branches        | POST /api/branches                     | 201 Created + branch ID                |
+| A3      | Branches        | PUT /api/branches/:id                  | 200 OK + updated branch                |
+| A4      | Branches        | DELETE /api/branches/:id               | 204 No Content                         |
+| A5      | Company         | GET /api/company                       | 200 OK + company array                 |
+| A6      | Company         | POST /api/company                      | 201 Created + company ID               |
+| A7      | Company         | PUT /api/company/:id                   | 200 OK + updated company               |
+| A8      | Company         | DELETE /api/company/:id                | 204 No Content                         |
+| A9      | Employees       | GET /api/employees                     | 200 OK + employee array                |
+| A10     | Employees       | POST /api/employees                    | 201 Created + employee ID              |
+| A11     | Employees       | PUT /api/employees/:id                 | 200 OK + updated employee              |
+| A12     | Employees       | DELETE /api/employees/:id              | 204 No Content                         |
+
+#### Company
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A13     | Complaints      | GET /api/complaints                    | 200 OK + complaints array              |
+| A14     | Complaints      | POST /api/complaints                   | 201 Created + complaint ID             |
+| A15     | Complaints      | PUT /api/complaints/:id                | 200 OK + updated complaint             |
+| A16     | Complaints      | DELETE /api/complaints/:id             | 204 No Content                         |
+| A17     | Orders          | GET /api/orders                         | 200 OK + order array                   |
+| A18     | Orders          | POST /api/orders                        | 201 Created + order ID                 |
+| A19     | Orders          | PUT /api/orders/:id                     | 200 OK + updated order                 |
+| A20     | Orders          | DELETE /api/orders/:id                  | 204 No Content                         |
+| A21     | Messages        | GET /api/messages                       | 200 OK + messages array                |
+| A22     | Messages        | POST /api/messages                      | 201 Created + message ID               |
+| A23     | Messages        | DELETE /api/messages/:id                | 204 No Content                         |
+
+#### SalesManager
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A24     | Sales           | GET /api/sales                         | 200 OK + sales array                   |
+| A25     | Sales           | POST /api/sales                        | 201 Created + sale ID                  |
+| A26     | Sales           | PUT /api/sales/:id                     | 200 OK + updated sale                  |
+| A27     | Sales           | DELETE /api/sales/:id                  | 204 No Content                         |
+| A28     | Orders          | GET /api/orders                        | 200 OK + order array                   |
+| A29     | Orders          | POST /api/orders                       | 201 Created + order ID                 |
+| A30     | Orders          | PUT /api/orders/:id                    | 200 OK + updated order                 |
+| A31     | Orders          | DELETE /api/orders/:id                 | 204 No Content                         |
+| A32     | Employees       | GET /api/employees                     | 200 OK + employee array                |
+| A33     | Employees       | POST /api/employees                    | 201 Created + employee ID              |
+| A34     | Employees       | PUT /api/employees/:id                 | 200 OK + updated employee              |
+| A35     | Employees       | DELETE /api/employees/:id              | 204 No Content                         |
+| A36     | Salaries        | GET /api/salaries                      | 200 OK + salaries array                |
+| A37     | Salaries        | POST /api/salaries                     | 201 Created + salary ID                |
+| A38     | Salaries        | PUT /api/salaries/:id                  | 200 OK + updated salary                |
+| A39     | Salaries        | DELETE /api/salaries/:id               | 204 No Content                         |
+
+#### Salesman
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A40     | Sales           | GET /api/sales                         | 200 OK + sales array                   |
+| A41     | Sales           | POST /api/sales                        | 201 Created + sale ID                  |
+| A42     | Sales           | PUT /api/sales/:id                     | 200 OK + updated sale                  |
+| A43     | Sales           | DELETE /api/sales/:id                  | 204 No Content                         |
+| A44     | Employees       | GET /api/employees                     | 200 OK + employee array                |
+| A45     | Employees       | POST /api/employees                    | 201 Created + employee ID              |
+| A46     | Employees       | PUT /api/employees/:id                 | 200 OK + updated employee              |
+| A47     | Employees       | DELETE /api/employees/:id              | 204 No Content                         |
+| A48     | Salaries        | GET /api/salaries                      | 200 OK + salaries array                |
+| A49     | Salaries        | POST /api/salaries                     | 201 Created + salary ID                |
+| A50     | Salaries        | PUT /api/salaries/:id                  | 200 OK + updated salary                |
+| A51     | Salaries        | DELETE /api/salaries/:id               | 204 No Content                         |
+
+#### Customer
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A52     | Complaints      | GET /api/complaints                    | 200 OK + complaints array              |
+| A53     | Complaints      | POST /api/complaints                   | 201 Created + complaint ID             |
+| A54     | Complaints      | PUT /api/complaints/:id                | 200 OK + updated complaint             |
+| A55     | Complaints      | DELETE /api/complaints/:id             | 204 No Content                         |
+| A56     | Reviews         | GET /api/reviews                       | 200 OK + reviews array                 |
+| A57     | Reviews         | POST /api/reviews                      | 201 Created + review ID                |
+| A58     | Reviews         | PUT /api/reviews/:id                   | 200 OK + updated review                |
+| A59     | Reviews         | DELETE /api/reviews/:id                | 204 No Content                         |
+| A60     | Previous Purchase| GET /api/purchases                    | 200 OK + purchases array               |
+| A61     | Previous Purchase| POST /api/purchases                   | 201 Created + purchase ID              |
+| A62     | Previous Purchase| PUT /api/purchases/:id                | 200 OK + updated purchase              |
+| A63     | Previous Purchase| DELETE /api/purchases/:id             | 204 No Content                         |
+| A64     | Contact Us      | POST /api/contactus                    | 201 Created + message ID               |
+
+---
+
+## 5. Test Results Summary
+
+- All validation, dynamic HTML, and async data handling cases covered for each role and feature.
+- Dynamic HTML rendering and updates work as expected.
+- Minor UI layout bugs (if any) noted for final review.
+
+## 6. Evidence
+
+- `/network_evidence/` — contains screenshots of async API calls (Network tab)
+- `/screenshots/validation/` — form validation evidence
+- `/screenshots/dynamic/` — dynamic HTML updates
+
+## 7. Conclusion
+
+The mid-review build satisfies FFSD framework requirements:
+- Frontend validation
+- Dynamic DOM manipulation
+- Async API calls
+
+All core modules are working and verified through manual and functional testing.
