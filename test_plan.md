@@ -2,15 +2,15 @@
 
 ## 1. Objective
 
-The goal of this test plan is to verify the correctness and robustness of the FFSD web-based project’s frontend and backend modules. Focus areas include validation logic, dynamic HTML generation, and asynchronous data handling (Fetch/AJAX/Axios). The plan ensures that user interactions, data flow, and UI updates function as intended.
+The goal of this test plan is to verify the validation logic, dynamic HTML generation, and asynchronous data handling (Fetch/AJAX/Axios) for all major roles and features in the FFSD web-based project. The plan ensures that user interactions, data flow, and UI updates function as intended for each module.
 
 ## 2. Scope
 
 This test plan covers:
-- Form validation using DOM manipulation and JavaScript.
+- Form validation using DOM manipulation and JavaScript for all major forms (add/edit branches, employees, companies, sales, orders, complaints, reviews, contact us).
 - Dynamic HTML updates (adding, updating, deleting elements in the DOM).
 - Asynchronous data handling with Fetch/Axios/AJAX and backend API communication.
-- UI and data flow verification across major modules (signup, login, products, orders, etc.).
+- UI and data flow verification across modules for Admin, Company, SalesManager, Salesman, and Customer.
 
 ## 3. Test Environment
 
@@ -23,193 +23,254 @@ This test plan covers:
 
 ### A. Validation Test Cases (DOM-based)
 
-| Test ID | Role         | Feature         | Input                                 | Expected Output                        |
-|---------|--------------|-----------------|---------------------------------------|----------------------------------------|
-| V1      | Owner        | Add Branch      | Blank branch name                     | Error: "Branch name required"          |
-| V2      | Owner        | Add Branch      | Invalid address                       | Error: "Enter valid address"           |
-| V3      | Owner        | Add Branch      | Unchecked terms                       | Error: "Accept terms to continue"      |
-| V4      | Owner        | Add Employee    | Short password                        | Error: "Password must be at least 8 characters" |
-| V5      | Owner        | Add Employee    | Passwords do not match                | Error: "Passwords do not match"        |
-| V6      | Owner        | Add Employee    | Invalid phone number                  | Error: "Enter valid phone number"      |
-| V7      | Owner        | Add Product     | Blank product name                    | Error: "Product name required"         |
-| V8      | Owner        | Add Product     | Negative price                        | Error: "Price must be positive"        |
-| V9      | Owner        | Add Product     | Invalid date                          | Error: "Enter valid date"              |
-| V10     | Owner        | Add Product     | Non-numeric price                     | Error: "Price must be a number"        |
-| V11     | Salesman     | Login           | Blank username                        | Error: "Username required"             |
-| V12     | Salesman     | Login           | Wrong password                        | Error: "Incorrect password"            |
-| V13     | Salesman     | Login           | Invalid email format                  | Error: "Enter valid email"             |
-| V14     | Salesman     | Add Sale        | Blank sale amount                     | Error: "Sale amount required"          |
-| V15     | Salesman     | Add Sale        | Negative sale amount                  | Error: "Sale amount must be positive"  |
-| V16     | Salesman     | Add Sale        | Invalid date                          | Error: "Enter valid date"              |
-| V17     | Salesman     | Add Sale        | Non-numeric sale amount               | Error: "Sale amount must be a number"  |
-| V18     | Salesman     | Add Inventory   | Blank item name                       | Error: "Item name required"            |
-| V19     | Salesman     | Add Inventory   | Negative quantity                     | Error: "Quantity must be positive"     |
-| V20     | Salesman     | Add Inventory   | Non-numeric quantity                  | Error: "Quantity must be a number"     |
-| V21     | Salesmanager | Add Employee    | Blank employee name                   | Error: "Employee name required"        |
-| V22     | Salesmanager | Add Employee    | Invalid email format                  | Error: "Enter valid email"             |
-| V23     | Salesmanager | Add Employee    | Short password                        | Error: "Password must be at least 8 characters" |
-| V24     | Salesmanager | Add Employee    | Passwords do not match                | Error: "Passwords do not match"        |
-| V25     | Salesmanager | Add Employee    | Invalid phone number                  | Error: "Enter valid phone number"      |
-| V26     | Salesmanager | Add Product     | Blank product name                    | Error: "Product name required"         |
-| V27     | Salesmanager | Add Product     | Negative price                        | Error: "Price must be positive"        |
-| V28     | Salesmanager | Add Product     | Invalid date                          | Error: "Enter valid date"              |
-| V29     | Salesmanager | Add Product     | Non-numeric price                     | Error: "Price must be a number"        |
-| V30     | Company      | Add Company     | Blank company name                    | Error: "Company name required"         |
-| V31     | Company      | Add Company     | Invalid email format                  | Error: "Enter valid email"             |
-| V32     | Company      | Add Company     | Short password                        | Error: "Password must be at least 8 characters" |
-| V33     | Company      | Add Company     | Passwords do not match                | Error: "Passwords do not match"        |
-| V34     | Company      | Add Company     | Invalid phone number                  | Error: "Enter valid phone number"      |
-| V35     | Company      | Add Product     | Blank product name                    | Error: "Product name required"         |
-| V36     | Company      | Add Product     | Negative price                        | Error: "Price must be positive"        |
-| V37     | Company      | Add Product     | Invalid date                          | Error: "Enter valid date"              |
-| V38     | Company      | Add Product     | Non-numeric price                     | Error: "Price must be a number"        |
-| V39     | Customer     | Signup          | Existing email                        | Error: "Email already registered"      |
-| V40     | Customer     | Signup          | Weak password                         | Error: "Weak Password"                 |
-| V41     | Customer     | Signup          | Blank form submit                     | Error: "All fields required"           |
-| V42     | Customer     | Signup          | Invalid phone number                  | Error: "Enter valid phone number"      |
-| V43     | Customer     | Signup          | Passwords do not match                | Error: "Passwords do not match"        |
-| V44     | Customer     | Signup          | Invalid email format                  | Error: "Enter valid email"             |
-| V45     | Customer     | Signup          | Short password                        | Error: "Password must be at least 8 characters" |
-| V46     | Customer     | Signup          | Unchecked terms                       | Error: "Accept terms to continue"      |
-| V47     | Customer     | Add Complaint   | Blank complaint text                  | Error: "Complaint text required"       |
-| V48     | Customer     | Add Review      | Blank review text                     | Error: "Review text required"          |
-| V49     | Customer     | Add Review      | Invalid rating (e.g., 6 stars)        | Error: "Rating must be 1-5"            |
-| V50     | Customer     | Add Review      | Non-numeric rating                    | Error: "Rating must be a number"       |
+#### Admin
+
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V1      | Add Branch      | Blank branch name                     | Error: "Branch name required"          |
+| V2      | Add Branch      | Valid branch name, address            | Success: Branch added                  |
+| V3      | Add Branch      | Invalid address                       | Error: "Enter valid address"           |
+| V4      | Add Branch      | Valid name, address, terms checked    | Success: Branch added                  |
+| V5      | Add Company     | Blank company name                    | Error: "Company name required"         |
+| V6      | Add Company     | Valid company name, address           | Success: Company added                 |
+| V7      | Add Company     | Invalid email format                  | Error: "Enter valid email"             |
+| V8      | Add Company     | Valid name, email, address            | Success: Company added                 |
+| V9      | Add Employee    | Blank employee name                   | Error: "Employee name required"        |
+| V10     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V11     | Add Employee    | Invalid phone number                  | Error: "Enter valid phone number"      |
+| V12     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V13     | Edit Employee   | Change salary to valid number         | Success: Employee updated              |
+| V14     | Edit Employee   | Change salary to negative number      | Error: "Salary must be positive"       |
+| V15     | Edit Branch     | Update address to valid address       | Success: Branch updated                |
+| V16     | Edit Branch     | Update address to blank               | Error: "Address required"              |
+| V17     | Edit Company    | Update email to valid email           | Success: Company updated               |
+| V18     | Edit Company    | Update email to invalid format        | Error: "Enter valid email"             |
+
+#### Company
+
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V19     | Add Complaint   | Blank complaint text                  | Error: "Complaint text required"       |
+| V20     | Add Complaint   | Valid complaint text                  | Success: Complaint added               |
+| V21     | Add Order       | Blank product list                    | Error: "Select at least one product"   |
+| V22     | Add Order       | Valid product list, quantity          | Success: Order added                   |
+| V23     | Add Message     | Blank message text                    | Error: "Message required"              |
+| V24     | Add Message     | Valid message text                    | Success: Message sent                  |
+| V25     | Edit Order      | Update quantity to valid number       | Success: Order updated                 |
+| V26     | Edit Order      | Update quantity to negative number    | Error: "Quantity must be positive"     |
+
+#### SalesManager
+
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V27     | Add Sales       | Blank sales amount                    | Error: "Sales amount required"         |
+| V28     | Add Sales       | Valid sales amount, date              | Success: Sale added                    |
+| V29     | Add Order       | Blank customer name                   | Error: "Customer name required"        |
+| V30     | Add Order       | Valid customer name, product list     | Success: Order added                   |
+| V31     | Add Employee    | Blank employee name                   | Error: "Employee name required"        |
+| V32     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V33     | Edit Employee   | Update phone to valid number          | Success: Employee updated              |
+| V34     | Edit Employee   | Update phone to invalid number        | Error: "Enter valid phone number"      |
+| V35     | Add Salary      | Blank salary amount                   | Error: "Salary required"               |
+| V36     | Add Salary      | Valid salary amount                   | Success: Salary added                  |
+
+#### Salesman
+
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V37     | Add Sales       | Blank sales amount                    | Error: "Sales amount required"         |
+| V38     | Add Sales       | Valid sales amount, date              | Success: Sale added                    |
+| V39     | Add Employee    | Blank employee name                   | Error: "Employee name required"        |
+| V40     | Add Employee    | Valid name, phone, salary             | Success: Employee added                |
+| V41     | Edit Employee   | Update salary to valid number         | Success: Employee updated              |
+| V42     | Edit Employee   | Update salary to negative number      | Error: "Salary must be positive"       |
+| V43     | Add Salary      | Blank salary amount                   | Error: "Salary required"               |
+| V44     | Add Salary      | Valid salary amount                   | Success: Salary added                  |
+
+#### Customer
+
+| Test ID | Feature         | Input                                 | Expected Output                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| V45     | Add Complaint   | Blank complaint text                  | Error: "Complaint text required"       |
+| V46     | Add Complaint   | Valid complaint text                  | Success: Complaint added               |
+| V47     | Add Review      | Blank review text                     | Error: "Review text required"          |
+| V48     | Add Review      | Valid review text, rating             | Success: Review added                  |
+| V49     | Previous Purchase| Blank product list                   | Error: "Select at least one product"   |
+| V50     | Previous Purchase| Valid product list, quantity         | Success: Purchase recorded             |
+| V51     | Contact Us      | Blank name                            | Error: "Name required"                 |
+| V52     | Contact Us      | Valid name, email, message            | Success: Message sent                  |
+| V53     | Contact Us      | Invalid email format                  | Error: "Enter valid email"             |
+| V54     | Contact Us      | Valid email, message                  | Success: Message sent                  |
 
 ---
 
 ### B. Dynamic HTML Test Cases
 
-| Test ID | Role         | Feature         | Action                                | Expected Result                        |
-|---------|--------------|-----------------|---------------------------------------|----------------------------------------|
-| D1      | Owner        | Branches        | Add branch                            | Branch card added to DOM               |
-| D2      | Owner        | Branches        | Delete branch                         | Branch card removed from DOM           |
-| D3      | Owner        | Employees       | Add employee                          | Employee card added to DOM             |
-| D4      | Owner        | Employees       | Delete employee                       | Employee card removed from DOM         |
-| D5      | Owner        | Products        | Add product                           | Product card added to DOM              |
-| D6      | Owner        | Products        | Delete product                        | Product card removed from DOM          |
-| D7      | Owner        | Dashboard       | New sale recorded                     | Dashboard stats update instantly       |
-| D8      | Owner        | Orders          | Add order                             | Order row added to table               |
-| D9      | Owner        | Orders          | Delete order                          | Order row removed from table           |
-| D10     | Owner        | Complaints      | Add complaint                         | Complaint appears in list dynamically  |
-| D11     | Salesman     | Inventory       | Add inventory item                    | Item appears in inventory list         |
-| D12     | Salesman     | Inventory       | Delete inventory item                 | Item removed from inventory list       |
-| D13     | Salesman     | Sales           | Add sale                              | Sale row added to sales table          |
-| D14     | Salesman     | Sales           | Delete sale                           | Sale row removed from sales table      |
-| D15     | Salesman     | Messages        | Add message                           | Message appears in list dynamically    |
-| D16     | Salesman     | Messages        | Delete message                        | Message removed from list              |
-| D17     | Salesman     | Profile         | Update profile                        | Profile info updates instantly         |
-| D18     | Salesman     | Salary          | Update salary info                    | Salary info updates instantly          |
-| D19     | Salesmanager | Employees       | Add employee                          | Employee card added to list            |
-| D20     | Salesmanager | Employees       | Delete employee                       | Employee card removed from list        |
-| D21     | Salesmanager | Products        | Add product                           | Product card added to DOM              |
-| D22     | Salesmanager | Products        | Delete product                        | Product card removed from DOM          |
-| D23     | Salesmanager | Orders          | Add order                             | Order row added to table               |
-| D24     | Salesmanager | Orders          | Delete order                          | Order row removed from table           |
-| D25     | Salesmanager | Messages        | Add message                           | Message appears in list dynamically    |
-| D26     | Salesmanager | Messages        | Delete message                        | Message removed from list              |
-| D27     | Salesmanager | Salary          | Update salary info                    | Salary info updates instantly          |
-| D28     | Company      | Products        | Add product                           | Product card added to DOM              |
-| D29     | Company      | Products        | Delete product                        | Product card removed from DOM          |
-| D30     | Company      | Orders          | Add order                             | Order row added to table               |
-| D31     | Company      | Orders          | Delete order                          | Order row removed from table           |
-| D32     | Company      | Complaints      | Add complaint                         | Complaint appears in list dynamically  |
-| D33     | Company      | Complaints      | Delete complaint                      | Complaint removed from list            |
-| D34     | Company      | Messages        | Add message                           | Message appears in list dynamically    |
-| D35     | Company      | Messages        | Delete message                        | Message removed from list              |
-| D36     | Customer     | Cart            | Add to cart                           | Cart count updates dynamically         |
-| D37     | Customer     | Cart            | Remove from cart                      | Cart count updates dynamically         |
-| D38     | Customer     | Reviews         | Submit review                         | Review appears below product           |
-| D39     | Customer     | Reviews         | Delete review                         | Review removed from list               |
-| D40     | Customer     | Complaints      | Submit complaint                      | Complaint appears in list dynamically  |
-| D41     | Customer     | Complaints      | Delete complaint                      | Complaint removed from list            |
-| D42     | Customer     | Previous Orders | Add order                             | Order row added to table               |
-| D43     | Customer     | Previous Orders | Delete order                          | Order row removed from table           |
-| D44     | Customer     | Profile         | Update profile                        | Profile info updates instantly         |
-| D45     | Customer     | Blogs           | Add blog post                         | Blog post appears in list dynamically  |
-| D46     | Customer     | Blogs           | Delete blog post                      | Blog post removed from list            |
-| D47     | Customer     | Review Filter   | Change filter                         | Review list updates instantly          |
-| D48     | Customer     | Complaint Filter| Change filter                         | Complaint list updates instantly       |
-| D49     | Customer     | Cart Filter     | Change filter                         | Cart list updates instantly            |
-| D50     | Customer     | Pagination      | Change page                           | New items load without page reload     |
+#### Admin
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D1      | Branches        | Add branch                            | Branch card added to DOM               |
+| D2      | Branches        | Edit branch                           | Branch card updated in DOM             |
+| D3      | Branches        | Delete branch                         | Branch card removed from DOM           |
+| D4      | Company         | Add company                           | Company card added to DOM              |
+| D5      | Company         | Edit company                          | Company card updated in DOM            |
+| D6      | Company         | Delete company                        | Company card removed from DOM          |
+| D7      | Employees       | Add employee                          | Employee card added to DOM             |
+| D8      | Employees       | Edit employee                         | Employee card updated in DOM           |
+| D9      | Employees       | Delete employee                       | Employee card removed from DOM         |
+
+#### Company
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D10     | Complaints      | Add complaint                         | Complaint appears in list dynamically  |
+| D11     | Complaints      | Edit complaint                        | Complaint updated in list              |
+| D12     | Complaints      | Delete complaint                      | Complaint removed from list            |
+| D13     | Orders          | Add order                             | Order row added to table               |
+| D14     | Orders          | Edit order                            | Order row updated in table             |
+| D15     | Orders          | Delete order                          | Order row removed from table           |
+| D16     | Messages        | Add message                           | Message appears in list dynamically    |
+| D17     | Messages        | Delete message                        | Message removed from list              |
+
+#### SalesManager
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D18     | Sales           | Add sale                              | Sale row added to sales table          |
+| D19     | Sales           | Edit sale                             | Sale row updated in sales table        |
+| D20     | Sales           | Delete sale                           | Sale row removed from sales table      |
+| D21     | Orders          | Add order                             | Order row added to table               |
+| D22     | Orders          | Edit order                            | Order row updated in table             |
+| D23     | Orders          | Delete order                          | Order row removed from table           |
+| D24     | Employees       | Add employee                          | Employee card added to DOM             |
+| D25     | Employees       | Edit employee                         | Employee card updated in DOM           |
+| D26     | Employees       | Delete employee                       | Employee card removed from DOM         |
+| D27     | Salaries        | Add salary                            | Salary row added to table              |
+| D28     | Salaries        | Edit salary                           | Salary row updated in table            |
+| D29     | Salaries        | Delete salary                         | Salary row removed from table          |
+
+#### Salesman
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D30     | Sales           | Add sale                              | Sale row added to sales table          |
+| D31     | Sales           | Edit sale                             | Sale row updated in sales table        |
+| D32     | Sales           | Delete sale                           | Sale row removed from sales table      |
+| D33     | Employees       | Add employee                          | Employee card added to DOM             |
+| D34     | Employees       | Edit employee                         | Employee card updated in DOM           |
+| D35     | Employees       | Delete employee                       | Employee card removed from DOM         |
+| D36     | Salaries        | Add salary                            | Salary row added to table              |
+| D37     | Salaries        | Edit salary                           | Salary row updated in table            |
+| D38     | Salaries        | Delete salary                         | Salary row removed from table          |
+
+#### Customer
+
+| Test ID | Feature         | Action                                | Expected Result                        |
+|---------|-----------------|---------------------------------------|----------------------------------------|
+| D39     | Complaints      | Add complaint                         | Complaint appears in list dynamically  |
+| D40     | Complaints      | Edit complaint                        | Complaint updated in list              |
+| D41     | Complaints      | Delete complaint                      | Complaint removed from list            |
+| D42     | Reviews         | Add review                            | Review appears below product           |
+| D43     | Reviews         | Edit review                           | Review updated below product           |
+| D44     | Reviews         | Delete review                         | Review removed from list               |
+| D45     | Previous Purchase| Add purchase                         | Purchase row added to table            |
+| D46     | Previous Purchase| Edit purchase                        | Purchase row updated in table          |
+| D47     | Previous Purchase| Delete purchase                      | Purchase row removed from table        |
+| D48     | Contact Us      | Submit message                        | Message appears in confirmation area   |
 
 ---
 
 ### C. Async Data Handling (AJAX/Fetch/Axios) Test Cases
 
-| Test ID | Role         | API / Feature   | Request                               | Expected Response                      |
-|---------|--------------|-----------------|---------------------------------------|----------------------------------------|
-| A1      | Owner        | GET /api/branches | Fetch branch list                   | 200 OK + branch array                  |
-| A2      | Owner        | POST /api/branches | Add branch                          | 201 Created + branch ID                |
-| A3      | Owner        | PUT /api/branches/:id | Update branch                      | 200 OK + updated branch                |
-| A4      | Owner        | DELETE /api/branches/:id | Delete branch                     | 204 No Content                         |
-| A5      | Owner        | GET /api/employees | Fetch employee list                 | 200 OK + employee array                |
-| A6      | Owner        | POST /api/employees | Add employee                        | 201 Created + employee ID              |
-| A7      | Owner        | PUT /api/employees/:id | Update employee                    | 200 OK + updated employee              |
-| A8      | Owner        | DELETE /api/employees/:id | Delete employee                   | 204 No Content                         |
-| A9      | Owner        | GET /api/products | Fetch product list                   | 200 OK + product array                 |
-| A10     | Owner        | POST /api/products | Add product                          | 201 Created + product ID               |
-| A11     | Owner        | PUT /api/products/:id | Update product                      | 200 OK + updated product               |
-| A12     | Owner        | DELETE /api/products/:id | Delete product                     | 204 No Content                         |
-| A13     | Owner        | GET /api/orders | Fetch order list                      | 200 OK + order array                   |
-| A14     | Owner        | POST /api/orders | Add order                             | 201 Created + order ID                 |
-| A15     | Owner        | PUT /api/orders/:id | Update order                         | 200 OK + updated order                 |
-| A16     | Owner        | DELETE /api/orders/:id | Delete order                        | 204 No Content                         |
-| A17     | Salesman     | GET /api/inventory | Fetch inventory list                | 200 OK + inventory array               |
-| A18     | Salesman     | POST /api/inventory | Add inventory item                  | 201 Created + inventory ID             |
-| A19     | Salesman     | PUT /api/inventory/:id | Update inventory item               | 200 OK + updated inventory             |
-| A20     | Salesman     | DELETE /api/inventory/:id | Delete inventory item             | 204 No Content                         |
-| A21     | Salesman     | GET /api/sales | Fetch sales list                      | 200 OK + sales array                   |
-| A22     | Salesman     | POST /api/sales | Add sale                              | 201 Created + sale ID                  |
-| A23     | Salesman     | PUT /api/sales/:id | Update sale                          | 200 OK + updated sale                  |
-| A24     | Salesman     | DELETE /api/sales/:id | Delete sale                         | 204 No Content                         |
-| A25     | Salesman     | GET /api/messages | Fetch messages list                  | 200 OK + messages array                |
-| A26     | Salesman     | POST /api/messages | Add message                          | 201 Created + message ID               |
-| A27     | Salesman     | DELETE /api/messages/:id | Delete message                     | 204 No Content                         |
-| A28     | Salesmanager | GET /api/employees | Fetch employee list                 | 200 OK + employee array                |
-| A29     | Salesmanager | POST /api/employees | Add employee                        | 201 Created + employee ID              |
-| A30     | Salesmanager | PUT /api/employees/:id | Update employee                    | 200 OK + updated employee              |
-| A31     | Salesmanager | DELETE /api/employees/:id | Delete employee                   | 204 No Content                         |
-| A32     | Salesmanager | GET /api/products | Fetch product list                   | 200 OK + product array                 |
-| A33     | Salesmanager | POST /api/products | Add product                          | 201 Created + product ID               |
-| A34     | Salesmanager | PUT /api/products/:id | Update product                      | 200 OK + updated product               |
-| A35     | Salesmanager | DELETE /api/products/:id | Delete product                     | 204 No Content                         |
-| A36     | Salesmanager | GET /api/orders | Fetch order list                      | 200 OK + order array                   |
-| A37     | Salesmanager | POST /api/orders | Add order                             | 201 Created + order ID                 |
-| A38     | Salesmanager | PUT /api/orders/:id | Update order                         | 200 OK + updated order                 |
-| A39     | Salesmanager | DELETE /api/orders/:id | Delete order                        | 204 No Content                         |
-| A40     | Salesmanager | GET /api/messages | Fetch messages list                  | 200 OK + messages array                |
-| A41     | Salesmanager | POST /api/messages | Add message                          | 201 Created + message ID               |
-| A42     | Salesmanager | DELETE /api/messages/:id | Delete message                     | 204 No Content                         |
-| A43     | Company      | GET /api/company | Fetch company info                   | 200 OK + company object                |
-| A44     | Company      | PUT /api/company/:id | Update company info                 | 200 OK + updated company               |
-| A45     | Company      | GET /api/products | Fetch product list                   | 200 OK + product array                 |
-| A46     | Company      | POST /api/products | Add product                          | 201 Created + product ID               |
-| A47     | Company      | PUT /api/products/:id | Update product                      | 200 OK + updated product               |
-| A48     | Company      | DELETE /api/products/:id | Delete product                     | 204 No Content                         |
-| A49     | Company      | GET /api/orders | Fetch order list                      | 200 OK + order array                   |
-| A50     | Company      | POST /api/orders | Add order                             | 201 Created + order ID                 |
-| A51     | Company      | PUT /api/orders/:id | Update order                         | 200 OK + updated order                 |
-| A52     | Company      | DELETE /api/orders/:id | Delete order                        | 204 No Content                         |
-| A53     | Company      | GET /api/complaints | Fetch complaints list               | 200 OK + complaints array              |
-| A54     | Company      | POST /api/complaints | Add complaint                       | 201 Created + complaint ID             |
-| A55     | Company      | DELETE /api/complaints/:id | Delete complaint                  | 204 No Content                         |
-| A56     | Company      | GET /api/messages | Fetch messages list                  | 200 OK + messages array                |
-| A57     | Company      | POST /api/messages | Add message                          | 201 Created + message ID               |
-| A58     | Company      | DELETE /api/messages/:id | Delete message                     | 204 No Content                         |
-| A59     | Customer     | POST /api/signup | Register user                        | 201 Created + user ID                  |
-| A60     | Customer     | POST /api/login | Login                                 | 200 OK + token                         |
-| A61     | Customer     | GET /api/products | Fetch product list                   | 200 OK + product array                 |
-| A62     | Customer     | POST /api/order | Place order                           | 201 Created + order ID                 |
-| A63     | Customer     | GET /api/orders | Fetch previous orders                 | 200 OK + orders array                  |
-| A64     | Customer     | POST /api/complaint | Submit complaint                    | 201 Created + complaint ID             |
-| A65     | Customer     | GET /api/complaints | Fetch complaints list               | 200 OK + complaints array              |
-| A66     | Customer     | POST /api/review | Submit review                        | 201 Created + review ID                |
-| A67     | Customer     | GET /api/reviews | Fetch reviews list                   | 200 OK + reviews array                 |
-| A68     | Customer     | DELETE /api/review/:id | Delete review                      | 204 No Content                         |
-| A69     | Customer     | GET /api/blogs | Fetch blogs list                      | 200 OK + blogs array                   |
-| A70     | Customer     | POST /api/blogs | Add blog post                         | 201 Created + blog ID                  |
-| A71     | Customer     | DELETE /api/blogs/:id | Delete blog post                    | 204 No Content                         |
+#### Admin
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A1      | Branches        | GET /api/branches                      | 200 OK + branch array                  |
+| A2      | Branches        | POST /api/branches                     | 201 Created + branch ID                |
+| A3      | Branches        | PUT /api/branches/:id                  | 200 OK + updated branch                |
+| A4      | Branches        | DELETE /api/branches/:id               | 204 No Content                         |
+| A5      | Company         | GET /api/company                       | 200 OK + company array                 |
+| A6      | Company         | POST /api/company                      | 201 Created + company ID               |
+| A7      | Company         | PUT /api/company/:id                   | 200 OK + updated company               |
+| A8      | Company         | DELETE /api/company/:id                | 204 No Content                         |
+| A9      | Employees       | GET /api/employees                     | 200 OK + employee array                |
+| A10     | Employees       | POST /api/employees                    | 201 Created + employee ID              |
+| A11     | Employees       | PUT /api/employees/:id                 | 200 OK + updated employee              |
+| A12     | Employees       | DELETE /api/employees/:id              | 204 No Content                         |
+
+#### Company
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A13     | Complaints      | GET /api/complaints                    | 200 OK + complaints array              |
+| A14     | Complaints      | POST /api/complaints                   | 201 Created + complaint ID             |
+| A15     | Complaints      | PUT /api/complaints/:id                | 200 OK + updated complaint             |
+| A16     | Complaints      | DELETE /api/complaints/:id             | 204 No Content                         |
+| A17     | Orders          | GET /api/orders                         | 200 OK + order array                   |
+| A18     | Orders          | POST /api/orders                        | 201 Created + order ID                 |
+| A19     | Orders          | PUT /api/orders/:id                     | 200 OK + updated order                 |
+| A20     | Orders          | DELETE /api/orders/:id                  | 204 No Content                         |
+| A21     | Messages        | GET /api/messages                       | 200 OK + messages array                |
+| A22     | Messages        | POST /api/messages                      | 201 Created + message ID               |
+| A23     | Messages        | DELETE /api/messages/:id                | 204 No Content                         |
+
+#### SalesManager
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A24     | Sales           | GET /api/sales                         | 200 OK + sales array                   |
+| A25     | Sales           | POST /api/sales                        | 201 Created + sale ID                  |
+| A26     | Sales           | PUT /api/sales/:id                     | 200 OK + updated sale                  |
+| A27     | Sales           | DELETE /api/sales/:id                  | 204 No Content                         |
+| A28     | Orders          | GET /api/orders                        | 200 OK + order array                   |
+| A29     | Orders          | POST /api/orders                       | 201 Created + order ID                 |
+| A30     | Orders          | PUT /api/orders/:id                    | 200 OK + updated order                 |
+| A31     | Orders          | DELETE /api/orders/:id                 | 204 No Content                         |
+| A32     | Employees       | GET /api/employees                     | 200 OK + employee array                |
+| A33     | Employees       | POST /api/employees                    | 201 Created + employee ID              |
+| A34     | Employees       | PUT /api/employees/:id                 | 200 OK + updated employee              |
+| A35     | Employees       | DELETE /api/employees/:id              | 204 No Content                         |
+| A36     | Salaries        | GET /api/salaries                      | 200 OK + salaries array                |
+| A37     | Salaries        | POST /api/salaries                     | 201 Created + salary ID                |
+| A38     | Salaries        | PUT /api/salaries/:id                  | 200 OK + updated salary                |
+| A39     | Salaries        | DELETE /api/salaries/:id               | 204 No Content                         |
+
+#### Salesman
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A40     | Sales           | GET /api/sales                         | 200 OK + sales array                   |
+| A41     | Sales           | POST /api/sales                        | 201 Created + sale ID                  |
+| A42     | Sales           | PUT /api/sales/:id                     | 200 OK + updated sale                  |
+| A43     | Sales           | DELETE /api/sales/:id                  | 204 No Content                         |
+| A44     | Employees       | GET /api/employees                     | 200 OK + employee array                |
+| A45     | Employees       | POST /api/employees                    | 201 Created + employee ID              |
+| A46     | Employees       | PUT /api/employees/:id                 | 200 OK + updated employee              |
+| A47     | Employees       | DELETE /api/employees/:id              | 204 No Content                         |
+| A48     | Salaries        | GET /api/salaries                      | 200 OK + salaries array                |
+| A49     | Salaries        | POST /api/salaries                     | 201 Created + salary ID                |
+| A50     | Salaries        | PUT /api/salaries/:id                  | 200 OK + updated salary                |
+| A51     | Salaries        | DELETE /api/salaries/:id               | 204 No Content                         |
+
+#### Customer
+
+| Test ID | Feature         | Request                                | Expected Response                      |
+|---------|-----------------|----------------------------------------|----------------------------------------|
+| A52     | Complaints      | GET /api/complaints                    | 200 OK + complaints array              |
+| A53     | Complaints      | POST /api/complaints                   | 201 Created + complaint ID             |
+| A54     | Complaints      | PUT /api/complaints/:id                | 200 OK + updated complaint             |
+| A55     | Complaints      | DELETE /api/complaints/:id             | 204 No Content                         |
+| A56     | Reviews         | GET /api/reviews                       | 200 OK + reviews array                 |
+| A57     | Reviews         | POST /api/reviews                      | 201 Created + review ID                |
+| A58     | Reviews         | PUT /api/reviews/:id                   | 200 OK + updated review                |
+| A59     | Reviews         | DELETE /api/reviews/:id                | 204 No Content                         |
+| A60     | Previous Purchase| GET /api/purchases                    | 200 OK + purchases array               |
+| A61     | Previous Purchase| POST /api/purchases                   | 201 Created + purchase ID              |
+| A62     | Previous Purchase| PUT /api/purchases/:id                | 200 OK + updated purchase              |
+| A63     | Previous Purchase| DELETE /api/purchases/:id             | 204 No Content                         |
+| A64     | Contact Us      | POST /api/contactus                    | 201 Created + message ID               |
 
 ---
 
