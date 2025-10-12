@@ -57,9 +57,16 @@
     .header-container {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 20px; /* Standardized margin */
       flex-wrap: wrap; /* Allow wrapping on small screens */
+    }
+
+    .left-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
     }
 
     .header-container h1 {
@@ -88,6 +95,19 @@
       margin-bottom: 15px;
       text-align: center;
       display: none;
+      font-size: 0.9rem;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    #searchInput {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 250px;
       font-size: 0.9rem;
     }
 
@@ -161,6 +181,14 @@
         gap: 10px;
       }
 
+      .left-section {
+        width: 100%;
+      }
+
+      .search-container {
+        width: 100%;
+      }
+
       .header-container h1 {
         font-size: 1.2rem;
       }
@@ -175,6 +203,10 @@
 
       .success-message {
         font-size: 0.85rem;
+      }
+
+      #searchInput {
+        width: 100%;
       }
 
       table {
@@ -233,6 +265,10 @@
         padding: 8px 16px;
         font-size: 0.85rem;
       }
+
+      #searchInput {
+        width: 220px;
+      }
     }
   </style>
 </head>
@@ -242,7 +278,12 @@
     <%- include('../../partials/salesman_sidebar') %>
     <div class="content-area" id="content">
       <div class="header-container">
-        <h1>Sales - <%= branchName %></h1>
+        <div class="left-section">
+          <h1>Sales - <%= branchName %></h1>
+          <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search by Sale ID...">
+          </div>
+        </div>
         <a href="/salesman/add-sale" class="add-button">Add Sale</a>
       </div>
       <div id="successMessage" class="success-message">Sale added successfully!</div>
@@ -282,6 +323,19 @@
         successMessage.style.display = 'none';
       }, 3000);
     }
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const table = document.querySelector('table');
+    const rows = table.querySelectorAll('tbody tr');
+
+    searchInput.addEventListener('input', () => {
+      const filter = searchInput.value.toLowerCase();
+      rows.forEach(row => {
+        const saleId = row.querySelector('td:first-child').textContent.toLowerCase();
+        row.style.display = saleId.includes(filter) ? '' : 'none';
+      });
+    });
   </script>
 </body>
 </html>
