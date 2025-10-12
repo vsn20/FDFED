@@ -20,10 +20,10 @@ const saleControllers = require("../controllers/company/sale");
 console.log('Imported sale controllers:', saleControllers);
 const { 
   sales_display, 
-  get_sales_data, 
   salesdetaildisplay, 
-  get_sale_details, 
-  updateInstallationStatus 
+  updateInstallationStatus,
+  get_sales_data = null,  // Default to null if not exported
+  get_sale_details = null  // Default to null if not exported
 } = saleControllers;
 const { displayComplaints, updateComplaintStatus } = require("../controllers/company/complaint");
 const { company_messages_display, render_compose_message_form, compose_message, view_message, view_sent_messages } = require("../controllers/company/company_messages_display");
@@ -49,9 +49,22 @@ router.post("/messages/compose", compose_message);
 router.get("/messages/view", view_message);
 router.get("/messages/sent", view_sent_messages);
 router.get("/sales", sales_display);
-router.get("/sales/data", get_sales_data);
+
+// Guard the routes that might use undefined handlers
+if (typeof get_sales_data === 'function') {
+  router.get("/sales/data", get_sales_data);
+} else {
+  console.warn('get_sales_data is not available; skipping /sales/data route');
+}
+
 router.get("/sales/:salesid", salesdetaildisplay);
-router.get("/sales/details/:salesid", get_sale_details);
+
+if (typeof get_sale_details === 'function') {
+  router.get("/sales/details/:salesid", get_sale_details);
+} else {
+  console.warn('get_sale_details is not available; skipping /sales/details/:salesid route');
+}
+
 router.post("/sales/update-installation/:salesid", updateInstallationStatus);
 router.get("/complaints", displayComplaints);
 router.post("/complaints/update-status/:complaint_id", updateComplaintStatus);
