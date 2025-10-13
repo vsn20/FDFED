@@ -72,6 +72,20 @@
       height: 250px !important;
     }
 
+    .loading {
+      color: #636e72;
+      font-size: 1rem;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 1rem;
+      text-align: center;
+      margin: 20px 0;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .container {
@@ -134,15 +148,16 @@
     <div class="content-area" id="content">
       <h1>Salesman Dashboard</h1>
       <p>Welcome to the ElectroLand Salesman Dashboard. Use the sidebar to navigate to different management sections.</p>
+      <p class="loading" id="loading">Loading dashboard data...</p>
+      <p class="error" id="error" style="display: none;">Failed to load dashboard data. Please try again later.</p>
 
-      <div class="graph-container">
+      <div class="graph-container" id="graphContainer" style="display: none;">
         <!-- Sales Graph -->
-        <div class="graph">
+        <div class="graph" id="salesGraph">
           <canvas id="salesChart"></canvas>
         </div>
-
         <!-- Profit Graph -->
-        <div class="graph">
+        <div class="graph" id="profitGraph">
           <canvas id="profitChart"></canvas>
         </div>
       </div>
@@ -154,80 +169,107 @@
   <!-- Include Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script>
-    // Parse the data passed from the controller
-    const days = <%- days %>;
-    const saleCounts = <%- saleCounts %>;
-    const profitTotals = <%- profitTotals %>;
+    // Function to initialize charts with fetched data
+    function initializeCharts(data) {
+      const { days, saleCounts, profitTotals } = data;
 
-    // Sales Chart
-    const salesCtx = document.getElementById('salesChart').getContext('2d');
-    new Chart(salesCtx, {
-      type: 'bar',
-      data: {
-        labels: days,
-        datasets: [{
-          label: 'Total Sales',
-          data: saleCounts,
-          backgroundColor: 'rgba(212, 177, 6, 0.7)',
-          borderColor: '#d4b106',
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Number of Sales'
+      // Hide loading, show graph container
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('graphContainer').style.display = 'flex';
+      document.getElementById('salesGraph').style.display = 'block';
+      document.getElementById('profitGraph').style.display = 'block';
+
+      // Sales Chart
+      const salesCtx = document.getElementById('salesChart').getContext('2d');
+      new Chart(salesCtx, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Total Sales',
+            data: saleCounts,
+            backgroundColor: 'rgba(212, 177, 6, 0.7)',
+            borderColor: '#d4b106',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Sales'
+              },
+              ticks: {
+                stepSize: 1
+              }
             },
-            ticks: {
-              stepSize: 1
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Day of Month'
+            x: {
+              title: {
+                display: true,
+                text: 'Day of Month'
+              }
             }
           }
         }
-      }
-    });
+      });
 
-    // Profit Chart
-    const profitCtx = document.getElementById('profitChart').getContext('2d');
-    new Chart(profitCtx, {
-      type: 'bar',
-      data: {
-        labels: days,
-        datasets: [{
-          label: 'Total Profit ($)',
-          data: profitTotals,
-          backgroundColor: profitTotals.map(value => value >= 0 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'),
-          borderColor: profitTotals.map(value => value >= 0 ? '#2ecc71' : '#e74c3c'),
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            title: {
-              display: true,
-              text: 'Profit ($)'
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Day of Month'
+      // Profit Chart
+      const profitCtx = document.getElementById('profitChart').getContext('2d');
+      new Chart(profitCtx, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Total Profit ($)',
+            data: profitTotals,
+            backgroundColor: profitTotals.map(value => value >= 0 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'),
+            borderColor: profitTotals.map(value => value >= 0 ? '#2ecc71' : '#e74c3c'),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: 'Profit ($)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Day of Month'
+              }
             }
           }
         }
-      }
-    });
+      });
+    }
+
+    // Fetch dashboard data
+    fetch('/salesman/home/data')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        initializeCharts(data);
+      })
+      .catch(error => {
+        console.error('Error fetching dashboard data:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('graphContainer').style.display = 'none';
+      });
   </script>
 </body>
 </html>

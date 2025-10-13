@@ -43,7 +43,16 @@ const {
 const { getDashboardData } = require("../controllers/company/dashboard");
 
 // Dashboard
-router.get("/home", getDashboardData);
+router.get("/home", (req, res) => {
+  console.log('[Route] Accessing /company/home');
+  res.render("company/home", {
+    activePage: "company",
+    activeRoute: ""
+  });
+});
+
+// Dashboard - API endpoint for data
+router.get("/home/data", getDashboardData);
 
 // Products
 router.get("/products", companyproducts_display);

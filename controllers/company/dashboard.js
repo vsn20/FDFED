@@ -2,16 +2,20 @@ const Order = require("../../models/orders");
 const Sale = require("../../models/sale");
 const Company = require("../../models/company");
 
-// Function to fetch dashboard data (orders and sales for the past 6 months)
 async function getDashboardData(req, res) {
   try {
     const user = res.locals.user;
+
+    if (!user || !user.c_id) {
+      console.log('[getDashboardData] No authenticated user or company ID found');
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     // Fetch the company associated with the logged-in user
     const company = await Company.findOne({ c_id: user.c_id }).lean();
     if (!company) {
       console.log('[getDashboardData] Company not found for c_id:', user.c_id);
-      return res.status(404).send("Company not found");
+      return res.status(404).json({ error: "Company not found" });
     }
 
     // Calculate the date 6 months ago from today
@@ -43,21 +47,23 @@ async function getDashboardData(req, res) {
       const date = new Date();
       date.setMonth(currentDate.getMonth() - i);
       date.setDate(1); // Start of the month
-      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' }); // e.g., "May 2024"
+      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' }); // e.g., "Oct 2025"
       months.push(monthYear);
 
       // Count orders for this month
       const orderCount = orders.filter(order => {
-        const orderMonth = new Date(order.ordered_date).getMonth();
-        const orderYear = new Date(order.ordered_date).getFullYear();
+        const orderDate = new Date(order.ordered_date);
+        const orderMonth = orderDate.getMonth();
+        const orderYear = orderDate.getFullYear();
         return orderMonth === date.getMonth() && orderYear === date.getFullYear();
       }).length;
       orderCounts.push(orderCount);
 
       // Count sales for this month
       const saleCount = sales.filter(sale => {
-        const saleMonth = new Date(sale.sales_date).getMonth();
-        const saleYear = new Date(sale.sales_date).getFullYear();
+        const saleDate = new Date(sale.sales_date);
+        const saleMonth = saleDate.getMonth();
+        const saleYear = saleDate.getFullYear();
         return saleMonth === date.getMonth() && saleYear === date.getFullYear();
       }).length;
       saleCounts.push(saleCount);
@@ -65,17 +71,15 @@ async function getDashboardData(req, res) {
 
     console.log('[getDashboardData] Processed data:', { months, orderCounts, saleCounts });
 
-    // Render the home page with the data
-    res.render("company/home", {
-      activePage: 'company',
-      activeRoute: '',
-      months: JSON.stringify(months), // Pass as JSON string for JavaScript usage
-      orderCounts: JSON.stringify(orderCounts),
-      saleCounts: JSON.stringify(saleCounts)
+    // Return JSON data
+    res.json({
+      months,
+      orderCounts,
+      saleCounts
     });
   } catch (error) {
     console.error("[getDashboardData] Error fetching dashboard data:", error);
-    res.status(500).send("Internal server error");
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
 

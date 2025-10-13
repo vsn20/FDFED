@@ -158,6 +158,21 @@
       font-weight: 500;
     }
 
+    /* Loading and Error States */
+    .loading {
+      color: #636e72;
+      font-size: 1rem;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .error {
+      color: #dc3545;
+      font-size: 1rem;
+      text-align: center;
+      margin: 20px 0;
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 768px) {
       .container {
@@ -222,31 +237,27 @@
     <!-- Content Area -->
     <div class="content-area" id="content">
       <h1>SalesManager Dashboard</h1>
-      <p>Welcome to the ElectroLand SalesManager Dashboard for <%= branch_name %>. Use the sidebar to navigate to different management sections.</p>
+      <p id="welcome-message">Loading branch information...</p>
+      <p class="loading" id="loading">Loading profit data...</p>
+      <p class="error" id="error" style="display: none;">Failed to load dashboard data. Please try again later.</p>
 
-      <div class="profit-section">
+      <div class="profit-section" id="profit-section" style="display: none;">
         <h2>Profit Overview</h2>
         <div class="profit-cards">
           <div class="profit-card">
-            <h3>Cumulative Profit (Up to <%= previousMonthName %> <%= new Date().getUTCFullYear() %>)</h3>
-            <p class="<%= cumulativeProfit ? '' : 'na' %>">
-              <%= cumulativeProfit ? '$' + cumulativeProfit : 'N/A' %>
-            </p>
+            <h3 id="cumulative-profit-title">Cumulative Profit</h3>
+            <p id="cumulative-profit" class="na">N/A</p>
           </div>
           <div class="profit-card">
-            <h3><%= previousMonthName %> Profit</h3>
-            <p class="<%= previousMonthProfit ? '' : 'na' %>">
-              <%= previousMonthProfit ? '$' + previousMonthProfit : 'N/A' %>
-            </p>
+            <h3 id="previous-month-title">Previous Month Profit</h3>
+            <p id="previous-month-profit" class="na">N/A</p>
           </div>
           <div class="profit-card profit-card--full">
             <h3>Profit by Month</h3>
             <div class="month-selector-wrapper">
               <select id="month-selector">
                 <option value="">Select a month</option>
-                <% months.forEach(month => { %>
-                  <option value="<%= month.year %>-<%= month.month %>"><%= month.name %></option>
-                <% }) %>
+                <!-- Months will be populated dynamically -->
               </select>
               <div id="selected-month-profit" class="na">Select a month to view profit</div>
             </div>
@@ -259,10 +270,82 @@
   <%- include('../partials/footer') %>
 
   <script>
+    // Function to initialize the dashboard with fetched data
+    function initializeDashboard(data) {
+      const welcomeMessage = document.getElementById('welcome-message');
+      const profitSection = document.getElementById('profit-section');
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const cumulativeProfit = document.getElementById('cumulative-profit');
+      const previousMonthProfit = document.getElementById('previous-month-profit');
+      const cumulativeProfitTitle = document.getElementById('cumulative-profit-title');
+      const previousMonthTitle = document.getElementById('previous-month-title');
+      const monthSelector = document.getElementById('month-selector');
+
+      // Hide loading, show profit section
+      loading.style.display = 'none';
+      profitSection.style.display = 'block';
+
+      // Update welcome message with branch name
+      welcomeMessage.textContent = `Welcome to the ElectroLand SalesManager Dashboard for ${data.branch_name || 'N/A'}. Use the sidebar to navigate to different management sections.`;
+
+      // Update profit cards
+      if (data.cumulativeProfit) {
+        cumulativeProfit.textContent = `$${data.cumulativeProfit}`;
+        cumulativeProfit.className = '';
+        cumulativeProfitTitle.textContent = `Cumulative Profit (Up to ${data.previousMonthName} ${new Date().getUTCFullYear()})`;
+      } else {
+        cumulativeProfit.textContent = 'N/A';
+        cumulativeProfit.className = 'na';
+        cumulativeProfitTitle.textContent = 'Cumulative Profit';
+      }
+
+      if (data.previousMonthProfit) {
+        previousMonthProfit.textContent = `$${data.previousMonthProfit}`;
+        previousMonthProfit.className = '';
+        previousMonthTitle.textContent = `${data.previousMonthName} Profit`;
+      } else {
+        previousMonthProfit.textContent = 'N/A';
+        previousMonthProfit.className = 'na';
+        previousMonthTitle.textContent = 'Previous Month Profit';
+      }
+
+      // Populate month selector
+      monthSelector.innerHTML = '<option value="">Select a month</option>';
+      data.months.forEach(month => {
+        const option = document.createElement('option');
+        option.value = `${month.year}-${month.month}`;
+        option.textContent = month.name;
+        monthSelector.appendChild(option);
+      });
+    }
+
+    // Fetch dashboard data
+    fetch('/salesmanager/home/data')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        initializeDashboard(data);
+      })
+      .catch(error => {
+        console.error('Error fetching dashboard data:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('profit-section').style.display = 'none';
+      });
+
+    // Month selector change handler (unchanged from original)
     document.getElementById('month-selector').addEventListener('change', async (event) => {
       const month = event.target.value;
       const profitDisplay = document.getElementById('selected-month-profit');
-      
+
       if (!month) {
         profitDisplay.textContent = 'Select a month to view profit';
         profitDisplay.className = 'na';
@@ -272,7 +355,7 @@
       try {
         const response = await fetch(`/salesmanager/profit-by-month?month=${month}`);
         const data = await response.json();
-        
+
         if (data.error) {
           profitDisplay.textContent = `Error: ${data.error}`;
           profitDisplay.className = 'na';

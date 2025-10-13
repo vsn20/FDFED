@@ -6,7 +6,7 @@ const Sale = require("../models/sale");
 const Product = require("../models/products");
 const Order = require("../models/orders");
 
-// Helper function to calculate profit for a given sales array, orders, and date range
+// Helper function to calculate profit (unchanged)
 async function calculateProfit(sales, branchId, startDate) {
   let totalSalesAmount = 0;
   let totalRetailCost = 0;
@@ -71,27 +71,41 @@ async function calculateProfit(sales, branchId, startDate) {
   return profit;
 }
 
+// Render empty Sales Manager homepage
 router.get("/home", async (req, res) => {
   console.log('[Route] Accessing /salesmanager/home');
+  const emp_id = req.user?.emp_id;
+  if (!emp_id) {
+    console.log('[Error] No authenticated user found');
+    return res.redirect("/login");
+  }
+
+  res.render("salesmanager/home", {
+    activePage: "employee",
+    activeRoute: ""
+  });
+});
+
+// API endpoint to fetch Sales Manager dashboard data
+router.get("/home/data", async (req, res) => {
+  console.log('[Route] Accessing /salesmanager/home/data');
   try {
     const emp_id = req.user?.emp_id;
     if (!emp_id) {
       console.log('[Error] No authenticated user found');
-      return res.redirect("/login");
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const employee = await Employee.findOne({ e_id: emp_id, status: "active" });
     if (!employee) {
       console.log('[Error] No active employee found for emp_id:', emp_id);
-      return res.redirect("/login");
+      return res.status(401).json({ error: "Employee not found" });
     }
 
     const branch = await Branch.findOne({ manager_id: employee._id, active: "active" });
     if (!branch) {
       console.log('[Error] No active branch assigned to this manager');
-      return res.render("salesmanager/home", {
-        activePage: 'employee',
-        activeRoute: '',
+      return res.json({
         cumulativeProfit: null,
         previousMonthProfit: null,
         branch_name: "N/A",
@@ -103,7 +117,7 @@ router.get("/home", async (req, res) => {
     const now = new Date();
     const currentYear = now.getUTCFullYear();
     const currentMonth = now.getUTCMonth();
-    
+
     const previousMonthDate = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
     const previousMonthStart = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
     const previousMonthEnd = new Date(Date.UTC(currentYear, currentMonth, 0));
@@ -139,9 +153,7 @@ router.get("/home", async (req, res) => {
       });
     }
 
-    res.render("salesmanager/home", {
-      activePage: 'employee',
-      activeRoute: '',
+    res.json({
       cumulativeProfit: cumulativeProfit.toFixed(2),
       previousMonthProfit: previousMonthProfit.toFixed(2),
       branch_name: branch.b_name,
@@ -149,10 +161,9 @@ router.get("/home", async (req, res) => {
       months
     });
   } catch (error) {
-    console.error('[Error] Failed to load salesmanager home:', error);
-    res.render("salesmanager/home", {
-      activePage: 'employee',
-      activeRoute: '',
+    console.error('[Error] Failed to fetch salesmanager home data:', error);
+    res.status(500).json({
+      error: "Internal Server Error",
       cumulativeProfit: null,
       previousMonthProfit: null,
       branch_name: "N/A",
@@ -162,6 +173,7 @@ router.get("/home", async (req, res) => {
   }
 });
 
+// Profit by month endpoint (unchanged)
 router.get("/profit-by-month", async (req, res) => {
   try {
     const emp_id = req.user?.emp_id;

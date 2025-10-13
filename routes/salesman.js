@@ -5,8 +5,24 @@ const { getProductsByCompany } = require("../controllers/salesmanager/products")
 const { getSalesmanDashboardData } = require("../controllers/salesman/dashboard");
 
 // Salesman home
-router.get("/", getSalesmanDashboardData);
-router.get("/home", getSalesmanDashboardData);
+router.get("/", (req, res) => {
+  console.log('[Route] Accessing /salesman/');
+  res.render("salesman/home", {
+    activePage: "employee",
+    activeRoute: ""
+  });
+});
+
+router.get("/home", (req, res) => {
+  console.log('[Route] Accessing /salesman/home');
+  res.render("salesman/home", {
+    activePage: "employee",
+    activeRoute: ""
+  });
+});
+
+// API endpoint to fetch Salesman dashboard data
+router.get("/home/data", getSalesmanDashboardData);
 
 // Salesman inventory
 const { inventory_display, get_inventory_data } = require("../controllers/salesman/inventory_display");
