@@ -56,8 +56,14 @@ router.get("/products/edit/:prod_id", render_edit_product_form);
 router.post("/products/edit/:prod_id", update_product);
 router.get("/products/:prod_id", render_product_details);
 
-router.get("/home", getAdminDashboardData);
+router.get("/home", (req, res) => {
+  res.render("owner/homepage", {
+    activePage: "employee",
+    activeRoute: ""
+  });
+});
 
+router.get("/home/data", getAdminDashboardData);
 const { 
   company_display, 
   getCompaniesData, 

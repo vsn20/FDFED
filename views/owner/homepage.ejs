@@ -73,6 +73,20 @@
       height: 250px !important;
     }
 
+    .loading {
+      color: #636e72;
+      font-size: 1rem;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 1rem;
+      text-align: center;
+      margin: 20px 0;
+    }
+
     .note {
       color: #636e72;
       font-size: 0.85rem;
@@ -152,23 +166,23 @@
       <h1>Admin Dashboard</h1>
       <p>Welcome to the ElectroLand Admin Dashboard. Use the sidebar to navigate to different management sections.</p>
 
-      <div class="graph-container">
+      <div class="graph-container" id="graphContainer">
+        <p class="loading" id="loading">Loading dashboard data...</p>
         <!-- Orders Graph -->
-        <div class="graph">
+        <div class="graph" id="ordersGraph" style="display: none;">
           <canvas id="ordersChart"></canvas>
         </div>
-
         <!-- Sales Graph -->
-        <div class="graph">
+        <div class="graph" id="salesGraph" style="display: none;">
           <canvas id="salesChart"></canvas>
         </div>
-
         <!-- Profit/Loss Graph -->
-        <div class="graph">
+        <div class="graph" id="profitLossGraph" style="display: none;">
           <canvas id="profitLossChart"></canvas>
         </div>
       </div>
 
+      <p class="error" id="error" style="display: none;">Failed to load dashboard data. Please try again later.</p>
       <p class="note">Note: Profits shown are for sales only. Realized profit, after removing salaries, can be verified from the Profits feature.</p>
     </div>
   </div>
@@ -178,118 +192,140 @@
   <!-- Include Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script>
-    // Parse the data passed from the controller
-    const days = <%- days %>;
-    const orderCounts = <%- orderCounts %>;
-    const saleCounts = <%- saleCounts %>;
-    const profitLossTotals = <%- profitLossTotals %>;
+    // Function to initialize charts with fetched data
+    function initializeCharts(data) {
+      const { days, orderCounts, saleCounts, profitLossTotals } = data;
 
-    // Orders Chart
-    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
-    new Chart(ordersCtx, {
-      type: 'bar',
-      data: {
-        labels: days,
-        datasets: [{
-          label: 'Total Orders',
-          data: orderCounts,
-          backgroundColor: 'rgba(45, 52, 54, 0.7)',
-          borderColor: '#2d3436',
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Number of Orders'
+      // Hide loading message, show graphs
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('ordersGraph').style.display = 'block';
+      document.getElementById('salesGraph').style.display = 'block';
+      document.getElementById('profitLossGraph').style.display = 'block';
+
+      // Orders Chart
+      const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+      new Chart(ordersCtx, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Total Orders',
+            data: orderCounts,
+            backgroundColor: 'rgba(45, 52, 54, 0.7)',
+            borderColor: '#2d3436',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Orders'
+              },
+              ticks: {
+                stepSize: 1
+              }
             },
-            ticks: {
-              stepSize: 1
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Day of Month'
+            x: {
+              title: {
+                display: true,
+                text: 'Day of Month'
+              }
             }
           }
         }
-      }
-    });
+      });
 
-    // Sales Chart
-    const salesCtx = document.getElementById('salesChart').getContext('2d');
-    new Chart(salesCtx, {
-      type: 'bar',
-      data: {
-        labels: days,
-        datasets: [{
-          label: 'Total Sales',
-          data: saleCounts,
-          backgroundColor: 'rgba(212, 177, 6, 0.7)',
-          borderColor: '#d4b106',
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Number of Sales'
+      // Sales Chart
+      const salesCtx = document.getElementById('salesChart').getContext('2d');
+      new Chart(salesCtx, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Total Sales',
+            data: saleCounts,
+            backgroundColor: 'rgba(212, 177, 6, 0.7)',
+            borderColor: '#d4b106',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Sales'
+              },
+              ticks: {
+                stepSize: 1
+              }
             },
-            ticks: {
-              stepSize: 1
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Day of Month'
+            x: {
+              title: {
+                display: true,
+                text: 'Day of Month'
+              }
             }
           }
         }
-      }
-    });
+      });
 
-    // Profit/Loss Chart
-    const profitLossCtx = document.getElementById('profitLossChart').getContext('2d');
-    new Chart(profitLossCtx, {
-      type: 'bar',
-      data: {
-        labels: days,
-        datasets: [{
-          label: 'Total Profit/Loss ($)',
-          data: profitLossTotals,
-          backgroundColor: profitLossTotals.map(value => value >= 0 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'),
-          borderColor: profitLossTotals.map(value => value >= 0 ? '#2ecc71' : '#e74c3c'),
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            title: {
-              display: true,
-              text: 'Profit/Loss ($)'
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Day of Month'
+      // Profit/Loss Chart
+      const profitLossCtx = document.getElementById('profitLossChart').getContext('2d');
+      new Chart(profitLossCtx, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Total Profit/Loss ($)',
+            data: profitLossTotals,
+            backgroundColor: profitLossTotals.map(value => value >= 0 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'),
+            borderColor: profitLossTotals.map(value => value >= 0 ? '#2ecc71' : '#e74c3c'),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: 'Profit/Loss ($)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Day of Month'
+              }
             }
           }
         }
-      }
-    });
+      });
+    }
+
+    // Fetch data from /home/data endpoint
+    fetch('/admin/home/data')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        initializeCharts(data);
+      })
+      .catch(error => {
+        console.error('Error fetching dashboard data:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+      });
   </script>
 </body>
 </html>
