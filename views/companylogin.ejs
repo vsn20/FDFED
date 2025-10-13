@@ -102,6 +102,14 @@
             box-shadow: 0 0 10px rgba(52, 73, 94, 0.3);
         }
 
+        input.error {
+            border: 2px solid #e74c3c;
+        }
+
+        input.success {
+            border: 2px solid #27ae60;
+        }
+
         button {
             width: 70%;
             padding: 12px;
@@ -127,6 +135,12 @@
         button:active {
             background: linear-gradient(to left, rgb(66, 32, 70), rgb(30, 26, 71), rgb(77, 38, 44), #155217, #2E8B57);
             transform: scale(0.95);
+        }
+
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .clicked {
@@ -161,6 +175,29 @@
             background: #ffebee;
             border-radius: 5px;
             width: 70%;
+            display: none;
+        }
+
+        .password-match {
+            color: #27ae60;
+            margin: 5px auto;
+            padding: 8px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            width: 70%;
+            display: none;
+            font-size: 14px;
+        }
+
+        .password-mismatch {
+            color: #e74c3c;
+            margin: 5px auto;
+            padding: 8px;
+            background: #ffebee;
+            border-radius: 5px;
+            width: 70%;
+            display: none;
+            font-size: 14px;
         }
 
         .signup-form {
@@ -194,7 +231,6 @@
 </head>
 
 <body>
-    <!-- Added activePage -->
     <%- include('partials/navbar', { activePage: 'company' }) %>
 
     <div class="content-wrapper">
@@ -209,55 +245,46 @@
             <div class="auth-container">
                 <div id="loginForm">
                     <h2>Company Login</h2>
-                    <% if (typeof loginError !== 'undefined' && loginError) { %>
-                        <div class="error-message">
-                            <%= loginError %>
-                        </div>
-                    <% } %>
-                    <form id="companyForm" action="/company-loginvalidation" method="POST">
-                        <input type="text" id="companyUserId" name="user_id" placeholder="Enter your User ID"
-                            required>
-                        <input type="password" id="companyPassword" name="password" placeholder="Enter password"
-                            required>
-                        <button type="submit">Login</button>
+                    <div class="error-message" id="login-error"></div>
+                    <div id="companyForm">
+                        <input type="text" id="companyUserId" name="user_id" placeholder="Enter your User ID">
+                        <input type="password" id="companyPassword" name="password" placeholder="Enter password">
+                        <button type="button" id="login-btn">Login</button>
 
                         <div class="link-container">
                             <a id="toggleSignup">Don't have an account? Sign Up</a>
                             <a href="/forgot-password">Forgot Password?</a>
                         </div>
-                    </form>
+                    </div>
                 </div>
 
                 <div id="signupForm" class="signup-form">
                     <h2>Sign Up</h2>
-                    <% if (typeof signupError !== 'undefined' && signupError) { %>
-                        <div class="error-message">
-                            <%= signupError %>
-                        </div>
-                    <% } %>
-                    <form id="companySignupForm" action="/company-signupvalidation" method="POST">
-                        <input type="text" name="user_id" placeholder="User ID" required>
-                        <input type="email" name="email" placeholder="Email" required>
-                        <input type="password" name="password" placeholder="Password" required>
-                        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-                        <button type="submit">Sign Up</button>
+                    <div class="error-message" id="signup-error"></div>
+                    <div class="password-match" id="password-match">✓ Passwords match</div>
+                    <div class="password-mismatch" id="password-mismatch">✗ Passwords do not match</div>
+                    <div id="companySignupForm">
+                        <input type="text" id="signup-user-id" name="user_id" placeholder="User ID">
+                        <input type="email" id="signup-email" name="email" placeholder="Email">
+                        <input type="password" id="signup-password" name="password" placeholder="Password">
+                        <input type="password" id="signup-confirm-password" name="confirm_password" placeholder="Confirm Password">
+                        <button type="button" id="signup-btn">Sign Up</button>
 
                         <div class="link-container">
                             <a id="toggleLogin">Already have an account? Login</a>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Added activePage -->
     <%- include('partials/footer', { activePage: 'company' }) %>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const loginForm = document.getElementById("loginForm");
-            const signupForm = document.getElementById("signupForm");
+            const loginFormDiv = document.getElementById("loginForm");
+            const signupFormDiv = document.getElementById("signupForm");
             const toggleSignup = document.getElementById("toggleSignup");
             const toggleLogin = document.getElementById("toggleLogin");
             const imageSection = document.querySelector(".image-section");
@@ -265,30 +292,21 @@
             const authImage = document.getElementById("authImage");
             const buttons = document.querySelectorAll("button");
 
-            // Set initial form state based on errors
-            const hasSignupError = <%- typeof signupError !== 'undefined' && signupError ? 'true' : 'false' %>;
-            const hasLoginError = <%- typeof loginError !== 'undefined' && loginError ? 'true' : 'false' %>;
+            // Login elements
+            const loginBtn = document.getElementById("login-btn");
+            const loginError = document.getElementById("login-error");
+            const companyUserId = document.getElementById("companyUserId");
+            const companyPassword = document.getElementById("companyPassword");
 
-            if (hasSignupError) {
-                loginForm.style.display = "none";
-                signupForm.style.display = "block";
-                imageSection.style.order = "2";
-                authContainer.style.order = "1";
-                authImage.src = "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
-            } else if (hasLoginError) {
-                loginForm.style.display = "block";
-                signupForm.style.display = "none";
-                imageSection.style.order = "1";
-                authContainer.style.order = "2";
-                authImage.src = "https://plus.unsplash.com/premium_photo-1664476845274-27c2dabdd7f0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8c3RvY2slMjBtYXJrZXR8ZW58MHx8MHx8fDA%3D";
-            } else {
-                // Default state (no errors)
-                loginForm.style.display = "block";
-                signupForm.style.display = "none";
-                imageSection.style.order = "1";
-                authContainer.style.order = "2";
-                authImage.src = "https://plus.unsplash.com/premium_photo-1664476845274-27c2dabdd7f0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8c3RvY2slMjBtYXJrZXR8ZW58MHx8MHx8fDA%3D";
-            }
+            // Signup elements
+            const signupBtn = document.getElementById("signup-btn");
+            const signupError = document.getElementById("signup-error");
+            const signupUserId = document.getElementById("signup-user-id");
+            const signupEmail = document.getElementById("signup-email");
+            const signupPassword = document.getElementById("signup-password");
+            const signupConfirmPassword = document.getElementById("signup-confirm-password");
+            const passwordMatch = document.getElementById("password-match");
+            const passwordMismatch = document.getElementById("password-mismatch");
 
             // Button click animation
             buttons.forEach(button => {
@@ -301,21 +319,235 @@
             // Toggle to signup form
             toggleSignup.addEventListener("click", function (e) {
                 e.preventDefault();
-                loginForm.style.display = "none";
-                signupForm.style.display = "block";
+                loginFormDiv.style.display = "none";
+                signupFormDiv.style.display = "block";
                 imageSection.style.order = "2";
                 authContainer.style.order = "1";
                 authImage.src = "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+                clearLoginForm();
             });
 
             // Toggle to login form
             toggleLogin.addEventListener("click", function (e) {
                 e.preventDefault();
-                signupForm.style.display = "none";
-                loginForm.style.display = "block";
+                signupFormDiv.style.display = "none";
+                loginFormDiv.style.display = "block";
                 imageSection.style.order = "1";
                 authContainer.style.order = "2";
                 authImage.src = "https://plus.unsplash.com/premium_photo-1664476845274-27c2dabdd7f0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8c3RvY2slMjBtYXJrZXR8ZW58MHx8MHx8fDA%3D";
+                clearSignupForm();
+            });
+
+            // Real-time password matching for signup
+            function checkPasswordMatch() {
+                const password = signupPassword.value;
+                const confirmPassword = signupConfirmPassword.value;
+
+                if (confirmPassword === '') {
+                    passwordMatch.style.display = 'none';
+                    passwordMismatch.style.display = 'none';
+                    signupConfirmPassword.classList.remove('error', 'success');
+                    return;
+                }
+
+                if (password === confirmPassword) {
+                    passwordMatch.style.display = 'block';
+                    passwordMismatch.style.display = 'none';
+                    signupConfirmPassword.classList.remove('error');
+                    signupConfirmPassword.classList.add('success');
+                } else {
+                    passwordMatch.style.display = 'none';
+                    passwordMismatch.style.display = 'block';
+                    signupConfirmPassword.classList.remove('success');
+                    signupConfirmPassword.classList.add('error');
+                }
+            }
+
+            signupPassword.addEventListener('input', checkPasswordMatch);
+            signupConfirmPassword.addEventListener('input', checkPasswordMatch);
+
+            // Clear login form
+            function clearLoginForm() {
+                companyUserId.value = '';
+                companyPassword.value = '';
+                companyUserId.classList.remove('error');
+                companyPassword.classList.remove('error');
+                loginError.style.display = 'none';
+                loginError.textContent = '';
+            }
+
+            // Clear signup form
+            function clearSignupForm() {
+                signupUserId.value = '';
+                signupEmail.value = '';
+                signupPassword.value = '';
+                signupConfirmPassword.value = '';
+                signupUserId.classList.remove('error');
+                signupEmail.classList.remove('error');
+                signupPassword.classList.remove('error');
+                signupConfirmPassword.classList.remove('error', 'success');
+                signupError.style.display = 'none';
+                signupError.textContent = '';
+                passwordMatch.style.display = 'none';
+                passwordMismatch.style.display = 'none';
+            }
+
+            // Login validation and submission
+            loginBtn.addEventListener("click", async function () {
+                // Clear previous errors
+                companyUserId.classList.remove('error');
+                companyPassword.classList.remove('error');
+                loginError.style.display = 'none';
+                loginError.textContent = '';
+
+                let isValid = true;
+
+                // Validate User ID
+                if (!companyUserId.value.trim()) {
+                    companyUserId.classList.add('error');
+                    loginError.textContent = 'Please enter your User ID';
+                    loginError.style.display = 'block';
+                    isValid = false;
+                }
+
+                // Validate Password
+                if (!companyPassword.value.trim()) {
+                    companyPassword.classList.add('error');
+                    loginError.textContent = isValid ? 'Please enter your password' : 'Please fill in all fields';
+                    loginError.style.display = 'block';
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                // Disable button during submission
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Logging in...';
+
+                try {
+                    const response = await fetch('/company-loginvalidation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: companyUserId.value,
+                            password: companyPassword.value
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        window.location.href = result.redirectUrl || '/company-dashboard';
+                    } else {
+                        companyUserId.classList.add('error');
+                        companyPassword.classList.add('error');
+                        loginError.textContent = result.message || 'Invalid credentials';
+                        loginError.style.display = 'block';
+                    }
+                } catch (error) {
+                    loginError.textContent = 'An error occurred. Please try again.';
+                    loginError.style.display = 'block';
+                } finally {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login';
+                }
+            });
+
+            // Signup validation and submission
+            signupBtn.addEventListener("click", async function () {
+                // Clear previous errors
+                signupUserId.classList.remove('error');
+                signupEmail.classList.remove('error');
+                signupPassword.classList.remove('error');
+                signupConfirmPassword.classList.remove('error');
+                signupError.style.display = 'none';
+                signupError.textContent = '';
+
+                let isValid = true;
+                let errorMessage = '';
+
+                // Validate User ID
+                if (!signupUserId.value.trim()) {
+                    signupUserId.classList.add('error');
+                    errorMessage = 'Please enter a User ID';
+                    isValid = false;
+                }
+
+                // Validate Email
+                if (!signupEmail.value.trim()) {
+                    signupEmail.classList.add('error');
+                    errorMessage = isValid ? 'Please enter an email address' : 'Please fill in all fields';
+                    isValid = false;
+                } else if (!signupEmail.value.includes('@')) {
+                    signupEmail.classList.add('error');
+                    errorMessage = 'Please enter a valid email address';
+                    isValid = false;
+                }
+
+                // Validate Password
+                if (!signupPassword.value.trim()) {
+                    signupPassword.classList.add('error');
+                    errorMessage = isValid ? 'Please enter a password' : 'Please fill in all fields';
+                    isValid = false;
+                }
+
+                // Validate Confirm Password
+                if (!signupConfirmPassword.value.trim()) {
+                    signupConfirmPassword.classList.add('error');
+                    errorMessage = isValid ? 'Please confirm your password' : 'Please fill in all fields';
+                    isValid = false;
+                } else if (signupPassword.value !== signupConfirmPassword.value) {
+                    signupPassword.classList.add('error');
+                    signupConfirmPassword.classList.add('error');
+                    errorMessage = 'Passwords do not match';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    signupError.textContent = errorMessage;
+                    signupError.style.display = 'block';
+                    return;
+                }
+
+                // Disable button during submission
+                signupBtn.disabled = true;
+                signupBtn.textContent = 'Signing up...';
+
+                try {
+                    const response = await fetch('/company-signupvalidation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: signupUserId.value,
+                            email: signupEmail.value,
+                            password: signupPassword.value,
+                            confirm_password: signupConfirmPassword.value
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        window.location.href = result.redirectUrl || '/company-dashboard';
+                    } else {
+                        signupUserId.classList.add('error');
+                        signupEmail.classList.add('error');
+                        signupPassword.classList.add('error');
+                        signupConfirmPassword.classList.add('error');
+                        signupError.textContent = result.message || 'Signup failed';
+                        signupError.style.display = 'block';
+                    }
+                } catch (error) {
+                    signupError.textContent = 'An error occurred. Please try again.';
+                    signupError.style.display = 'block';
+                } finally {
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Sign Up';
+                }
             });
         });
     </script>

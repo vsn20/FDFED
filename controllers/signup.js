@@ -12,10 +12,9 @@ async function handlesignup(req, res) {
 
   // Check if passwords match
   if (trimmedPassword !== trimmedConfirmPassword) {
-    return res.render("employeelogin", {
-      activePage: "employee",
-      signupError: "Passwords do not match",
-      loginError: null,
+    return res.json({
+      success: false,
+      message: "Passwords do not match"
     });
   }
 
@@ -23,30 +22,27 @@ async function handlesignup(req, res) {
     // Check if user_id is taken
     const existingUser = await User.findOne({ user_id });
     if (existingUser) {
-      return res.render("employeelogin", {
-        activePage: "employee",
-        signupError: "User ID taken",
-        loginError: null,
+      return res.json({
+        success: false,
+        message: "User ID taken"
       });
     }
 
     // Check if email exists in Employee
     const employee = await Employee.findOne({ email });
     if (!employee) {
-      return res.render("employeelogin", {
-        activePage: "employee",
-        signupError: "You are not a registered employee",
-        loginError: null,
+      return res.json({
+        success: false,
+        message: "You are not a registered employee"
       });
     }
 
     // Check if account already exists for this employee
     const existingUserByEmpId = await User.findOne({ emp_id: employee.e_id });
     if (existingUserByEmpId) {
-      return res.render("employeelogin", {
-        activePage: "employee",
-        signupError: "Account already created",
-        loginError: null,
+      return res.json({
+        success: false,
+        message: "Account already created"
       });
     }
 
@@ -62,25 +58,37 @@ async function handlesignup(req, res) {
     });
     await newUser.save();
 
-    // Set token and redirect
+    // Set token
     const token = setuser(newUser, employee);
     res.cookie("uid", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
 
+    // Determine redirect URL based on role
     const userType = employee.role.toLowerCase();
+    let redirectUrl;
+
     if (userType === "owner") {
-      return res.redirect("admin/home");
+      redirectUrl = "/admin/home";
     } else if (userType === "sales manager") {
-      return res.redirect("salesmanager/home");
+      redirectUrl = "/salesmanager/home";
     } else if (userType === "salesman") {
-      return res.redirect("salesman/home");
+      redirectUrl = "/salesman/home";
     } else {
-      return res.status(403).send("Unauthorized role");
+      return res.json({
+        success: false,
+        message: "Unauthorized role"
+      });
     }
+
+    return res.json({
+      success: true,
+      redirectUrl: redirectUrl
+    });
+
   } catch (error) {
-    return res.render("employeelogin", {
-      activePage: "employee",
-      signupError: "Signup failed: " + error.message,
-      loginError: null,
+    console.error("Signup error:", error);
+    return res.json({
+      success: false,
+      message: "Signup failed: " + error.message
     });
   }
 }

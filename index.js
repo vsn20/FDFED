@@ -45,10 +45,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(upload.array('prod_photos'));
 
-
-// Middleware for handling multiple file uploads
-
-
 app.use((req, res, next) => {
   const token = req.cookies && req.cookies.uid ? req.cookies.uid : null;
   res.locals.user = getuser(token) || {};
@@ -57,8 +53,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
-
 app.get('/logout', (req, res) => {
   res.clearCookie('uid');
   res.redirect("/");
@@ -66,12 +60,15 @@ app.get('/logout', (req, res) => {
 
 app.post("/contact/submit", submitContact);
 
+// Public routes (no authentication required)
 app.use("/", staticrouter);
 app.use("/loginvalidation", loginrouter);
 app.use("/signupvalidation", signuprouter);
-app.use("/customer-login", customerlogin);
-app.use("/", companyauth);
+app.use("/", companyauth);  // This handles /company-loginvalidation and /company-signupvalidation
+app.use("/", customerlogin); // FIXED: Changed from "/customer-login" to "/"
+                              // This now correctly handles /customer-send-otp and /customer-login
 
+// Protected routes (authentication required)
 app.use(restrictlogedinuser);
 
 app.use("/admin", restrict("owner"), adminroutes);

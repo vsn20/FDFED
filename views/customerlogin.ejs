@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Login</title>
     <style>
-        /* Existing CSS remains unchanged */
         body {
             min-height: 100vh;
             margin: 0;
@@ -101,6 +100,10 @@
             box-shadow: 0 0 10px rgba(52, 73, 94, 0.3);
         }
 
+        input.error {
+            border: 2px solid #e74c3c;
+        }
+
         button {
             width: 70%;
             padding: 12px;
@@ -128,6 +131,12 @@
             transform: scale(0.95);
         }
 
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .clicked {
             transform: scale(0.95);
         }
@@ -140,6 +149,7 @@
             border-radius: 5px;
             width: 70%;
             text-align: center;
+            display: none;
         }
 
         .hidden {
@@ -172,25 +182,16 @@
             
             <div class="auth-container">
                 <h2>Customer Login</h2>
-                <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="error-message"><%= error %></div>
-                    <script>
-                        // Show OTP section if there's an error after OTP submission
-                        document.addEventListener("DOMContentLoaded", function () {
-                            document.getElementById("send-otp-btn").classList.add("hidden");
-                            document.getElementById("otp-section").classList.remove("hidden");
-                        });
-                    </script>
-                <% } %>
-                <form id="customerForm" action="/customer-login" method="POST">
-                    <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="Enter your mobile number" required pattern="[0-9]{10}" title="Please enter a 10-digit mobile number">
+                <div class="error-message" id="error-message"></div>
+                <div id="customerForm">
+                    <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="Enter your mobile number" maxlength="10">
                     <button type="button" id="send-otp-btn">Send OTP</button>
                     
                     <div id="otp-section" class="hidden">
-                        <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
-                        <button type="submit">Login</button>
+                        <input type="text" id="otp" name="otp" placeholder="Enter OTP" maxlength="6">
+                        <button type="button" id="login-btn">Login</button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -199,10 +200,12 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const customerForm = document.getElementById("customerForm");
             const sendOtpBtn = document.getElementById("send-otp-btn");
+            const loginBtn = document.getElementById("login-btn");
             const otpSection = document.getElementById("otp-section");
             const mobileNumberInput = document.getElementById("mobileNumber");
+            const otpInput = document.getElementById("otp");
+            const errorMessage = document.getElementById("error-message");
             const buttons = document.querySelectorAll("button");
 
             // Button click animation for all buttons
@@ -213,17 +216,131 @@
                 });
             });
 
+            // Allow only numbers in mobile number input
+            mobileNumberInput.addEventListener("input", function (e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // Allow only numbers in OTP input
+            otpInput.addEventListener("input", function (e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // Clear error message
+            function clearError() {
+                errorMessage.style.display = 'none';
+                errorMessage.textContent = '';
+                mobileNumberInput.classList.remove('error');
+                otpInput.classList.remove('error');
+            }
+
+            // Show error message
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+
             // Handle "Send OTP" button click
-            sendOtpBtn.addEventListener("click", function () {
-                const mobileNumber = mobileNumberInput.value;
-                if (mobileNumber.match(/^[0-9]{10}$/)) {
-                    // Simulate OTP sending (replace with actual API call in production)
-                    setTimeout(() => {
-                        sendOtpBtn.classList.add("hidden");
-                        otpSection.classList.remove("hidden");
-                    }, 500); // Simulated delay
-                } else {
-                    alert("Please enter a valid 10-digit mobile number");
+            sendOtpBtn.addEventListener("click", async function () {
+                clearError();
+
+                const mobileNumber = mobileNumberInput.value.trim();
+
+                // Validate mobile number
+                if (!mobileNumber) {
+                    mobileNumberInput.classList.add('error');
+                    showError('Please enter your mobile number');
+                    return;
+                }
+
+                if (mobileNumber.length !== 10) {
+                    mobileNumberInput.classList.add('error');
+                    showError('Please enter a valid 10-digit mobile number');
+                    return;
+                }
+
+                // Disable button during submission
+                sendOtpBtn.disabled = true;
+                sendOtpBtn.textContent = 'Sending OTP...';
+
+                try {
+                    const response = await fetch('/customer-send-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            mobileNumber: mobileNumber
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        sendOtpBtn.classList.add('hidden');
+                        otpSection.classList.remove('hidden');
+                        showError(''); // Clear any previous errors
+                    } else {
+                        mobileNumberInput.classList.add('error');
+                        showError(result.message || 'Failed to send OTP. Please try again.');
+                    }
+                } catch (error) {
+                    showError('An error occurred. Please try again.');
+                } finally {
+                    sendOtpBtn.disabled = false;
+                    sendOtpBtn.textContent = 'Send OTP';
+                }
+            });
+
+            // Handle "Login" button click
+            loginBtn.addEventListener("click", async function () {
+                clearError();
+
+                const mobileNumber = mobileNumberInput.value.trim();
+                const otp = otpInput.value.trim();
+
+                // Validate OTP
+                if (!otp) {
+                    otpInput.classList.add('error');
+                    showError('Please enter the OTP');
+                    return;
+                }
+
+                if (otp.length < 4) {
+                    otpInput.classList.add('error');
+                    showError('Please enter a valid OTP');
+                    return;
+                }
+
+                // Disable button during submission
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Logging in...';
+
+                try {
+                    const response = await fetch('/customer-login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            mobileNumber: mobileNumber,
+                            otp: otp
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        window.location.href = result.redirectUrl || '/customer-dashboard';
+                    } else {
+                        otpInput.classList.add('error');
+                        showError(result.message || 'Invalid OTP. Please try again.');
+                    }
+                } catch (error) {
+                    showError('An error occurred. Please try again.');
+                } finally {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login';
                 }
             });
         });
