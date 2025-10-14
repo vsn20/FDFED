@@ -252,12 +252,13 @@
 
   <%- include('../../partials/footer') %>
 
-  <script>
+<script>
     const form = document.getElementById('employee-login-form');
     const roleSelect = document.getElementById('role');
     const branchSelect = document.getElementById('bid');
     const email = document.getElementById('email');
     const phone = document.getElementById('phone_no');
+    const salaryInput = document.getElementById('base_salary'); // <-- 1. GET THE SALARY ELEMENT
     const errorMessage = document.getElementById('error-message');
     const successMessage = document.getElementById('success-message');
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -296,6 +297,24 @@
         return true;
       }
     }
+    
+    // <-- 2. CREATE THE SALARY VALIDATION FUNCTION
+    function validateSalary(el) {
+      const salaryValue = parseFloat(el.value);
+      // Check if the value is not a number or is less than or equal to 0
+      if (isNaN(salaryValue) || salaryValue <= 0) {
+        el.style.borderColor = '#e74c3c';
+        el.style.backgroundColor = '#fff5f5';
+        showFieldError('Monthly salary must be a number greater than 0.');
+        return false;
+      } else {
+        el.style.borderColor = '#27ae60';
+        el.style.backgroundColor = '#f0fff4';
+        clearFieldError();
+        return true;
+      }
+    }
+
 
     function showFieldError(msg) {
       errorMessage.textContent = msg;
@@ -313,8 +332,14 @@
 
     phone.addEventListener('blur', () => validatePhone(phone));
 
+    // <-- 3. ADD EVENT LISTENERS FOR SALARY INPUT
+    salaryInput.addEventListener('input', () => validateSalary(salaryInput));
+    salaryInput.addEventListener('blur', () => validateSalary(salaryInput));
+
+
     // Reset styles on focus
-    [email, phone].forEach(el => {
+    // Add salaryInput to the array of elements to reset
+    [email, phone, salaryInput].forEach(el => {
       el.addEventListener('focus', () => {
         el.style.borderColor = '#333333';
         el.style.backgroundColor = '#fff';
@@ -380,8 +405,9 @@
       // Run real-time validations before submit
       const isEmailValid = validateEmail(email);
       const isPhoneValid = validatePhone(phone);
+      const isSalaryValid = validateSalary(salaryInput); // <-- 4. VALIDATE SALARY ON SUBMIT
 
-      if (!isEmailValid || !isPhoneValid) {
+      if (!isEmailValid || !isPhoneValid || !isSalaryValid) { // <-- 5. ADD THE CHECK HERE
         return; // Stop submit if invalid
       }
 

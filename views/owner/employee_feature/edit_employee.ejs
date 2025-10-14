@@ -263,7 +263,7 @@
 
   <%- include('../../partials/footer') %>
 
-  <script>
+<script>
     const urlParts = window.location.pathname.split('/');
     const e_id = urlParts[urlParts.length - 1];
     const loading = document.getElementById('loading');
@@ -275,6 +275,7 @@
     const statusSelect = document.getElementById('status');
     const email = document.getElementById('email');
     const phone = document.getElementById('phone_no');
+    const salaryInput = document.getElementById('base_salary'); // <-- 1. GET THE SALARY ELEMENT
     const errorMessage = document.getElementById('error-message');
     const submitBtn = form.querySelector('button[type="submit"]');
 
@@ -312,6 +313,22 @@
       }
     }
 
+    // <-- 2. CREATE THE SALARY VALIDATION FUNCTION
+    function validateSalary(el) {
+      const salaryValue = parseFloat(el.value);
+      if (isNaN(salaryValue) || salaryValue <= 0) {
+        el.style.borderColor = '#e74c3c';
+        el.style.backgroundColor = '#fff5f5';
+        showFieldError('Monthly salary must be a number greater than 0.');
+        return false;
+      } else {
+        el.style.borderColor = '#27ae60';
+        el.style.backgroundColor = '#f0fff4';
+        clearFieldError();
+        return true;
+      }
+    }
+
     function showFieldError(msg) {
       errorMessage.textContent = msg;
       errorMessage.style.display = 'block';
@@ -328,8 +345,13 @@
 
     phone.addEventListener('blur', () => validatePhone(phone));
 
+    // <-- 3. ADD EVENT LISTENERS FOR SALARY INPUT
+    salaryInput.addEventListener('input', () => validateSalary(salaryInput));
+    salaryInput.addEventListener('blur', () => validateSalary(salaryInput));
+
     // Reset styles on focus
-    [email, phone].forEach(el => {
+    // Add salaryInput to the array of elements to reset
+    [email, phone, salaryInput].forEach(el => {
       el.addEventListener('focus', () => {
         el.style.borderColor = '#333333';
         el.style.backgroundColor = '#fff';
@@ -390,9 +412,13 @@
 
     function toggleFormInputs() {
       const isActive = statusSelect.value === 'active';
-      const inputs = form.querySelectorAll('input:not(#status), select:not(#status), textarea');
+      const inputs = form.querySelectorAll('input, select, textarea');
+      const statusInput = document.getElementById('status');
+      
       inputs.forEach(input => {
-        input.disabled = !isActive;
+        if(input.id !== 'status'){
+             input.disabled = !isActive;
+        }
       });
       submitBtn.disabled = !isActive;
     }
@@ -423,9 +449,9 @@
         statusSelect.value = employeeData.status;
         populateBranchSelect(employeeData.bid);
         toggleFormInputs();
-        // Trigger initial validation after population
         validateEmail(email);
         validatePhone(phone);
+        validateSalary(salaryInput); 
         loading.style.display = 'none';
         formContainer.style.display = 'block';
       } catch (error) {
@@ -456,9 +482,10 @@
       // Run real-time validations before submit
       const isEmailValid = validateEmail(email);
       const isPhoneValid = validatePhone(phone);
+      const isSalaryValid = validateSalary(salaryInput); 
 
-      if (!isEmailValid || !isPhoneValid) {
-        return; // Stop submit if invalid
+      if (!isEmailValid || !isPhoneValid || !isSalaryValid) { 
+        return; 
       }
 
       const formData = new FormData(form);
@@ -476,7 +503,17 @@
         const result = await response.json();
 
         if (response.ok && result.success) {
-          window.location.href = `/admin/employee/${e_id}`;
+          // Add a success message before redirecting
+          const successMessage = document.createElement('div');
+          successMessage.textContent = 'Employee updated successfully!';
+          successMessage.style.color = '#27ae60';
+          successMessage.style.textAlign = 'center';
+          successMessage.style.margin = '10px 0';
+          form.insertBefore(successMessage, submitBtn);
+          setTimeout(() => {
+              window.location.href = `/admin/employees`;
+          }, 1500);
+
         } else {
           showFieldError(result.message || 'An error occurred while updating the employee.');
         }
